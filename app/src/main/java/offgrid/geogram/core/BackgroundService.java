@@ -28,6 +28,15 @@ public class BackgroundService extends Service {
     private Runnable logTask;
 
     private WiFiDirectAdvertiser wifiDirectAdvertiser; // Wi-Fi Direct Advertiser instance
+    private WiFiDirectDiscovery discover = null;
+
+    // how long between scans
+    private long interval_seconds = 10;
+
+    private boolean
+            wifi_advertise = true,
+            wifi_discover = true;
+
 
     @Override
     public void onCreate() {
@@ -52,8 +61,24 @@ public class BackgroundService extends Service {
         }
 
         // Initialize Wi-Fi Direct Advertiser
-        wifiDirectAdvertiser = new WiFiDirectAdvertiser(this);
-        log(TAG_ID, "WiFiDirectAdvertiser initialized");
+        if(wifi_advertise){
+            wifiDirectAdvertiser = new WiFiDirectAdvertiser(this);
+            wifiDirectAdvertiser.startAdvertising();
+            log(TAG_ID, "WiFi advertise initialized");
+        }else{
+            log(TAG_ID, "WiFi advertise disabled");
+        }
+
+        // Initialize the discovery of other apps
+        if(wifi_discover) {
+            log(TAG_ID, "WiFi discovery initialized");
+            discover = new WiFiDirectDiscovery(this);
+            discover.registerIntents();
+            //discover.startDiscovery(1);
+        }else{
+            log(TAG_ID, "WiFi discover disabled");
+        }
+
     }
 
     @Override
@@ -74,13 +99,7 @@ public class BackgroundService extends Service {
         // Start the service in the foreground
         startForeground(1, notification);
 
-        log(TAG_ID, "Offgrid service is starting");
-
-        // Start Wi-Fi Direct advertising
-        if (wifiDirectAdvertiser != null) {
-            wifiDirectAdvertiser.startAdvertising();
-            log(TAG_ID, "Wi-Fi Direct advertising started");
-        }
+        log(TAG_ID, "Geogram is starting");
 
         // Start periodic logging
         handler = new Handler();
@@ -89,12 +108,12 @@ public class BackgroundService extends Service {
             public void run() {
                 log(TAG_ID, "Service is running...");
                 runBackgroundTask();
-                handler.postDelayed(this, 30_000); // Repeat every NN seconds
+                handler.postDelayed(this, interval_seconds * 1000); // Repeat every NN seconds
             }
         };
         handler.post(logTask);
 
-        log(TAG_ID, "Offgrid service was launched");
+        log(TAG_ID, "Geogram was launched");
         return START_STICKY;
     }
 
@@ -117,8 +136,9 @@ public class BackgroundService extends Service {
         // Stop Wi-Fi Direct advertising
         if (wifiDirectAdvertiser != null) {
             wifiDirectAdvertiser.stopAdvertising();
-            log(TAG_ID, "Wi-Fi Direct advertising stopped");
+            log(TAG_ID, "Wi-Fi advertise stopped");
         }
+
     }
 
     /**
@@ -127,9 +147,13 @@ public class BackgroundService extends Service {
      *  + Synchronize messages and data with others
      */
     private void runBackgroundTask() {
-        WiFiDirectDiscovery discover = new WiFiDirectDiscovery(this);
-        discover.startDiscovery(1);
-        discover.stopDiscovery();
+//        if(wifi_discover) {
+//            discover.logAvailablePeers();
+//        }
+        if(wifi_discover) {
+            discover.startDiscovery(1);
+            discover.stopDiscovery();
+        }
     }
 
 }
