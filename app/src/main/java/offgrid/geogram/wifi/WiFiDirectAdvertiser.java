@@ -1,5 +1,8 @@
 package offgrid.geogram.wifi;
 
+import static offgrid.geogram.wifi.WiFiCommon.channel;
+import static offgrid.geogram.wifi.WiFiCommon.wifiP2pManager;
+
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.util.Log;
 
@@ -15,17 +19,19 @@ import androidx.core.app.ActivityCompat;
 public class WiFiDirectAdvertiser {
     private static final String TAG = "WiFiDirectAdvertiser";
 
-    private final WifiP2pManager wifiP2pManager;
-    private final WifiP2pManager.Channel channel;
-    private final Context context;
     private final BroadcastReceiver receiver;
+    private final Context context;
 
     public WiFiDirectAdvertiser(Context context) {
         this.context = context;
 
         // Initialize the Wi-Fi P2P Manager
-        wifiP2pManager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
-        channel = wifiP2pManager.initialize(context, context.getMainLooper(), null);
+        if(wifiP2pManager == null) {
+            wifiP2pManager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
+        }
+        if(channel == null) {
+            channel = wifiP2pManager.initialize(context, context.getMainLooper(), null);
+        }
 
         // Define a BroadcastReceiver to handle Wi-Fi P2P state changes
         receiver = new BroadcastReceiver() {
@@ -50,9 +56,11 @@ public class WiFiDirectAdvertiser {
                         return;
                     }
                     wifiP2pManager.requestPeers(channel, peers -> {
-                        for (WifiP2pDevice device : peers.getDeviceList()) {
-                            Log.i(TAG, "Found peer: " + device.deviceName);
-                        }
+                        // update the common list of peers
+                        WiFiCommon.peers = peers;
+//                        for (WifiP2pDevice device : peers.getDeviceList()) {
+//                            Log.i(TAG, "Found peer: " + device.deviceName);
+//                        }
                     });
                 } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
                     Log.i(TAG, "This device's Wi-Fi Direct state changed");

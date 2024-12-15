@@ -1,6 +1,7 @@
 package offgrid.geogram.core;
 
 import static offgrid.geogram.core.Messages.log;
+import static offgrid.geogram.wifi.WiFiCommon.peers;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -8,15 +9,18 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
+import offgrid.geogram.wifi.WiFiCommon;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
 import offgrid.geogram.wifi.WiFiDirectDiscovery;
 
@@ -73,7 +77,7 @@ public class BackgroundService extends Service {
         if(wifi_discover) {
             log(TAG_ID, "WiFi discovery initialized");
             discover = new WiFiDirectDiscovery(this);
-            discover.registerIntents();
+            //discover.registerIntents();
             //discover.startDiscovery(1);
         }else{
             log(TAG_ID, "WiFi discover disabled");
@@ -150,9 +154,22 @@ public class BackgroundService extends Service {
 //        if(wifi_discover) {
 //            discover.logAvailablePeers();
 //        }
+
+        listPeers();
+
         if(wifi_discover) {
             discover.startDiscovery(1);
             discover.stopDiscovery();
+            listPeers();
+        }
+    }
+
+    private void listPeers() {
+        if(peers == null){
+            return;
+        }
+        for (WifiP2pDevice device : peers.getDeviceList()) {
+            Log.i(TAG_ID, "Found P2P available: " + device.deviceName);
         }
     }
 
