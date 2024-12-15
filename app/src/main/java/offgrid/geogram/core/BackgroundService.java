@@ -20,9 +20,7 @@ import androidx.core.app.NotificationCompat;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.BluetoothBeacon;
 import offgrid.geogram.bluetooth.EddystoneBeacon;
-import offgrid.geogram.wifi.WiFiCommon;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
 import offgrid.geogram.wifi.WiFiDirectDiscovery;
 

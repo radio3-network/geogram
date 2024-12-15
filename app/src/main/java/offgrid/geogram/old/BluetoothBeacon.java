@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.old;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.AdvertiseCallback;
@@ -13,6 +13,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.UUID;
+
+import offgrid.geogram.bluetooth.GenerateUUID;
 
 /**
  * Handles Bluetooth beacon functionality, including generating a unique UUID and starting BLE advertisement.
