@@ -46,7 +46,15 @@ public class BluetoothBeacon {
     private void requestPermissions(Context context) {
         ActivityCompat.requestPermissions(
                 (android.app.Activity) context,
-                new String[]{Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN},
+                new String[]{
+                        Manifest.permission.BLUETOOTH,
+                        Manifest.permission.BLUETOOTH_SCAN,
+                        Manifest.permission.BLUETOOTH_ADVERTISE,
+                        Manifest.permission.BLUETOOTH_CONNECT,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                        Manifest.permission.BLUETOOTH_ADMIN
+                },
                 REQUEST_CODE_PERMISSIONS
         );
     }

@@ -21,6 +21,7 @@ import androidx.core.app.NotificationCompat;
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BluetoothBeacon;
+import offgrid.geogram.bluetooth.EddystoneBeacon;
 import offgrid.geogram.wifi.WiFiCommon;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
 import offgrid.geogram.wifi.WiFiDirectDiscovery;
@@ -34,6 +35,7 @@ public class BackgroundService extends Service {
 
     private WiFiDirectAdvertiser wifiDirectAdvertiser; // Wi-Fi Direct Advertiser instance
     private WiFiDirectDiscovery discover = null;
+    private EddystoneBeacon eddystoneBeacon = null;
 
     // how long between scans
     private long interval_seconds = 10;
@@ -85,8 +87,16 @@ public class BackgroundService extends Service {
         }
 
         // initialize the bluetooth beacon
-        BluetoothBeacon beacon = new BluetoothBeacon();
-        beacon.startAdvertising(this);
+//        BluetoothBeacon beacon = new BluetoothBeacon();
+//        beacon.startAdvertising(this);
+
+        // Initialize the EddystoneBeacon
+        eddystoneBeacon = new EddystoneBeacon(this);
+        // Example Namespace ID and Instance ID
+        String namespaceId = "0123456789abcdef0123"; // 20 hex characters
+        String instanceId = "abcdef123456";         // 12 hex characters
+        // Start advertising
+        eddystoneBeacon.startAdvertising(namespaceId, instanceId);
 
 
     }
@@ -143,11 +153,26 @@ public class BackgroundService extends Service {
             handler.removeCallbacks(logTask);
         }
 
+        // stop bluetooth
+        if(eddystoneBeacon != null){
+            eddystoneBeacon.stopAdvertising();
+            log(TAG_ID, "BLE beacon stopped");
+        }
+
+
         // Stop Wi-Fi Direct advertising
         if (wifiDirectAdvertiser != null) {
             wifiDirectAdvertiser.stopAdvertising();
             log(TAG_ID, "Wi-Fi advertise stopped");
         }
+//
+//        // Stop Wi-Fi Direct discovery
+//        if (discover != null) {
+//            discover.stopDiscovery();
+//            log(TAG_ID, "Wi-Fi discovery stopped");
+//        }
+
+
 
     }
 
@@ -157,17 +182,13 @@ public class BackgroundService extends Service {
      *  + Synchronize messages and data with others
      */
     private void runBackgroundTask() {
-//        if(wifi_discover) {
-//            discover.logAvailablePeers();
-//        }
-
-        listPeers();
 
         if(wifi_discover) {
             discover.startDiscovery(1);
             discover.stopDiscovery();
             listPeers();
         }
+
     }
 
     private void listPeers() {
