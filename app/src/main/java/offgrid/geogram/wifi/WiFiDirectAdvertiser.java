@@ -1,6 +1,8 @@
 package offgrid.geogram.wifi;
 
 import static offgrid.geogram.wifi.WiFiCommon.channel;
+import static offgrid.geogram.wifi.WiFiCommon.passphrase;
+import static offgrid.geogram.wifi.WiFiCommon.ssid;
 import static offgrid.geogram.wifi.WiFiCommon.wifiP2pManager;
 
 import android.Manifest;
@@ -9,8 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.wifi.p2p.WifiP2pDevice;
-import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.util.Log;
 
@@ -46,6 +47,7 @@ public class WiFiDirectAdvertiser {
                     wifiP2pManager.requestConnectionInfo(channel, info -> {
                         if (info.groupFormed && info.isGroupOwner) {
                             Log.i(TAG, "This device is the Group Owner");
+                            logGroupDetails();
                         } else if (info.groupFormed) {
                             Log.i(TAG, "This device is a Client");
                         }
@@ -56,17 +58,38 @@ public class WiFiDirectAdvertiser {
                         return;
                     }
                     wifiP2pManager.requestPeers(channel, peers -> {
-                        // update the common list of peers
                         WiFiCommon.peers = peers;
-//                        for (WifiP2pDevice device : peers.getDeviceList()) {
-//                            Log.i(TAG, "Found peer: " + device.deviceName);
-//                        }
                     });
                 } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
                     Log.i(TAG, "This device's Wi-Fi Direct state changed");
                 }
             }
         };
+    }
+
+    /**
+     * Logs the SSID and passphrase of the group if available.
+     */
+    private void logGroupDetails() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Permission ACCESS_FINE_LOCATION not granted. Cannot retrieve group details.");
+            return;
+        }
+
+        try {
+            wifiP2pManager.requestGroupInfo(channel, group -> {
+                if (group != null) {
+                    ssid = group.getNetworkName();
+                    passphrase = group.getPassphrase();
+                    Log.i(TAG, "Group SSID: " + ssid);
+                    Log.i(TAG, "Group Passphrase: " + passphrase);
+                } else {
+                    Log.e(TAG, "No group information available.");
+                }
+            });
+        } catch (SecurityException e) {
+            Log.e(TAG, "SecurityException while retrieving group details: " + e.getMessage());
+        }
     }
 
     /**
@@ -101,6 +124,35 @@ public class WiFiDirectAdvertiser {
             return;
         }
 
+        // Ensure any existing group is removed
+        wifiP2pManager.removeGroup(channel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.i(TAG, "Existing group removed successfully. Attempting to create a new group...");
+                attemptCreateGroup();
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Log.e(TAG, "Failed to remove existing group. Reason: " + reason + ". Attempting to create a new group...");
+                attemptCreateGroup(); // Proceed even if removing the group fails
+            }
+        });
+
+        // Register the receiver to listen for Wi-Fi Direct events
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        context.registerReceiver(receiver, intentFilter);
+        Log.i(TAG, "Wi-Fi Direct advertising started.");
+    }
+
+    /**
+     * Attempts to create a Wi-Fi Direct group after cleanup.
+     */
+    private void attemptCreateGroup() {
         try {
             wifiP2pManager.createGroup(channel, new WifiP2pManager.ActionListener() {
                 @Override
@@ -116,15 +168,6 @@ public class WiFiDirectAdvertiser {
         } catch (SecurityException e) {
             Log.e(TAG, "SecurityException while creating Wi-Fi Direct group: " + e.getMessage());
         }
-
-        // Register the receiver to listen for Wi-Fi Direct events
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-        context.registerReceiver(receiver, intentFilter);
-        Log.i(TAG, "Wi-Fi Direct advertising started.");
     }
 
     /**

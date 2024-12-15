@@ -20,6 +20,7 @@ import androidx.core.app.NotificationCompat;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
+import offgrid.geogram.bluetooth.BluetoothBeacon;
 import offgrid.geogram.wifi.WiFiCommon;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
 import offgrid.geogram.wifi.WiFiDirectDiscovery;
@@ -82,6 +83,11 @@ public class BackgroundService extends Service {
         }else{
             log(TAG_ID, "WiFi discover disabled");
         }
+
+        // initialize the bluetooth beacon
+        BluetoothBeacon beacon = new BluetoothBeacon();
+        beacon.startAdvertising(this);
+
 
     }
 

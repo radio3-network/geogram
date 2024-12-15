@@ -13,5 +13,8 @@ public class WiFiCommon {
     public static WifiP2pManager wifiP2pManager;
     public static WifiP2pManager.Channel channel;
 
+    public static String ssid = null;
+    public static String passphrase = null;
+
 
 }
