@@ -1,5 +1,7 @@
 package offgrid.geogram.bluetooth;
 
+import static offgrid.geogram.bluetooth.MessageGenerator.generateShareSSID;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
@@ -42,6 +44,26 @@ public class EddystoneBeacon {
         initializeBluetooth();
     }
 
+    public void setDeviceName(String newName) {
+        if (bluetoothAdapter == null) {
+            Log.e(TAG, "BluetoothAdapter is not initialized. Cannot change device name.");
+            return;
+        }
+
+        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission. Cannot change device name.");
+            return;
+        }
+
+        boolean result = bluetoothAdapter.setName(newName);
+        if (result) {
+            Log.i(TAG, "Device name changed to: " + newName);
+        } else {
+            Log.e(TAG, "Failed to change device name.");
+        }
+    }
+
+
     private void initializeBluetooth() {
         BluetoothManager bluetoothManager =
                 (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -56,6 +78,9 @@ public class EddystoneBeacon {
             Log.e(TAG, "Bluetooth is not enabled or not supported on this device.");
             return;
         }
+
+        // setup the name
+        setDeviceName("geogram");
 
         advertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
         if (advertiser == null) {
@@ -155,6 +180,10 @@ public class EddystoneBeacon {
         }
     }
 
+
+
+
+
     public void stopAdvertising() {
         if (advertiser != null && advertiseCallback != null) {
             if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
@@ -183,8 +212,12 @@ public class EddystoneBeacon {
 
 
     private boolean checkPermissions() {
-        boolean hasAdvertisePermission = context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE) == PackageManager.PERMISSION_GRANTED;
-        boolean hasConnectPermission = context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
+        boolean hasAdvertisePermission =
+                context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_ADVERTISE)
+                        == PackageManager.PERMISSION_GRANTED;
+        boolean hasConnectPermission =
+                context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+                        == PackageManager.PERMISSION_GRANTED;
 
         if (!hasAdvertisePermission) {
             Log.w(TAG, "Missing BLUETOOTH_ADVERTISE permission.");
@@ -223,7 +256,7 @@ public class EddystoneBeacon {
             }
 
             if (CUSTOM_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
-                String message = "Hello from Beacon";
+                String message = generateShareSSID(); //"Hello from Beacon";
                 gattServer.sendResponse(device, requestId, android.bluetooth.BluetoothGatt.GATT_SUCCESS, offset, message.getBytes());
                 Log.i(TAG, "Read request from " + device.getAddress());
             }
