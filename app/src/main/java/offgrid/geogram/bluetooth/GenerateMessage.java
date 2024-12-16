@@ -5,7 +5,7 @@ import offgrid.geogram.wifi.WiFiCommon;
 /**
  * Generates messages specific to the Eddystone beacon.
  */
-public class MessageGenerator {
+public class GenerateMessage {
     private static final String TAG = "MessageGenerator";
 
     public static String generateShareSSID() {

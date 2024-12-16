@@ -8,6 +8,7 @@ material = "1.12.0"
 activity = "1.9.0"
 constraintlayout = "2.1.4"
 playServicesNearby = "19.3.0"
+sparkCore = "2.9.4"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -18,6 +19,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 play-services-nearby = { group = "com.google.android.gms", name = "play-services-nearby", version.ref = "playServicesNearby" }
+spark-core = { group = "com.sparkjava", name = "spark-core", version.ref = "sparkCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

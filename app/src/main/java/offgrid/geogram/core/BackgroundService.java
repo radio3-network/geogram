@@ -21,6 +21,7 @@ import androidx.core.app.NotificationCompat;
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.EddystoneBeacon;
+import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
 import offgrid.geogram.wifi.WiFiDirectDiscovery;
 
@@ -130,6 +131,10 @@ public class BackgroundService extends Service {
             }
         };
         handler.post(logTask);
+
+        // Start the Spark server in a background thread
+        Thread serverThread = new Thread(new SimpleSparkServer());
+        serverThread.start();
 
         log(TAG_ID, "Geogram was launched");
         return START_STICKY;

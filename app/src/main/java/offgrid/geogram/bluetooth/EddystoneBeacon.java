@@ -1,6 +1,6 @@
 package offgrid.geogram.bluetooth;
 
-import static offgrid.geogram.bluetooth.MessageGenerator.generateShareSSID;
+import static offgrid.geogram.bluetooth.GenerateMessage.generateShareSSID;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattServer;
