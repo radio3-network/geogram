@@ -2,6 +2,8 @@
 
 Geogram is an Android app designed to enable seamless communication in both **off-grid** and **internet-enabled** environments. The app leverages **Wi-Fi Direct** and **Bluetooth Low Energy (BLE)** for off-grid messaging and traditional internet connections for online messaging. Geogram ensures connectivity even in remote areas.
 
+*ATTENTION*: App is not yet available for download (early development)
+
 ---
 
 ## Features
@@ -25,6 +27,31 @@ Geogram is an Android app designed to enable seamless communication in both **of
 
 - **Security**:
   - Messages transmitted off-grid are encrypted for privacy.
+
+---
+
+## How does it work
+
+Geograms are telegrams based on _geography_. In other words, specific
+to a location. Users with the geogram app running on their devices are
+interacting automatically with the geogram beacons installed on a
+specific location.
+
+Beacon are simple devices, often based on ESP32-arduino machines that
+run from USB power and have both Wi-Fi and bluetooth available.
+They are installed on locations such as houses, train stations or 
+relevant places. Users passing through the beacons receive a
+notification (most of them only time messages).
+
+Beacons are both cheap and smart enough to interact with users,
+providing local messages that are relevant such as welcome messages,
+warning messages or even specific information about events and other
+things happening on that place.
+
+Last but not least, geogram beacons can store messages from users to
+other users. They are meeting points to exchange messages in cases when
+Internet is not available. These messages can either be written in
+plain text or made private just for a specific user to read.
 
 ---
 
