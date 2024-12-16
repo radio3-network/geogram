@@ -122,3 +122,38 @@ Characteristics:
 
 Color:
 + green
+
+
+## CHAT message
+
+Some beacons permit to leave public chat messages.
+The goal is let people arriving to the beacon to leave
+short information to other users.
+
+Each message includes the public identifier of the user
+so that private messages can be sent if needed.
+
+By default only the last 100 messages are displayed to
+the users. The administrator is responsible to monitor
+the chat conversations and make sure it follows the
+necessary behavior guidelines.
+
+Users can be temporarily suspended or banned from using
+the chat system by the administrator when necessary.
+
+
+## PRIVATE message
+
+Some beacons permit users to write private messages for
+other users. These messages will be stored by a period
+of time defined by the administrator and follow a specific
+set of rules (e.g. size of messages, attachments allowed).
+
+When the target user reaches the beacon and is identified,
+the beacon will send the specific for that user. Before
+delivering the message, the beacon needs to be verify the
+authenticity of the user. This is usually done by requesting
+a signed reply from the target user from his private key.
+
+Messages can opt to use encryption or to leave them in plain
+text.
