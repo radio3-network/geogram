@@ -25,13 +25,13 @@ public class EddystoneBeacon {
 
     // Eddystone Service UUID
     private static final ParcelUuid EDDYSTONE_SERVICE_UUID =
-            ParcelUuid.fromString("0000FEAA-0000-1000-8000-00805F9B34FB");
+            ParcelUuid.fromString(Definitions.EDDYSTONE_SERVICE_UUID);
 
     // Custom Service and Characteristic UUIDs
     private static final UUID CUSTOM_SERVICE_UUID =
-            UUID.fromString("12345678-1234-5678-1234-56789abcdef0");
+            UUID.fromString(Definitions.CUSTOM_SERVICE_UUID);
     private static final UUID CUSTOM_CHARACTERISTIC_UUID =
-            UUID.fromString("abcdef12-3456-7890-abcd-ef1234567890");
+            UUID.fromString(Definitions.CUSTOM_CHARACTERISTIC_UUID);
 
     private final Context context;
     private BluetoothAdapter bluetoothAdapter;
@@ -104,7 +104,8 @@ public class EddystoneBeacon {
     }
 
     private void setupGattServer() {
-        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+                != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "Missing BLUETOOTH_CONNECT permission. Cannot add GATT service.");
             return;
         }
@@ -286,7 +287,10 @@ public class EddystoneBeacon {
 
         try {
             byte[] namespaceBytes = hexStringToByteArray(namespaceId);
-            byte[] instanceBytes = hexStringToByteArray(instanceId);
+
+            // make a unique ID that based on Android ID for this cellphone
+            String deviceId = GenerateDeviceId.generateInstanceId(context);
+            byte[] instanceBytes = hexStringToByteArray(deviceId);
 
             // Fix: Allocate the correct buffer size (20 bytes)
             ByteBuffer buffer = ByteBuffer.allocate(20);
