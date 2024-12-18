@@ -1,5 +1,6 @@
 package offgrid.geogram.core;
 
+import static offgrid.geogram.MainActivity.activity;
 import static offgrid.geogram.core.Messages.log;
 import static offgrid.geogram.wifi.WiFiCommon.peers;
 
@@ -13,13 +14,13 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
+import offgrid.geogram.bluetooth.BeaconDefinitions;
 import offgrid.geogram.bluetooth.EddystoneBeacon;
 import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
@@ -41,7 +42,8 @@ public class BackgroundService extends Service {
 
     private boolean
             wifi_advertise = true,
-            wifi_discover = true;
+            wifi_discover = true,
+            hasNecessaryPermissions = false;
 
 
     @Override
@@ -66,16 +68,45 @@ public class BackgroundService extends Service {
             }
         }
 
-        // Initialize Wi-Fi Direct Advertiser
-        if(wifi_advertise){
-            wifiDirectAdvertiser = new WiFiDirectAdvertiser(this);
-            wifiDirectAdvertiser.startAdvertising();
-            log(TAG_ID, "WiFi advertise initialized");
-        }else{
-            log(TAG_ID, "WiFi advertise disabled");
+        hasNecessaryPermissions = PermissionsHelper.requestPermissionsIfNecessary(activity);
+
+
+        // Check and request permissions again
+        if (!hasNecessaryPermissions) {
+            log(TAG_ID, "Permissions are not granted yet. Waiting for user response.");
+            hasNecessaryPermissions = PermissionsHelper.requestPermissionsIfNecessary(activity);
         }
 
-        // Initialize the discovery of other apps
+        // needs to have permissions by now
+        if (!hasNecessaryPermissions) {
+            Messages.message(activity, "Please enable the app permissions");
+            return;
+        }
+
+
+//        // Initialize Wi-Fi Direct Advertiser
+//        startWiFiAdvertise();
+//
+//        // Initialize the discovery of other apps
+//        startWiFiDiscover();
+
+        // initialize the bluetooth beacon
+        startBluetoothBeacon();
+
+
+    }
+
+    private void startBluetoothBeacon() {
+        // Initialize the EddystoneBeacon
+        eddystoneBeacon = new EddystoneBeacon(this);
+        // Start advertising
+        eddystoneBeacon.startAdvertising(BeaconDefinitions.namespaceId);
+    }
+
+    /**
+     * Starts the Wi-Fi Direct discovery
+     */
+    private void startWiFiDiscover() {
         if(wifi_discover) {
             log(TAG_ID, "WiFi discovery initialized");
             discover = new WiFiDirectDiscovery(this);
@@ -84,22 +115,31 @@ public class BackgroundService extends Service {
         }else{
             log(TAG_ID, "WiFi discover disabled");
         }
-
-        // initialize the bluetooth beacon
-//        BluetoothBeacon beacon = new BluetoothBeacon();
-//        beacon.startAdvertising(this);
-
-        // Initialize the EddystoneBeacon
-        eddystoneBeacon = new EddystoneBeacon(this);
-        // Example Namespace ID and Instance ID
-        String namespaceId = "0123456789abcdef0123"; // 20 hex characters
-        String instanceId = "abcdef123456";         // 12 hex characters
-        // Start advertising
-        eddystoneBeacon.startAdvertising(namespaceId, instanceId);
-
-
     }
 
+    private void startWiFiAdvertise() {
+        if(wifi_advertise){
+            wifiDirectAdvertiser = new WiFiDirectAdvertiser(this);
+            wifiDirectAdvertiser.startAdvertising();
+            log(TAG_ID, "WiFi advertise initialized");
+        }else{
+            log(TAG_ID, "WiFi advertise disabled");
+        }
+    }
+
+    /**
+     * The method with the loop that runs ever NN seconds
+     *
+     * @param intent The Intent supplied to {@link android.content.Context#startService},
+     * as given.  This may be null if the service is being restarted after
+     * its process has gone away, and it had previously returned anything
+     * except {@link #START_STICKY_COMPATIBILITY}.
+     * @param flags Additional data about this start request.
+     * @param startId A unique integer representing this specific request to
+     * start.  Use with {@link #stopSelfResult(int)}.
+     *
+     * @return
+     */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Intent notificationIntent = new Intent(this, MainActivity.class);
@@ -126,7 +166,11 @@ public class BackgroundService extends Service {
             @Override
             public void run() {
                 log(TAG_ID, "Service is running...");
-                runBackgroundTask();
+                if(hasNecessaryPermissions){
+                    runBackgroundTask();
+                }else{
+                    log(TAG_ID, "Missing permissions, cannot proceed");
+                }
                 handler.postDelayed(this, interval_seconds * 1000); // Repeat every NN seconds
             }
         };
@@ -186,7 +230,7 @@ public class BackgroundService extends Service {
      */
     private void runBackgroundTask() {
 
-        if(wifi_discover) {
+        if(discover != null && wifi_discover) {
             discover.startDiscovery(1);
             discover.stopDiscovery();
             listPeers();

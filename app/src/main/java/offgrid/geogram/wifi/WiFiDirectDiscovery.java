@@ -4,21 +4,12 @@ import static offgrid.geogram.MainActivity.activity;
 import static offgrid.geogram.wifi.WiFiCommon.channel;
 import static offgrid.geogram.wifi.WiFiCommon.wifiP2pManager;
 
-import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.WifiP2pDevice;
-import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.os.Build;
-import android.util.Log;
 
-import androidx.core.app.ActivityCompat;
-
+import offgrid.geogram.core.Log;
 import offgrid.geogram.core.PermissionsHelper;
 
 public class WiFiDirectDiscovery {

@@ -10,9 +10,10 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Handler;
-import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
+
+import offgrid.geogram.core.Log;
 
 public class WiFiDirectDiscovery2 {
 

@@ -14,10 +14,11 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.ParcelUuid;
-import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
+
+import offgrid.geogram.core.Log;
 
 public class EddystoneBeacon {
 
@@ -25,13 +26,13 @@ public class EddystoneBeacon {
 
     // Eddystone Service UUID
     private static final ParcelUuid EDDYSTONE_SERVICE_UUID =
-            ParcelUuid.fromString(Definitions.EDDYSTONE_SERVICE_UUID);
+            ParcelUuid.fromString(BeaconDefinitions.EDDYSTONE_SERVICE_UUID);
 
     // Custom Service and Characteristic UUIDs
     private static final UUID CUSTOM_SERVICE_UUID =
-            UUID.fromString(Definitions.CUSTOM_SERVICE_UUID);
+            UUID.fromString(BeaconDefinitions.CUSTOM_SERVICE_UUID);
     private static final UUID CUSTOM_CHARACTERISTIC_UUID =
-            UUID.fromString(Definitions.CUSTOM_CHARACTERISTIC_UUID);
+            UUID.fromString(BeaconDefinitions.CUSTOM_CHARACTERISTIC_UUID);
 
     private final Context context;
     private BluetoothAdapter bluetoothAdapter;
@@ -125,12 +126,12 @@ public class EddystoneBeacon {
             gattServer.addService(customService);
             Log.i(TAG, "GATT server setup complete. Custom service added.");
         } catch (SecurityException e) {
-            Log.e(TAG, "SecurityException while adding GATT service: ", e);
+            Log.e(TAG, "SecurityException while adding GATT service: ");
         }
     }
 
 
-    public void startAdvertising(String namespaceId, String instanceId) {
+    public void startAdvertising(String namespaceId) {
         if (advertiser == null) {
             Log.e(TAG, "Advertiser is null. Cannot start advertising.");
             return;
@@ -150,7 +151,7 @@ public class EddystoneBeacon {
 
             AdvertiseData advertiseData = new AdvertiseData.Builder()
                     .addServiceUuid(EDDYSTONE_SERVICE_UUID)
-                    .addServiceData(EDDYSTONE_SERVICE_UUID, buildEddystoneUidFrame(namespaceId, instanceId))
+                    .addServiceData(EDDYSTONE_SERVICE_UUID, buildEddystoneUidFrame(namespaceId))
                     .setIncludeDeviceName(false)
                     .build();
 
@@ -163,7 +164,7 @@ public class EddystoneBeacon {
                     Log.i(TAG, "Eddystone beacon started successfully.");
                     Log.i(TAG, "Broadcasting Eddystone UID Frame:");
                     Log.i(TAG, "Namespace ID: " + namespaceId);
-                    Log.i(TAG, "Instance ID: " + instanceId);
+                    Log.i(TAG, "Device ID: " + BeaconDefinitions.instanceId);
                 }
 
                 @Override
@@ -175,9 +176,9 @@ public class EddystoneBeacon {
             Log.i(TAG, "Starting advertising...");
             advertiser.startAdvertising(settings, advertiseData, advertiseCallback);
         } catch (SecurityException e) {
-            Log.e(TAG, "SecurityException while starting advertising: ", e);
+            Log.e(TAG, "SecurityException while starting advertising: ");
         } catch (Exception e) {
-            Log.e(TAG, "Unexpected error while starting advertising: ", e);
+            Log.e(TAG, "Unexpected error while starting advertising: ");
         }
     }
 
@@ -196,7 +197,7 @@ public class EddystoneBeacon {
                 advertiser.stopAdvertising(advertiseCallback);
                 Log.i(TAG, "Eddystone beacon stopped.");
             } catch (SecurityException e) {
-                Log.e(TAG, "SecurityException while stopping advertising: ", e);
+                Log.e(TAG, "SecurityException while stopping advertising: ");
             }
         }
 
@@ -221,11 +222,11 @@ public class EddystoneBeacon {
                         == PackageManager.PERMISSION_GRANTED;
 
         if (!hasAdvertisePermission) {
-            Log.w(TAG, "Missing BLUETOOTH_ADVERTISE permission.");
+            Log.i(TAG, "Missing BLUETOOTH_ADVERTISE permission.");
         }
 
         if (!hasConnectPermission) {
-            Log.w(TAG, "Missing BLUETOOTH_CONNECT permission.");
+            Log.i(TAG, "Missing BLUETOOTH_CONNECT permission.");
         }
 
         return hasAdvertisePermission && hasConnectPermission;
@@ -280,8 +281,8 @@ public class EddystoneBeacon {
         }
     }
 
-    private byte[] buildEddystoneUidFrame(String namespaceId, String instanceId) {
-        if (namespaceId.length() != 20 || instanceId.length() != 12) {
+    private byte[] buildEddystoneUidFrame(String namespaceId) {
+        if (namespaceId.length() != 20) {
             throw new IllegalArgumentException("Namespace ID must be 20 hex characters and Instance ID must be 12 hex characters.");
         }
 
@@ -289,8 +290,8 @@ public class EddystoneBeacon {
             byte[] namespaceBytes = hexStringToByteArray(namespaceId);
 
             // make a unique ID that based on Android ID for this cellphone
-            String deviceId = GenerateDeviceId.generateInstanceId(context);
-            byte[] instanceBytes = hexStringToByteArray(deviceId);
+            BeaconDefinitions.instanceId = GenerateDeviceId.generateInstanceId(context);
+            byte[] instanceBytes = hexStringToByteArray(BeaconDefinitions.instanceId);
 
             // Fix: Allocate the correct buffer size (20 bytes)
             ByteBuffer buffer = ByteBuffer.allocate(20);
@@ -303,7 +304,7 @@ public class EddystoneBeacon {
 
             return buffer.array();
         } catch (Exception e) {
-            Log.e(TAG, "Error building Eddystone UID Frame: ", e);
+            Log.e(TAG, "Error building Eddystone UID Frame: ");
             throw e;
         }
     }

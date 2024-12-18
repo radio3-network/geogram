@@ -5,54 +5,67 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@color/dark_gray_background"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/tv_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/retro_font"
-        android:gravity="center"
-        android:text="geogram"
-        android:textColor="@color/neon_green"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.931"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.977" />
-
     <ListView
-        android:id="@+id/lv_log"
-        android:layout_width="306dp"
-        android:layout_height="440dp"
-        android:layout_marginBottom="48dp"
-        android:backgroundTint="@color/black"
-        app:layout_constraintBottom_toTopOf="@id/btn_connect"
+        android:id="@+id/lv_users"
+        android:layout_width="384dp"
+        android:layout_height="215dp"
+        android:background="#352F2F"
+        android:backgroundTint="#352F2F"
+        android:cacheColorHint="#352F2F"
+        app:layout_constraintBottom_toTopOf="@+id/lv_logevents"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="wrap"
-        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintHorizontal_bias="0.481"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.118" />
+        app:layout_constraintVertical_bias="0.292" />
 
     <Button
         android:id="@+id/btn_connect"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="100dp"
-        android:layout_marginEnd="32dp"
+        android:layout_width="79dp"
+        android:layout_height="45dp"
+        android:layout_marginEnd="16dp"
         android:backgroundTint="@color/material_dynamic_neutral40"
         android:fontFamily="@font/retro_font"
-        android:text="Synchronize"
+        android:text="Go"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@+id/lv_logevents"
+        app:layout_constraintVertical_bias="0.686" />
+
+    <EditText
+        android:id="@+id/lv_logevents"
+        android:layout_width="367dp"
+        android:layout_height="365dp"
+        android:layout_marginBottom="40dp"
+        android:background="#352F2F"
+        android:editable="false"
+        android:focusable="true"
+        android:textIsSelectable="true"
+        android:ems="10"
+        android:padding="10dp"
+        android:gravity="start|top"
+        android:inputType="none"
+        android:password="false"
+        app:layout_constraintBottom_toTopOf="@+id/spinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.897" />
+        android:textSize="10sp" />
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="223dp"
+        android:layout_height="56dp"
+        android:layout_marginBottom="16dp"
+        android:background="#352F2F"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btn_connect"
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

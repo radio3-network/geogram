@@ -11,11 +11,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
+
+import offgrid.geogram.core.Log;
 
 public class WiFiDirectAdvertiser {
     private static final String TAG = "WiFiDirectAdvertiser";

@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">geogram</string>
+    <string name="app_name" translatable="false">geogram</string>
+     <string-array name="spinner_options">
+         <item>Choose an action..</item>
+         <item>Search for users</item>
+         <item>Ping user</item>
+         <item>Test file download</item>
+         <item>Clear the log window</item>
+     </string-array>
 </resources>

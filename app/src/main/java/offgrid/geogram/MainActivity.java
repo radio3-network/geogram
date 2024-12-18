@@ -1,37 +1,37 @@
 package offgrid.geogram;
 
 import static offgrid.geogram.core.Messages.log;
-import static offgrid.geogram.core.Messages.message;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import offgrid.geogram.core.BackgroundService;
-import offgrid.geogram.core.Messages;
-import offgrid.geogram.core.PermissionsHelper;
+import offgrid.geogram.core.Log;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
     private static final String TAG = "MainActivity";
     public static Activity activity = null;
+    public static EditText logWindow = null;
 
     private TextView tvStatus;
     private Button btnDiscover;
-    private ListView lvPeers;
-    private Button btnConnect;
+    private ListView lvUsers;
+    private Button btnGo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,25 +43,32 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        tvStatus = findViewById(R.id.tv_status);
-        lvPeers = findViewById(R.id.lv_log);
-        btnConnect = findViewById(R.id.btn_connect);
+        //tvStatus = findViewById(R.id.tv_status);
+        lvUsers = findViewById(R.id.lv_users);
+        btnGo = findViewById(R.id.btn_connect);
+        logWindow = findViewById(R.id.lv_logevents);
+        Log.setLogWindow(logWindow);
+
+        // setup the debug spinner
+        Spinner spinner = findViewById(R.id.spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this, R.array.spinner_options, android.R.layout.simple_spinner_item
+        );
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
 
         // Log UI initialization
         log(TAG, "UI was launched");
+        addTextToLogWindow(TAG, "UI was launched");
         activity = this;
 
-        // Check and request permissions
-        if (!PermissionsHelper.requestPermissionsIfNecessary(activity)) {
-            log(TAG, "Permissions are not granted yet. Waiting for user response.");
-        }
+        // launch the background service
+        startBackgroundService();
 
-        // needs to have permissions by now
-        if (PermissionsHelper.requestPermissionsIfNecessary(activity)) {
-            startBackgroundService();
-        }else{
-            Messages.message(this, "Please enable the app permissions");
-        }
+    }
+
+    private void addTextToLogWindow(String tag, String uiWasLaunched) {
     }
 
     /**
@@ -79,26 +86,5 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        if (requestCode == PERMISSION_REQUEST_CODE) {
-//            boolean allPermissionsGranted = true;
-//            for (int i = 0; i < permissions.length; i++) {
-//                if (grantResults.length == 0 || grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-//                    message(this, permissions[i] + " permission not granted");
-//                    allPermissionsGranted = false;
-//                }
-//            }
-//            if (allPermissionsGranted) {
-//                // Permissions granted
-//                Central.hasNeededPermissions = true;
-//                message(this, "Needed permissions are enabled");
-//                startBackgroundService(); // Start the service once permissions are granted
-//            } else {
-//                // Handle permission denial
-//                message(this, "Failed: Necessary permissions denied.");
-//            }
-//        }
-//    }
+
 }

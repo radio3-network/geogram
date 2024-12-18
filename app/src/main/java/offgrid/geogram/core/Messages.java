@@ -1,9 +1,7 @@
 package offgrid.geogram.core;
 
-import android.util.Log;
+import android.content.Context;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 public class Messages {
 
@@ -17,8 +15,8 @@ public class Messages {
         Log.d(TAG, message);
     }
 
-    public static void message(AppCompatActivity app, String message) {
-        Toast.makeText(app, message, Toast.LENGTH_SHORT).show();
+    public static void message(Context context, String message) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         Log.d(TAG, message);
     }
 

@@ -6,4 +6,5 @@
     <color name="neon_blue">#00FFFF</color>
     <color name="neon_purple">#9400D3</color>
     <color name="neon_green">#39FF14</color>
+    <color name="dark_gray_background">#121212</color>
 </resources>
