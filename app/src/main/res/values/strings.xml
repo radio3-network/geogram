@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">geogram</string>
-     <string-array name="spinner_options">
+    <string name="go">Go</string>
+    <string-array name="spinner_options">
          <item>Choose an action..</item>
          <item>Search for users</item>
          <item>Ping user</item>

@@ -18,6 +18,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
 import offgrid.geogram.core.Log;
 
@@ -27,11 +28,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static Activity activity = null;
     public static EditText logWindow = null;
+    public static ListView beacons  = null;
 
     private TextView tvStatus;
     private Button btnDiscover;
     private ListView lvUsers;
     private Button btnGo;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +47,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //tvStatus = findViewById(R.id.tv_status);
-        lvUsers = findViewById(R.id.lv_users);
         btnGo = findViewById(R.id.btn_connect);
-        logWindow = findViewById(R.id.lv_logevents);
+        beacons = findViewById(R.id.lv_beacons);
+        logWindow = findViewById(R.id.lv_log);
         Log.setLogWindow(logWindow);
 
         // setup the debug spinner
@@ -58,17 +61,17 @@ public class MainActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
+        // output the starter logo
+
+
         // Log UI initialization
-        log(TAG, "UI was launched");
-        addTextToLogWindow(TAG, "UI was launched");
+        log("Geogram", Art.logo1());
+        //addTextToLogWindow(TAG, "UI was launched");
         activity = this;
 
         // launch the background service
         startBackgroundService();
 
-    }
-
-    private void addTextToLogWindow(String tag, String uiWasLaunched) {
     }
 
     /**

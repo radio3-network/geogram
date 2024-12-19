@@ -22,6 +22,9 @@ public class BeaconFinder {
     // Eddystone Service UUID
     private static final String EDDYSTONE_SERVICE_UUID = "0000FEAA-0000-1000-8000-00805F9B34FB";
 
+    // list of beacons that we are finding
+    BeaconList beaconList = new BeaconList();
+
     private final Context context;
     private BluetoothAdapter bluetoothAdapter;
     private android.bluetooth.le.BluetoothLeScanner scanner;
@@ -108,16 +111,8 @@ public class BeaconFinder {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
-
             // Log the beacon's details
-            String deviceAddress = result.getDevice().getAddress();
-            int rssi = result.getRssi();
-            byte[] serviceData = result.getScanRecord().getServiceData(ParcelUuid.fromString(EDDYSTONE_SERVICE_UUID));
-
-            Log.i(TAG, "Beacon found: " + deviceAddress + ", RSSI: " + rssi);
-            if (serviceData != null) {
-                Log.i(TAG, "Service Data: " + bytesToHex(serviceData));
-            }
+            beaconList.processBeacon(result);
         }
 
         @Override
@@ -135,8 +130,19 @@ public class BeaconFinder {
         }
     };
 
+    private void processBeacon(ScanResult result) {
+           String deviceAddress = result.getDevice().getAddress();
+        int rssi = result.getRssi();
+        byte[] serviceData = result.getScanRecord().getServiceData(ParcelUuid.fromString(EDDYSTONE_SERVICE_UUID));
+
+        Log.i(TAG, "Beacon found: " + deviceAddress + ", RSSI: " + rssi);
+        if (serviceData != null) {
+            Log.i(TAG, "Service Data: " + bytesToHex(serviceData));
+        }
+    }
+
     // Helper method to convert bytes to a hex string
-    private static String bytesToHex(byte[] bytes) {
+    public static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02X", b));

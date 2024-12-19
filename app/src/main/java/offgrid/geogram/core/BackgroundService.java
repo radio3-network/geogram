@@ -21,6 +21,7 @@ import androidx.core.app.NotificationCompat;
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BeaconDefinitions;
+import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.EddystoneBeacon;
 import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
@@ -34,8 +35,9 @@ public class BackgroundService extends Service {
     private Runnable logTask;
 
     private WiFiDirectAdvertiser wifiDirectAdvertiser; // Wi-Fi Direct Advertiser instance
-    private WiFiDirectDiscovery discover = null;
+    private WiFiDirectDiscovery WifiDiscover = null;
     private EddystoneBeacon eddystoneBeacon = null;
+    private BeaconFinder beaconFinder = null;
 
     // how long between scans
     private long interval_seconds = 10;
@@ -93,6 +95,10 @@ public class BackgroundService extends Service {
         // initialize the bluetooth beacon
         startBluetoothBeacon();
 
+        // initialize the bluetooth discovery
+        beaconFinder = new BeaconFinder(this);
+        beaconFinder.startScanning();
+
 
     }
 
@@ -109,7 +115,7 @@ public class BackgroundService extends Service {
     private void startWiFiDiscover() {
         if(wifi_discover) {
             log(TAG_ID, "WiFi discovery initialized");
-            discover = new WiFiDirectDiscovery(this);
+            WifiDiscover = new WiFiDirectDiscovery(this);
             //discover.registerIntents();
             //discover.startDiscovery(1);
         }else{
@@ -165,7 +171,7 @@ public class BackgroundService extends Service {
         logTask = new Runnable() {
             @Override
             public void run() {
-                log(TAG_ID, "Service is running...");
+                //log(TAG_ID, "Service is running...");
                 if(hasNecessaryPermissions){
                     runBackgroundTask();
                 }else{
@@ -206,6 +212,11 @@ public class BackgroundService extends Service {
             log(TAG_ID, "BLE beacon stopped");
         }
 
+        if(beaconFinder != null){
+            beaconFinder.stopScanning();
+            log(TAG_ID, "BLE beacon finder stopped");
+        }
+
 
         // Stop Wi-Fi Direct advertising
         if (wifiDirectAdvertiser != null) {
@@ -230,9 +241,9 @@ public class BackgroundService extends Service {
      */
     private void runBackgroundTask() {
 
-        if(discover != null && wifi_discover) {
-            discover.startDiscovery(1);
-            discover.stopDiscovery();
+        if(WifiDiscover != null && wifi_discover) {
+            WifiDiscover.startDiscovery(1);
+            WifiDiscover.stopDiscovery();
             listPeers();
         }
 

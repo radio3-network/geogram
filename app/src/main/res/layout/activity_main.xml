@@ -9,18 +9,19 @@
     tools:context=".MainActivity">
 
     <ListView
-        android:id="@+id/lv_users"
+        android:id="@+id/lv_beacons"
         android:layout_width="384dp"
         android:layout_height="215dp"
         android:background="#352F2F"
         android:backgroundTint="#352F2F"
         android:cacheColorHint="#352F2F"
-        app:layout_constraintBottom_toTopOf="@+id/lv_logevents"
+        app:layout_constraintBottom_toTopOf="@+id/lv_log"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_default="wrap"
         app:layout_constraintHorizontal_bias="0.481"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        android:textSize="11sp"
         app:layout_constraintVertical_bias="0.292" />
 
     <Button
@@ -30,15 +31,15 @@
         android:layout_marginEnd="16dp"
         android:backgroundTint="@color/material_dynamic_neutral40"
         android:fontFamily="@font/retro_font"
-        android:text="Go"
+        android:text="@string/go"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lv_logevents"
+        app:layout_constraintTop_toBottomOf="@+id/lv_log"
         app:layout_constraintVertical_bias="0.686" />
 
     <EditText
-        android:id="@+id/lv_logevents"
+        android:id="@+id/lv_log"
         android:layout_width="367dp"
         android:layout_height="365dp"
         android:layout_marginBottom="40dp"

@@ -3,6 +3,7 @@ package offgrid.geogram.core;
 import android.widget.EditText;
 
 public class Log {
+
     private static EditText logWindow;
 
     public static void setLogWindow(EditText editText) {
