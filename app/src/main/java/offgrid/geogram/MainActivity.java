@@ -31,6 +31,7 @@ import offgrid.geogram.core.BackgroundService;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.fragments.AboutFragment;
 import offgrid.geogram.fragments.DebugFragment;
+import offgrid.geogram.fragments.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -104,8 +105,12 @@ public class MainActivity extends AppCompatActivity {
             FragmentManager fragmentManager = getSupportFragmentManager();
 
             if (item.getItemId() == R.id.nav_settings) {
-                Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show();
-                btnAdd.show();
+                // Navigate to SettingsFragment
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.main, new SettingsFragment());
+                transaction.addToBackStack(null);
+                transaction.commit();
+                btnAdd.hide(); // Hide FAB on settings screen
             } else if (item.getItemId() == R.id.nav_debug) {
                 // Navigate to DebugFragment
                 FragmentTransaction transaction = fragmentManager.beginTransaction();

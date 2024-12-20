@@ -8,4 +8,10 @@
          <item>Test file download</item>
          <item>Clear the log window</item>
      </string-array>
+    <string-array name="beacon_types">
+        <item>Fixed Location</item>
+        <item>Person</item>
+        <item>Vehicle</item>
+        <item>Object</item>
+    </string-array>
 </resources>

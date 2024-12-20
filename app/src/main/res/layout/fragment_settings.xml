@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_gray_background"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Privacy Options -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Privacy Options"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Set as listen-only"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <Switch
+                android:id="@+id/switch_listen_only"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- User Preferences -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="User Preferences"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <EditText
+            android:id="@+id/edit_preferred_nickname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Preferred Nickname"
+            android:maxLength="10"
+            android:inputType="text"
+            android:backgroundTint="@color/material_dynamic_neutral40"
+            android:padding="8dp" />
+
+        <EditText
+            android:id="@+id/edit_intro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Intro (100 letters max)"
+            android:maxLength="100"
+            android:inputType="text"
+            android:backgroundTint="@color/material_dynamic_neutral40"
+            android:padding="8dp"
+            android:layout_marginTop="8dp" />
+
+        <!-- NOSTR Identity -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="NOSTR Identity"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <EditText
+            android:id="@+id/edit_npub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="NPUB"
+            android:inputType="text"
+            android:backgroundTint="@color/material_dynamic_neutral40"
+            android:padding="8dp" />
+
+        <EditText
+            android:id="@+id/edit_nsec"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="NSEC"
+            android:inputType="text"
+            android:backgroundTint="@color/material_dynamic_neutral40"
+            android:padding="8dp"
+            android:layout_marginTop="8dp" />
+
+        <!-- Beacon Preferences -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Beacon Preferences"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <Spinner
+            android:id="@+id/spinner_beacon_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/beacon_types"
+            android:backgroundTint="@color/material_dynamic_neutral40"
+            android:padding="8dp" />
+
+        <EditText
+            android:id="@+id/edit_group_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Group ID (5 letters max)"
+            android:maxLength="5"
+            android:inputType="text"
+            android:backgroundTint="@color/material_dynamic_neutral40"
+            android:padding="8dp"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/edit_device_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Device ID (5 letters max)"
+            android:maxLength="5"
+            android:inputType="text"
+            android:backgroundTint="@color/material_dynamic_neutral40"
+            android:padding="8dp"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+</ScrollView>
