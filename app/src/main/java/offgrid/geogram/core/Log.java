@@ -4,29 +4,39 @@ import android.widget.EditText;
 
 public class Log {
 
+    // the full log text
+    private static String currentText = "";
+
     private static EditText logWindow;
 
     public static void setLogWindow(EditText editText) {
         logWindow = editText;
     }
 
+    public static void logUpdate(){
+        logWindow.post(() -> {
+            logWindow.setText(currentText);
+            logWindow.setSelection(logWindow.getText().length()); // Auto-scroll
+        });
+    }
+
     public static void log(int priority, String tag, String message) {
         // Write to the system log
         android.util.Log.println(priority, tag, message);
+
+        // archive the current text
+        currentText += "\n" + "[" + tag + "] " + message;
+        if (currentText.length() > 5000) { // Example: Keep last 5000 characters
+            currentText = currentText.substring(currentText.length() - 5000);
+        }
 
         // Append the message to the log window
         if (logWindow == null) {
             return;
         }
         logWindow.post(() -> {
-                String currentText = logWindow.getText().toString();
-                logWindow.setText(currentText + "\n" + "[" + tag + "] " + message);
-
-                if (currentText.length() > 5000) { // Example: Keep last 5000 characters
-                    logWindow.setText(currentText.substring(currentText.length() - 5000));
-                }
-
-            logWindow.setSelection(logWindow.getText().length()); // Auto-scroll
+                logWindow.setText(currentText);
+                logWindow.setSelection(logWindow.getText().length()); // Auto-scroll
             });
     }
 

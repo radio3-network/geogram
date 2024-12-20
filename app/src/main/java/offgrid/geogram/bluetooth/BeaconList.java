@@ -7,8 +7,10 @@ import static offgrid.geogram.bluetooth.BeaconFinder.bytesToHex;
 
 import android.bluetooth.le.ScanResult;
 import android.os.ParcelUuid;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +18,7 @@ import java.util.Comparator;
 import java.util.Objects;
 
 import offgrid.geogram.MainActivity;
+import offgrid.geogram.R;
 import offgrid.geogram.core.Log;
 
 /**
@@ -171,8 +174,6 @@ public class BeaconList {
     public void updateList() {
 
         // we should only update every two seconds
-
-
         ListView beaconWindow = MainActivity.beacons;
 
         if (beaconWindow == null) {
@@ -196,6 +197,9 @@ public class BeaconList {
             displayList.add(displayText);
         }
 
+        // remove the label when there is a beacon visible
+        activity.updateEmptyViewVisibilityBeforeUpdate();
+
         beaconWindow.post(() -> {
             ArrayAdapter<String> adapter = new ArrayAdapter<>(
                     beaconWindow.getContext(),
@@ -204,6 +208,7 @@ public class BeaconList {
             );
             beaconWindow.setAdapter(adapter);
         });
+
     }
 
     /**

@@ -6,9 +6,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -33,7 +35,7 @@ import offgrid.geogram.fragments.DebugFragment;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    public static Activity activity = null;
+    public static MainActivity activity = null;
     public static EditText logWindow = null;
     public static ListView beacons = null;
 
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         // Initialize UI components
         btnAdd = findViewById(R.id.btn_add);
         beacons = findViewById(R.id.lv_beacons);
-        logWindow = findViewById(R.id.lv_log);
+        //logWindow = findViewById(R.id.lv_log);
         Log.setLogWindow(logWindow);
 
         // Handle window insets for modern devices
@@ -70,6 +72,24 @@ public class MainActivity extends AppCompatActivity {
         // Launch background service
         startBackgroundService();
     }
+
+    public void updateEmptyViewVisibilityBeforeUpdate() {
+        ListView lvBeacons = findViewById(R.id.lv_beacons);
+        TextView emptyView = findViewById(R.id.empty_view);
+
+        // Hide the empty view immediately
+        emptyView.setVisibility(View.GONE);
+
+        // After adapter updates, check the item count
+        lvBeacons.post(() -> {
+            if (lvBeacons.getAdapter() != null && lvBeacons.getAdapter().getCount() > 0) {
+                emptyView.setVisibility(View.GONE); // Keep hidden
+            } else {
+                emptyView.setVisibility(View.VISIBLE); // Show "No beacons available"
+            }
+        });
+    }
+
 
     private void setupNavigationDrawer() {
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);

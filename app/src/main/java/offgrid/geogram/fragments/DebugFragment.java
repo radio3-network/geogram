@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import offgrid.geogram.R;
+import offgrid.geogram.core.Log;
 
 public class DebugFragment extends Fragment {
 
@@ -24,7 +25,9 @@ public class DebugFragment extends Fragment {
 
         // Initialize log window
         EditText logWindow = view.findViewById(R.id.lv_log);
-        logWindow.setText("Debug logs will appear here..."); // Example placeholder text
+        Log.setLogWindow(logWindow);
+        Log.logUpdate();
+        //logWindow.setText("Debug logs will appear here..."); // Example placeholder text
 
         return view;
     }
