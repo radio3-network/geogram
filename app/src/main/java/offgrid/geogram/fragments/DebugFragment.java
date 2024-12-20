@@ -42,7 +42,7 @@ public class DebugFragment extends Fragment {
         // Clear log button functionality
         ImageButton btnClearLog = view.findViewById(R.id.btn_clear_log);
         btnClearLog.setOnClickListener(v -> {
-            Log.clear(); 
+            Log.clear();
             Toast.makeText(getContext(), "Log cleared", Toast.LENGTH_SHORT).show();
         });
 
