@@ -23,7 +23,7 @@ public class BeaconFinder {
     private static final String EDDYSTONE_SERVICE_UUID = "0000FEAA-0000-1000-8000-00805F9B34FB";
 
     // list of beacons that we are finding
-    BeaconList beaconList = new BeaconList();
+    public BeaconList beaconList = new BeaconList();
 
     private final Context context;
     private BluetoothAdapter bluetoothAdapter;

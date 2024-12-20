@@ -42,6 +42,8 @@ public class BackgroundService extends Service {
     // how long between scans
     private long interval_seconds = 10;
 
+    private long time_last_updated_list = System.currentTimeMillis();
+
     private boolean
             wifi_advertise = true,
             wifi_discover = true,
@@ -245,6 +247,14 @@ public class BackgroundService extends Service {
             WifiDiscover.startDiscovery(1);
             WifiDiscover.stopDiscovery();
             listPeers();
+        }
+
+        // update the beacon list
+        long time_now = System.currentTimeMillis();
+        long time_passed = time_now - time_last_updated_list;
+        if(time_passed > 20_000){ // 20 seconds to update the beacon list
+            time_last_updated_list = time_now;
+            beaconFinder.beaconList.updateList();
         }
 
     }

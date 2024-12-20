@@ -2,6 +2,7 @@ package offgrid.geogram.bluetooth;
 
 import static offgrid.geogram.MainActivity.*;
 import static offgrid.geogram.bluetooth.BeaconDefinitions.EDDYSTONE_SERVICE_UUID;
+import static offgrid.geogram.bluetooth.BeaconDefinitions.namespaceId;
 import static offgrid.geogram.bluetooth.BeaconFinder.bytesToHex;
 
 import android.bluetooth.le.ScanResult;
@@ -11,7 +12,6 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -23,14 +23,43 @@ import offgrid.geogram.core.Log;
  */
 public class BeaconList {
 
+    // when was the window last time updated?
+    private long lastUpdated = System.currentTimeMillis();
+
     private ArrayList<Beacon> beacons = new ArrayList<>();
     private static final String TAG = "BeaconList";
 
     public void processBeacon(ScanResult result) {
+
+        // only update after some time
+        long timeNow = System.currentTimeMillis();
+        long timePassed = timeNow - lastUpdated;
+        if(timePassed < 2000){
+            return;
+        }
+        lastUpdated = timeNow;
+
+
         boolean canUpdateList = false;
         // get basic data from the beacon
         String deviceAddress = result.getDevice().getAddress();
         int rssi = result.getRssi();
+
+
+        // get more advanced data
+        // update the service data
+        String namespaceId = null;
+        String instanceId = null;
+        byte[] serviceData = Objects.requireNonNull(result.getScanRecord())
+                .getServiceData(ParcelUuid.fromString(EDDYSTONE_SERVICE_UUID));
+        // can often be null
+        if(serviceData != null){
+            namespaceId = extractNamespaceId(serviceData);
+            instanceId = extractInstanceId(serviceData);
+        }else{
+            // don't process empty beacons
+            return;
+        }
 
         // try to find an existing beacon of this kind
         Beacon beacon = null;
@@ -40,6 +69,21 @@ public class BeaconList {
                 break;
             }
         }
+
+        // try to do this based on instanceId
+        if(instanceId != null && beacon == null){
+            for (Beacon b : beacons) {
+                // beacon is recognized, use it
+                if (b.getInstanceId().equals(instanceId)) {
+                    beacon = b;
+                    beacon.setMacAddress(deviceAddress);
+                    break;
+                }
+            }
+        }
+
+
+
         // we never saw it before, create a new one
         if (beacon == null) {
             beacon = new Beacon();
@@ -58,13 +102,20 @@ public class BeaconList {
             canUpdateList = true;
         }
 
-        // update the service data
-        byte[] serviceData = Objects.requireNonNull(result.getScanRecord())
-                .getServiceData(ParcelUuid.fromString(EDDYSTONE_SERVICE_UUID));
+        if(beacon.getInstanceId() == null && instanceId != null){
+            beacon.setNamespaceId(namespaceId);
+            beacon.setInstanceId(instanceId);
+            canUpdateList = true;
+        }
+
+
         // only update the service data if it changed
-        if (serviceData != null && Arrays.hashCode(serviceData) != Arrays.hashCode(beacon.getServiceData())) {
+        if (Arrays.hashCode(serviceData) != Arrays.hashCode(beacon.getServiceData())) {
             beacon.setServiceData(serviceData);
-            Log.i(TAG, "Service Data: " + bytesToHex(serviceData));
+
+            // Extract and log the instance ID
+            //Log.i(TAG, "Instance ID: " + instanceId);
+
             canUpdateList = true;
         }
 
@@ -75,9 +126,53 @@ public class BeaconList {
     }
 
     /**
+     * Extract the Namespace ID from service data.
+     */
+    private String extractNamespaceId(byte[] serviceData) {
+        if (serviceData == null || serviceData.length < 18) { // Ensure valid service data length
+            Log.e(TAG, "Invalid service data for Eddystone UID.");
+            return "Unknown";
+        }
+
+        // Extract Instance ID (6 bytes starting at offset 12)
+        byte[] instanceIdBytes = Arrays.copyOfRange(serviceData, 2, 12);
+
+        // Convert to hexadecimal string
+        StringBuilder namespaceId = new StringBuilder();
+        for (byte b : instanceIdBytes) {
+            namespaceId.append(String.format("%02X", b));
+        }
+        return namespaceId.toString();
+    }
+
+    /**
+     * Extract the Instance ID from service data.
+     */
+    private String extractInstanceId(byte[] serviceData) {
+        if (serviceData == null || serviceData.length < 18) { // Ensure valid service data length
+            Log.e(TAG, "Invalid service data for Eddystone UID.");
+            return "Unknown";
+        }
+
+        // Extract Instance ID (6 bytes starting at offset 12)
+        byte[] instanceIdBytes = Arrays.copyOfRange(serviceData, 12, 18);
+
+        // Convert to hexadecimal string
+        StringBuilder instanceId = new StringBuilder();
+        for (byte b : instanceIdBytes) {
+            instanceId.append(String.format("%02X", b));
+        }
+        return instanceId.toString();
+    }
+
+    /**
      * Update the list of beacons on the UI
      */
-    private void updateList() {
+    public void updateList() {
+
+        // we should only update every two seconds
+
+
         ListView beaconWindow = MainActivity.beacons;
 
         if (beaconWindow == null) {
@@ -85,17 +180,17 @@ public class BeaconList {
         }
 
         // Sort beacons by last seen time, most recent first
-        Collections.sort(beacons, new Comparator<Beacon>() {
+        beacons.sort(new Comparator<Beacon>() {
             @Override
             public int compare(Beacon b1, Beacon b2) {
-                return Long.compare(b2.getTimeLastFound(), b1.getTimeLastFound());
+                return Long.compare(b1.getTimeLastFound(), b2.getTimeLastFound());
             }
         });
 
         ArrayList<String> displayList = new ArrayList<>();
         for (Beacon beacon : beacons) {
             String humanReadableTime = getHumanReadableTime(beacon.getTimeLastFound());
-            String displayText = beacon.getMacAddress() +
+            String displayText = beacon.getInstanceId() +
                     " | Distance: " + calculateDistance(beacon.getRssi()) +
                     (humanReadableTime.isEmpty() ? "" : " | Last Seen: " + humanReadableTime);
             displayList.add(displayText);
@@ -152,15 +247,27 @@ public class BeaconList {
 
         long minutes = seconds / 60;
         if (minutes < 60) {
-            return minutes + " minutes ago";
+            if(minutes == 1){
+                return minutes + " minute ago";
+            }else{
+                return minutes + " minutes ago";
+            }
         }
 
         long hours = minutes / 60;
         if (hours < 24) {
-            return hours + " hours ago";
+            if(hours == 1){
+                return hours + " hour ago";
+            }else{
+                return hours + " hours ago";
+            }
         }
 
         long days = hours / 24;
-        return days + " days ago";
+        if(days == 1){
+            return days + " day ago";
+        }else{
+            return days + " days ago";
+        }
     }
 }

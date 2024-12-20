@@ -6,10 +6,28 @@ package offgrid.geogram.bluetooth;
  */
 public class Beacon {
     private String macAddress;
+    private String namespaceId = null;
+    private String instanceId = null;
     private int rssi;
     private byte[] serviceData;
     private final long timeFirstFound;
     private long timeLastFound;
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
+
+    public String getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(String namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Beacon() {
         this.timeFirstFound = System.currentTimeMillis();
