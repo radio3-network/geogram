@@ -20,6 +20,7 @@ import java.util.Objects;
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.fragments.BeaconDetailsFragment;
 
 /**
  * Manages the list of beacons that were found
@@ -172,8 +173,6 @@ public class BeaconList {
      * Update the list of beacons on the UI
      */
     public void updateList() {
-
-        // we should only update every two seconds
         ListView beaconWindow = MainActivity.beacons;
 
         if (beaconWindow == null) {
@@ -181,35 +180,35 @@ public class BeaconList {
         }
 
         // Sort beacons by last seen time, most recent first
-        beacons.sort(new Comparator<Beacon>() {
-            @Override
-            public int compare(Beacon b1, Beacon b2) {
-                return Long.compare(b1.getTimeLastFound(), b2.getTimeLastFound());
-            }
-        });
+        beacons.sort(Comparator.comparingLong(Beacon::getTimeLastFound).reversed());
 
         ArrayList<String> displayList = new ArrayList<>();
         for (Beacon beacon : beacons) {
-            String humanReadableTime = getHumanReadableTime(beacon.getTimeLastFound());
             String displayText = beacon.getInstanceId() +
-                    " | Distance: " + calculateDistance(beacon.getRssi()) +
-                    (humanReadableTime.isEmpty() ? "" : " | Last Seen: " + humanReadableTime);
+                    " | Distance: " + calculateDistance(beacon.getRssi());
             displayList.add(displayText);
         }
 
-        // remove the label when there is a beacon visible
-        activity.updateEmptyViewVisibilityBeforeUpdate();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                beaconWindow.getContext(),
+                android.R.layout.simple_list_item_1,
+                displayList
+        );
+        beaconWindow.setAdapter(adapter);
 
-        beaconWindow.post(() -> {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                    beaconWindow.getContext(),
-                    android.R.layout.simple_list_item_1,
-                    displayList
-            );
-            beaconWindow.setAdapter(adapter);
+        // Add click listener to items
+        beaconWindow.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedBeaconDetails = displayList.get(position);
+
+            // Replace the current fragment with the details fragment
+            MainActivity.activity.getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.main, BeaconDetailsFragment.newInstance(selectedBeaconDetails))
+                    .addToBackStack(null)
+                    .commit();
         });
-
     }
+
 
     /**
      * Convert RSSI to a human-readable distance.

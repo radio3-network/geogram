@@ -25,8 +25,8 @@ public class AboutFragment extends Fragment {
         btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
 
         // Set your about message
-        TextView aboutMessage = view.findViewById(R.id.about_message);
-        aboutMessage.setText("Geogram v1.0\nThe ultimate geolocation app. Developed by XYZ Team.");
+        //TextView aboutMessage = view.findViewById(R.id.about_message);
+        //aboutMessage.setText("Geogram v1.0\nThe ultimate geolocation app. Developed by XYZ Team.");
 
         return view;
     }

@@ -35,23 +35,20 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="About Geogram"
+                android:text="Beacon Details"
                 android:textColor="@color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
 
-        <!-- About Message -->
+        <!-- Beacon Details -->
         <TextView
-            android:id="@+id/about_message"
+            android:id="@+id/beacon_details_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/about_text"
+            android:text="Details will appear here"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:gravity="start"
             android:paddingTop="16dp" />
-
     </LinearLayout>
 </ScrollView>
