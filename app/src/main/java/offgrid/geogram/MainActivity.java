@@ -9,14 +9,20 @@ import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
@@ -46,20 +52,45 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // setup the navigation
+        NavigationView navigationView = findViewById(R.id.navigation_view);
+        navigationView.setNavigationItemSelectedListener(item -> {
+
+            if (item.getItemId() == R.id.nav_settings) {
+                Toast.makeText(this, "Settings clicked", Toast.LENGTH_SHORT).show();
+            } else if (item.getItemId() == R.id.nav_debug) {
+                Toast.makeText(this, "Debug clicked", Toast.LENGTH_SHORT).show();
+            } else if (item.getItemId() == R.id.nav_about) {
+                Toast.makeText(this, "About clicked", Toast.LENGTH_SHORT).show();
+            }
+
+            // Close the drawer after an item is clicked
+            DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+            drawerLayout.closeDrawer(GravityCompat.START);
+
+            return true;
+        });
+
+
+
+        DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        ImageButton btnSettings = findViewById(R.id.btn_settings);
+        btnSettings.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+
         //tvStatus = findViewById(R.id.tv_status);
-        btnGo = findViewById(R.id.btn_connect);
+        //btnGo = findViewById(R.id.btn_connect);
         beacons = findViewById(R.id.lv_beacons);
         logWindow = findViewById(R.id.lv_log);
         Log.setLogWindow(logWindow);
 
         // setup the debug spinner
-        Spinner spinner = findViewById(R.id.spinner);
+        //Spinner spinner = findViewById(R.id.spinner);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this, R.array.spinner_options, android.R.layout.simple_spinner_item
         );
 
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spinner.setAdapter(adapter);
 
         // output the starter logo
 
