@@ -13,6 +13,11 @@ public class Log {
         logWindow = editText;
     }
 
+    public static void clear() {
+        currentText = "";
+        logWindow.setText("");
+    }
+
     public static void logUpdate(){
         logWindow.post(() -> {
             logWindow.setText(currentText);
