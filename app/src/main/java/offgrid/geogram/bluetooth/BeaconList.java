@@ -176,7 +176,7 @@ public class BeaconList {
         ListView beaconWindow = MainActivity.beacons;
 
         // remove empty label
-        activity.updateEmptyViewVisibilityBeforeUpdate();
+        //activity.updateEmptyViewVisibilityBeforeUpdate();
 
         if (beaconWindow == null) {
             return;
@@ -201,6 +201,7 @@ public class BeaconList {
 
         // Add click listener to items
         beaconWindow.setOnItemClickListener((parent, view, position, id) -> {
+
             String selectedBeaconDetails = displayList.get(position);
 
             // Replace the current fragment with the details fragment

@@ -3,6 +3,7 @@ package offgrid.geogram;
 import static offgrid.geogram.core.Messages.log;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import offgrid.geogram.bluetooth.BeaconList;
 import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
 import offgrid.geogram.core.Log;
@@ -52,6 +54,11 @@ public class MainActivity extends AppCompatActivity {
         // Initialize UI components
         btnAdd = findViewById(R.id.btn_add);
         beacons = findViewById(R.id.lv_beacons);
+        activity = this;
+        // Initialize BeaconList and set adapter
+        BeaconList beaconList = new BeaconList();
+        beaconList.updateList();
+        
         //logWindow = findViewById(R.id.lv_log);
         Log.setLogWindow(logWindow);
 
@@ -68,35 +75,53 @@ public class MainActivity extends AppCompatActivity {
         // Handle floating action button
         setupBackPressedHandler();
 
+        // hide the label when it there is something
+        //updateEmptyViewVisibilityBeforeUpdate();
+
+
+        // minor checks
+        // Check if Bluetooth is enabled
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, "Bluetooth is not supported on this device.", Toast.LENGTH_LONG).show();
+        } else if (!bluetoothAdapter.isEnabled()) {
+            Toast.makeText(this, "Bluetooth is disabled. Please turn it on to connect with beacons.", Toast.LENGTH_LONG).show();
+        }
+
+
+
         // portions that we don't need to repeat
         if(wasCreatedBefore){
             return;
         }
         // Output starter logo to log window
         log("Geogram", Art.logo1());
-        activity = this;
 
         // Launch background service
         startBackgroundService();
         wasCreatedBefore = true;
     }
 
-    public void updateEmptyViewVisibilityBeforeUpdate() {
-        ListView lvBeacons = findViewById(R.id.lv_beacons);
-        TextView emptyView = findViewById(R.id.empty_view);
-
-        // Hide the empty view immediately
-        emptyView.setVisibility(View.GONE);
-
-        // After adapter updates, check the item count
-        lvBeacons.post(() -> {
-            if (lvBeacons.getAdapter() != null && lvBeacons.getAdapter().getCount() > 0) {
-                emptyView.setVisibility(View.GONE); // Keep hidden
-            } else {
-                emptyView.setVisibility(View.VISIBLE); // Show "No beacons available"
-            }
-        });
-    }
+//    public void updateEmptyViewVisibilityBeforeUpdate() {
+//        ListView lvBeacons = findViewById(R.id.lv_beacons);
+//        TextView emptyView = findViewById(R.id.empty_view);
+//
+//        // Hide the empty view immediately
+//        //emptyView.setVisibility(View.GONE);
+//
+//        // After adapter updates, check the item count
+//        lvBeacons.post(() -> {
+//            if (lvBeacons.getAdapter() == null){
+//                return;
+//            }
+//
+//            if (lvBeacons.getAdapter().getCount() > 0) {
+//                emptyView.setVisibility(View.GONE); // Keep hidden
+//            } else {
+//                emptyView.setVisibility(View.VISIBLE); // Show "No beacons available"
+//            }
+//        });
+//    }
 
     private void setupNavigationDrawer() {
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);

@@ -9,11 +9,13 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -73,6 +75,10 @@ public class BackgroundService extends Service {
             }
         }
 
+        // sometimes called in a weird way during processing
+        if(activity == null){
+            return;
+        }
         hasNecessaryPermissions = PermissionsHelper.requestPermissionsIfNecessary(activity);
 
 
@@ -99,8 +105,7 @@ public class BackgroundService extends Service {
         startBluetoothBeacon();
 
         // initialize the bluetooth discovery
-        beaconFinder = new BeaconFinder(this);
-        beaconFinder.startScanning();
+        startBluetoothFinder();
 
         // start the web server
         Thread serverThread = new Thread(new SimpleSparkServer());
@@ -126,16 +131,46 @@ public class BackgroundService extends Service {
 
     }
 
+    /**
+     * Starts the Bluetooth beacon
+     * Notice that eddyStoneBeacon variable will no longer be null
+     * when it is starting and running as expected.
+     */
     private void startBluetoothBeacon() {
+        // Check if Bluetooth is enabled
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            //Toast.makeText(this, "Bluetooth is not supported on this device.", Toast.LENGTH_LONG).show();
+            return;
+        } else if (!bluetoothAdapter.isEnabled()) {
+            //Toast.makeText(this, "Bluetooth is disabled. Please turn it on to connect with beacons.", Toast.LENGTH_LONG).show();
+            return;
+        }
         // Initialize the EddystoneBeacon
         eddystoneBeacon = new EddystoneBeacon(this);
         // Start advertising
         eddystoneBeacon.startAdvertising(BeaconDefinitions.namespaceId);
     }
 
-    /**
-     * Starts the Wi-Fi Direct discovery
-     */
+    private void startBluetoothFinder() {
+        // Check if Bluetooth is enabled
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            //Toast.makeText(this, "Bluetooth is not supported on this device.", Toast.LENGTH_LONG).show();
+            return;
+        } else if (!bluetoothAdapter.isEnabled()) {
+            //Toast.makeText(this, "Bluetooth is disabled. Please turn it on to connect with beacons.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        // initialize the finder
+        beaconFinder = new BeaconFinder(this);
+        beaconFinder.startScanning();
+    }
+
+
+        /**
+         * Starts the Wi-Fi Direct discovery
+         */
     private void startWiFiDiscover() {
         if(wifi_discover) {
             log(TAG_ID, "WiFi discovery initialized");
@@ -253,10 +288,34 @@ public class BackgroundService extends Service {
         long time_now = System.currentTimeMillis();
         long time_passed = time_now - time_last_updated_list;
         if(time_passed > 20_000){ // 20 seconds to update the beacon list
+            checkIfBluetoothWasEnabled();
             time_last_updated_list = time_now;
             beaconFinder.beaconList.updateList();
+            // remove empty label
+            //activity.updateEmptyViewVisibilityBeforeUpdate();
         }
 
+    }
+
+    /**
+     * During runs it is possible for the user to enable or disable bluetooth.
+     * Therefore we check here if it is already running
+     */
+    private void checkIfBluetoothWasEnabled() {
+        // Check if Bluetooth is enabled
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            return;
+        } else if (!bluetoothAdapter.isEnabled()) {
+            return;
+        }
+        // now check the variables
+        if(eddystoneBeacon == null){
+            startBluetoothBeacon();
+        }
+        if(beaconFinder == null){
+            startBluetoothFinder();
+        }
     }
 
     private void listPeers() {

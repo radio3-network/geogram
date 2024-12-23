@@ -42,30 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
-            <!-- Search Button -->
-            <ImageButton
-                android:id="@+id/btn_search"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="Search"
-                android:src="@drawable/ic_search"
-                app:tint="@color/white" />
         </LinearLayout>
-
-        <!-- Tab Layout for Navigation -->
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tab_layout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:tabIndicatorColor="@color/white"
-            app:tabSelectedTextColor="@color/white"
-            app:tabTextColor="@color/material_dynamic_neutral40"
-            android:background="@color/dark_gray_background"
-            app:tabMode="fixed"
-            app:layout_constraintTop_toBottomOf="@+id/top_action_bar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
 
         <!-- ListView for Beacons -->
         <ListView
@@ -74,22 +51,12 @@
             android:layout_height="0dp"
             android:background="#352F2F"
             android:cacheColorHint="#352F2F"
-            app:layout_constraintTop_toBottomOf="@+id/tab_layout"
+            app:layout_constraintTop_toBottomOf="@+id/top_action_bar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
         <!-- Empty View for Beacons -->
-        <TextView
-            android:id="@+id/empty_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="No beacons available"
-            android:textColor="@color/white"
-            android:gravity="center"
-            app:layout_constraintTop_toTopOf="@+id/lv_beacons"
-            app:layout_constraintBottom_toBottomOf="@+id/lv_beacons" />
 
         <!-- Floating Action Button -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
