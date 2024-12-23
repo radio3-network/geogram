@@ -1,5 +1,6 @@
 package offgrid.geogram.bluetooth;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
@@ -9,6 +10,9 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.ParcelUuid;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +51,22 @@ public class BeaconFinder {
             return;
         }
 
+//        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
+//        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//            adapter.disable();
+//            try {
+//                Thread.sleep(2000); // Wait for 2 seconds
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//            adapter.enable();
+//            return;
+//        }
+
+
         scanner = bluetoothAdapter.getBluetoothLeScanner();
+
         if (scanner == null) {
             Log.e(TAG, "BLE scanning is not supported on this device.");
         } else {
@@ -63,6 +82,11 @@ public class BeaconFinder {
 
         if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "Missing BLUETOOTH_SCAN permission. Cannot start scanning.");
+            return;
+        }
+
+        if (context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.e("Permissions", "BLE scanning permissions are not granted.");
             return;
         }
 

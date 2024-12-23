@@ -86,12 +86,7 @@ public class SettingsFragment extends Fragment {
         // Floating Action Button for saving settings
         View saveButton = view.findViewById(R.id.btn_save_settings);
         saveButton.setOnClickListener(v -> {
-            if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
-            } else {
-                saveSettings(nickname, bio, npub, nsec, beaconTypeSpinner, groupId, deviceId, listenOnlySwitch.isChecked());
-            }
+            saveSettings(nickname, bio, npub, nsec, beaconTypeSpinner, groupId, deviceId, listenOnlySwitch.isChecked());
         });
 
         return view;

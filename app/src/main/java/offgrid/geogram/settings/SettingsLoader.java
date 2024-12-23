@@ -1,6 +1,7 @@
 package offgrid.geogram.settings;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -18,24 +19,22 @@ public class SettingsLoader {
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
         File settingsFile = new File(context.getFilesDir(), SETTINGS_FILE_NAME);
 
-        // Check if the settings file exists
+        Log.i("SettingsLoader", "Settings file location: " + settingsFile.getAbsolutePath());
+
         if (settingsFile.exists()) {
             try (FileReader reader = new FileReader(settingsFile)) {
-                // Load settings from file
                 return gson.fromJson(reader, SettingsUser.class);
             } catch (IOException e) {
-                e.printStackTrace();
-                // If reading fails, create default settings
-                return createDefaultSettings(settingsFile, gson);
+                Log.e("SettingsLoader", "Failed to read settings file, creating default settings.", e);
+                return createDefaultSettings(context, gson);
             }
         } else {
-            // If the file does not exist, create default settings
-            return createDefaultSettings(settingsFile, gson);
+            Log.i("SettingsLoader", "Settings file not found, creating default settings.");
+            return createDefaultSettings(context, gson);
         }
     }
 
-    private static SettingsUser createDefaultSettings(File settingsFile, Gson gson) {
-        // Create default settings
+    private static SettingsUser createDefaultSettings(Context context, Gson gson) {
         SettingsUser defaultSettings = new SettingsUser();
         defaultSettings.nickname = "User";
         defaultSettings.intro = "Welcome to Geogram!";
@@ -46,12 +45,7 @@ public class SettingsLoader {
         defaultSettings.idGroup = "00001";
         defaultSettings.idDevice = "00001";
 
-        // Save default settings to disk
-        try (FileWriter writer = new FileWriter(settingsFile)) {
-            gson.toJson(defaultSettings, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        saveSettings(context, defaultSettings);
 
         return defaultSettings;
     }
@@ -62,8 +56,10 @@ public class SettingsLoader {
 
         try (FileWriter writer = new FileWriter(settingsFile)) {
             gson.toJson(settings, writer);
+            writer.flush(); // Ensure data is written to disk
+            Log.i("SettingsLoader", "Settings saved successfully to: " + settingsFile.getAbsolutePath());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("SettingsLoader", "Error saving settings file", e);
         }
     }
 }
