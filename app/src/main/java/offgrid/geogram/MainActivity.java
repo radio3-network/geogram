@@ -2,16 +2,13 @@ package offgrid.geogram;
 
 import static offgrid.geogram.core.Messages.log;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -33,7 +30,7 @@ import offgrid.geogram.core.BackgroundService;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.fragments.AboutFragment;
 import offgrid.geogram.fragments.DebugFragment;
-import offgrid.geogram.fragments.SettingsFragment;
+import offgrid.geogram.settings.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,10 +52,17 @@ public class MainActivity extends AppCompatActivity {
         btnAdd = findViewById(R.id.btn_add);
         beacons = findViewById(R.id.lv_beacons);
         activity = this;
+
+        // avoid confusions about existing button
+        btnAdd.setOnClickListener(v -> {
+            // Display a toast message
+            Toast.makeText(this, "Feature not yet implemented", Toast.LENGTH_SHORT).show();
+        });
+
         // Initialize BeaconList and set adapter
         BeaconList beaconList = new BeaconList();
         beaconList.updateList();
-        
+
         //logWindow = findViewById(R.id.lv_log);
         Log.setLogWindow(logWindow);
 
@@ -102,26 +106,6 @@ public class MainActivity extends AppCompatActivity {
         wasCreatedBefore = true;
     }
 
-//    public void updateEmptyViewVisibilityBeforeUpdate() {
-//        ListView lvBeacons = findViewById(R.id.lv_beacons);
-//        TextView emptyView = findViewById(R.id.empty_view);
-//
-//        // Hide the empty view immediately
-//        //emptyView.setVisibility(View.GONE);
-//
-//        // After adapter updates, check the item count
-//        lvBeacons.post(() -> {
-//            if (lvBeacons.getAdapter() == null){
-//                return;
-//            }
-//
-//            if (lvBeacons.getAdapter().getCount() > 0) {
-//                emptyView.setVisibility(View.GONE); // Keep hidden
-//            } else {
-//                emptyView.setVisibility(View.VISIBLE); // Show "No beacons available"
-//            }
-//        });
-//    }
 
     private void setupNavigationDrawer() {
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);

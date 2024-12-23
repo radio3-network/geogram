@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.play.services.nearby)
     implementation(libs.spark.core)
     implementation(libs.car.ui.lib)
+    implementation(libs.gson)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

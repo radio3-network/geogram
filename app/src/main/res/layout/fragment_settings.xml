@@ -1,174 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_gray_background"
-    android:padding="16dp">
+    android:background="@color/dark_gray_background">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:padding="16dp">
 
-        <!-- Top Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="8dp">
+            android:orientation="vertical">
 
-            <!-- Back Arrow -->
-            <ImageButton
-                android:id="@+id/btn_back"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="Back"
-                android:src="@drawable/ic_back"
-                app:tint="@color/white" />
-
-            <!-- Title -->
-            <TextView
-                android:layout_width="0dp"
+            <!-- Top Bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:text="Settings"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:paddingStart="8dp"/>
+                android:padding="8dp">
 
-        </LinearLayout>
+                <!-- Back Arrow -->
+                <ImageButton
+                    android:id="@+id/btn_back"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="Back"
+                    android:src="@drawable/ic_back"
+                    app:tint="@color/white" />
 
-        <!-- Privacy Options -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Privacy Options"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:paddingTop="16dp" />
+                <!-- Title -->
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="Settings"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingStart="8dp" />
+            </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="8dp">
-
+            <!-- Privacy Options -->
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Set as listen-only"
+                android:text="Privacy Options"
                 android:textColor="@color/white"
-                android:textSize="16sp" />
+                android:textStyle="bold"
+                android:paddingTop="16dp" />
 
-            <Switch
-                android:id="@+id/switch_listen_only"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Set as listen-only"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
+
+                <Switch
+                    android:id="@+id/switch_listen_only"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <!-- User Preferences -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="User Preferences"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:paddingTop="16dp" />
+
+            <EditText
+                android:id="@+id/edit_preferred_nickname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Preferred Nickname"
+                android:maxLength="10"
+                android:inputType="text"
+                android:backgroundTint="@color/material_dynamic_neutral40"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/edit_intro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Intro (100 letters max)"
+                android:maxLength="100"
+                android:inputType="text"
+                android:backgroundTint="@color/material_dynamic_neutral40"
+                android:padding="8dp"
+                android:layout_marginTop="8dp" />
+
+            <!-- NOSTR Identity -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="NOSTR Identity"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:paddingTop="16dp" />
+
+            <EditText
+                android:id="@+id/edit_npub"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="NPUB"
+                android:inputType="text"
+                android:backgroundTint="@color/material_dynamic_neutral40"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/edit_nsec"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="NSEC"
+                android:inputType="text"
+                android:backgroundTint="@color/material_dynamic_neutral40"
+                android:padding="8dp"
+                android:layout_marginTop="8dp" />
+
+            <!-- Beacon Preferences -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Beacon Preferences"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:paddingTop="16dp" />
+
+            <Spinner
+                android:id="@+id/spinner_beacon_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/beacon_types"
+                android:backgroundTint="@color/material_dynamic_neutral40"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/edit_group_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Group ID (5 letters max)"
+                android:maxLength="5"
+                android:inputType="text"
+                android:backgroundTint="@color/material_dynamic_neutral40"
+                android:padding="8dp"
+                android:layout_marginTop="8dp" />
+
+            <EditText
+                android:id="@+id/edit_device_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Device ID (5 letters max)"
+                android:maxLength="5"
+                android:inputType="text"
+                android:backgroundTint="@color/material_dynamic_neutral40"
+                android:padding="8dp"
+                android:layout_marginTop="8dp" />
         </LinearLayout>
+    </ScrollView>
 
-        <!-- User Preferences -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="User Preferences"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:paddingTop="16dp" />
-
-        <EditText
-            android:id="@+id/edit_preferred_nickname"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Preferred Nickname"
-            android:maxLength="10"
-            android:inputType="text"
-            android:backgroundTint="@color/material_dynamic_neutral40"
-            android:padding="8dp" />
-
-        <EditText
-            android:id="@+id/edit_intro"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Intro (100 letters max)"
-            android:maxLength="100"
-            android:inputType="text"
-            android:backgroundTint="@color/material_dynamic_neutral40"
-            android:padding="8dp"
-            android:layout_marginTop="8dp" />
-
-        <!-- NOSTR Identity -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="NOSTR Identity"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:paddingTop="16dp" />
-
-        <EditText
-            android:id="@+id/edit_npub"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="NPUB"
-            android:inputType="text"
-            android:backgroundTint="@color/material_dynamic_neutral40"
-            android:padding="8dp" />
-
-        <EditText
-            android:id="@+id/edit_nsec"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="NSEC"
-            android:inputType="text"
-            android:backgroundTint="@color/material_dynamic_neutral40"
-            android:padding="8dp"
-            android:layout_marginTop="8dp" />
-
-        <!-- Beacon Preferences -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Beacon Preferences"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:paddingTop="16dp" />
-
-        <Spinner
-            android:id="@+id/spinner_beacon_type"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:entries="@array/beacon_types"
-            android:backgroundTint="@color/material_dynamic_neutral40"
-            android:padding="8dp" />
-
-        <EditText
-            android:id="@+id/edit_group_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Group ID (5 letters max)"
-            android:maxLength="5"
-            android:inputType="text"
-            android:backgroundTint="@color/material_dynamic_neutral40"
-            android:padding="8dp"
-            android:layout_marginTop="8dp" />
-
-        <EditText
-            android:id="@+id/edit_device_id"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Device ID (5 letters max)"
-            android:maxLength="5"
-            android:inputType="text"
-            android:backgroundTint="@color/material_dynamic_neutral40"
-            android:padding="8dp"
-            android:layout_marginTop="8dp" />
-
-    </LinearLayout>
-</ScrollView>
+    <!-- Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_save_settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="Save"
+        android:src="@drawable/ic_save"
+        app:backgroundTint="@color/material_dynamic_neutral40" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
