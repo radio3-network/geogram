@@ -53,6 +53,7 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        log(TAG_ID, "Geogram is starting");
         log(TAG_ID, "Creating the background service");
 
         // Create notification channel for Android 8.0+ (API 26)
@@ -101,6 +102,27 @@ public class BackgroundService extends Service {
         beaconFinder = new BeaconFinder(this);
         beaconFinder.startScanning();
 
+        // start the web server
+        Thread serverThread = new Thread(new SimpleSparkServer());
+        serverThread.start();
+
+
+        // Existing logic
+        handler = new Handler();
+        logTask = new Runnable() {
+            @Override
+            public void run() {
+                if (hasNecessaryPermissions) {
+                    runBackgroundTask();
+                } else {
+                    log(TAG_ID, "Missing permissions, cannot proceed");
+                }
+                handler.postDelayed(this, interval_seconds * 1000); // Repeat every interval
+            }
+        };
+        handler.post(logTask);
+
+        log(TAG_ID, "Geogram was launched");
 
     }
 
@@ -150,47 +172,25 @@ public class BackgroundService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+        // Ensure startForeground() is called immediately
 
-        // Create the notification
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("Foreground Service")
-                .setContentText("Service is running in the background")
-                .setSmallIcon(R.drawable.ic_notification) // Ensure this drawable exists
-                .setContentIntent(pendingIntent)
-                .setOngoing(true) // Make the notification persistent
-                .build();
+            Intent notificationIntent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
-        // Start the service in the foreground
-        startForeground(1, notification);
+            // Create a notification
+            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setContentTitle("Geogram Service")
+                    .setContentText("Service is running in the background")
+                    .setSmallIcon(R.drawable.ic_notification) // Ensure this drawable exists
+                    .setContentIntent(pendingIntent)
+                    .setOngoing(true)
+                    .build();
 
-        log(TAG_ID, "Geogram is starting");
+            startForeground(1, notification);
 
-        // Start periodic logging
-        handler = new Handler();
-        logTask = new Runnable() {
-            @Override
-            public void run() {
-                //log(TAG_ID, "Service is running...");
-                if(hasNecessaryPermissions){
-                    runBackgroundTask();
-                }else{
-                    log(TAG_ID, "Missing permissions, cannot proceed");
-                }
-                handler.postDelayed(this, interval_seconds * 1000); // Repeat every NN seconds
-            }
-        };
-        handler.post(logTask);
-
-        // Start the Spark server in a background thread
-        Thread serverThread = new Thread(new SimpleSparkServer());
-        serverThread.start();
-
-        log(TAG_ID, "Geogram was launched");
         return START_STICKY;
     }
+
 
     @Nullable
     @Override

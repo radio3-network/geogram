@@ -39,8 +39,10 @@ public class MainActivity extends AppCompatActivity {
     public static MainActivity activity = null;
     public static EditText logWindow = null;
     public static ListView beacons = null;
+    Intent serviceIntent = null;
 
     private FloatingActionButton btnAdd;
+    private static boolean wasCreatedBefore = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,12 +68,17 @@ public class MainActivity extends AppCompatActivity {
         // Handle floating action button
         setupBackPressedHandler();
 
+        // portions that we don't need to repeat
+        if(wasCreatedBefore){
+            return;
+        }
         // Output starter logo to log window
         log("Geogram", Art.logo1());
         activity = this;
 
         // Launch background service
         startBackgroundService();
+        wasCreatedBefore = true;
     }
 
     public void updateEmptyViewVisibilityBeforeUpdate() {
@@ -90,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private void setupNavigationDrawer() {
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
@@ -152,7 +158,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startBackgroundService() {
-        Intent serviceIntent = new Intent(this, BackgroundService.class);
+
+        serviceIntent = new Intent(this, BackgroundService.class);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             log(TAG, "Starting BackgroundService as a foreground service");

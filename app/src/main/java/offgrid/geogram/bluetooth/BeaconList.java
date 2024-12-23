@@ -175,6 +175,9 @@ public class BeaconList {
     public void updateList() {
         ListView beaconWindow = MainActivity.beacons;
 
+        // remove empty label
+        activity.updateEmptyViewVisibilityBeforeUpdate();
+
         if (beaconWindow == null) {
             return;
         }

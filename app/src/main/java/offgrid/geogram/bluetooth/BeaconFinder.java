@@ -26,7 +26,6 @@ public class BeaconFinder {
     public BeaconList beaconList = new BeaconList();
 
     private final Context context;
-    private BluetoothAdapter bluetoothAdapter;
     private android.bluetooth.le.BluetoothLeScanner scanner;
 
     public BeaconFinder(Context context) {
@@ -42,7 +41,7 @@ public class BeaconFinder {
             return;
         }
 
-        bluetoothAdapter = bluetoothManager.getAdapter();
+        BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
             Log.e(TAG, "Bluetooth is not enabled or not supported on this device.");
             return;
