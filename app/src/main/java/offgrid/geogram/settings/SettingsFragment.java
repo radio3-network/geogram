@@ -1,5 +1,7 @@
 package offgrid.geogram.settings;
 
+import static offgrid.geogram.MainActivity.settings;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -18,11 +20,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 
 public class SettingsFragment extends Fragment {
 
-    private SettingsUser settings;
+
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -48,7 +51,7 @@ public class SettingsFragment extends Fragment {
 
     private void loadSettings() {
         try {
-            settings = SettingsLoader.loadSettings(requireContext());
+            settings = SettingsLoader.loadSettings(this.requireContext());
         } catch (Exception e) {
             settings = new SettingsUser(); // Default settings if loading fails
             this.saveSettings(settings);

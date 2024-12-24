@@ -3,6 +3,7 @@ package offgrid.geogram;
 import static offgrid.geogram.core.Messages.log;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,6 +34,8 @@ import offgrid.geogram.core.PermissionsHelper;
 import offgrid.geogram.fragments.AboutFragment;
 import offgrid.geogram.fragments.DebugFragment;
 import offgrid.geogram.settings.SettingsFragment;
+import offgrid.geogram.settings.SettingsLoader;
+import offgrid.geogram.settings.SettingsUser;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     public static EditText logWindow = null;
     public static ListView beacons = null;
     private Intent serviceIntent = null;
-
+    public static SettingsUser settings = null;
     private FloatingActionButton btnAdd;
     private static boolean wasCreatedBefore = false;
 
@@ -57,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Permissions are not granted yet. Waiting for user response.");
             return; // Defer initialization until permissions are granted
         }
+
+        // load the settings
+        loadSettings();
 
         initializeApp();
     }
@@ -186,6 +192,31 @@ public class MainActivity extends AppCompatActivity {
         } else {
             log(TAG, "Starting BackgroundService as a normal service");
             startService(serviceIntent);
+        }
+    }
+
+
+    private void loadSettings() {
+        try {
+            settings = SettingsLoader.loadSettings(this.getApplicationContext());
+        } catch (Exception e) {
+            settings = new SettingsUser(); // Default settings if loading fails
+            this.saveSettings(settings);
+            Toast.makeText(this.getApplicationContext(), "Failed to load settings. Using defaults.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void saveSettings(SettingsUser settings){
+        Context context = this.getApplicationContext();
+        try{
+            SettingsLoader.saveSettings(context, settings);
+            Toast.makeText(context, "Settings saved successfully", Toast.LENGTH_SHORT).show();
+        } catch (IllegalArgumentException e) {
+            // Handle invalid values
+            Toast.makeText(context, "Invalid: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            // Handle other errors
+            Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
