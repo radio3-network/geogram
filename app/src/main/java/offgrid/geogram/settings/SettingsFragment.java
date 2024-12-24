@@ -35,6 +35,10 @@ public class SettingsFragment extends Fragment {
         // Required empty public constructor
     }
 
+    private void loadSettings(){
+
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -93,7 +97,8 @@ public class SettingsFragment extends Fragment {
         // button for resetting the settings
         Button resetButton = view.findViewById(R.id.btn_reset_settings);
         resetButton.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Settings were reset", Toast.LENGTH_SHORT).show();
+            SettingsLoader.deleteSettings(this.requireContext());
+            requireActivity().onBackPressed();
         });
 
         // Shutdown App Button

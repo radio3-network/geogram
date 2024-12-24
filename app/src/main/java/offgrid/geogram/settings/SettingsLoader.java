@@ -2,6 +2,7 @@ package offgrid.geogram.settings;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,6 +11,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import offgrid.geogram.nostr.nostr_id.Identity;
 
 
 public class SettingsLoader {
@@ -37,13 +40,16 @@ public class SettingsLoader {
 
     private static SettingsUser createDefaultSettings(Context context, Gson gson) {
 
+        Identity user = Identity.generateRandomIdentity();
+        String nsec = user.getPrivateKey().toBech32String();
+        String npub = user.getPublicKey().toBech32String();
 
         SettingsUser defaultSettings = new SettingsUser();
         defaultSettings.nickname = "User";
         defaultSettings.intro = "Welcome to Geogram!";
         defaultSettings.invisibleMode = false;
-        defaultSettings.npub = "0001";
-        defaultSettings.nsec = "0002";
+        defaultSettings.npub = nsec;
+        defaultSettings.nsec = npub;
         defaultSettings.beaconType = "person";
         defaultSettings.idGroup = "00001";
         defaultSettings.idDevice = "00001";
@@ -51,6 +57,17 @@ public class SettingsLoader {
         saveSettings(context, defaultSettings);
 
         return defaultSettings;
+    }
+
+    public static void deleteSettings(Context context){
+        File settingsFile = new File(context.getFilesDir(), SETTINGS_FILE_NAME);
+        if(settingsFile.exists() == false){
+            String message = "Settings file not found, cannot delete.";
+            Log.e("SettingsLoader", message);
+            return;
+        }
+        settingsFile.delete();
+        Log.e("SettingsLoader", "Settings file was deleted");
     }
 
     public static void saveSettings(Context context, SettingsUser settings) {
