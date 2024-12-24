@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -87,6 +88,19 @@ public class SettingsFragment extends Fragment {
         View saveButton = view.findViewById(R.id.btn_save_settings);
         saveButton.setOnClickListener(v -> {
             saveSettings(nickname, bio, npub, nsec, beaconTypeSpinner, groupId, deviceId, listenOnlySwitch.isChecked());
+        });
+
+        // button for resetting the settings
+        Button resetButton = view.findViewById(R.id.btn_reset_settings);
+        resetButton.setOnClickListener(v -> {
+            Toast.makeText(requireContext(), "Settings were reset", Toast.LENGTH_SHORT).show();
+        });
+
+        // Shutdown App Button
+        Button shutdownButton = view.findViewById(R.id.btn_shutdown_app);
+        shutdownButton.setOnClickListener(v -> {
+            requireActivity().finish();
+            System.exit(0);
         });
 
         return view;

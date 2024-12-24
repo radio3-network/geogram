@@ -12,6 +12,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
@@ -28,6 +29,7 @@ import offgrid.geogram.bluetooth.BeaconList;
 import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.core.PermissionsHelper;
 import offgrid.geogram.fragments.AboutFragment;
 import offgrid.geogram.fragments.DebugFragment;
 import offgrid.geogram.settings.SettingsFragment;
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     public static MainActivity activity = null;
     public static EditText logWindow = null;
     public static ListView beacons = null;
-    Intent serviceIntent = null;
+    private Intent serviceIntent = null;
 
     private FloatingActionButton btnAdd;
     private static boolean wasCreatedBefore = false;
@@ -48,22 +50,49 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        activity = this;
+
+        // Request necessary permissions
+        if (!PermissionsHelper.requestPermissionsIfNecessary(this)) {
+            Log.e(TAG, "Permissions are not granted yet. Waiting for user response.");
+            return; // Defer initialization until permissions are granted
+        }
+
+        initializeApp();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (PermissionsHelper.handlePermissionResult(requestCode, permissions, grantResults)) {
+            // Initialize the app now that permissions are granted
+            initializeApp();
+        } else {
+            Toast.makeText(this, "Permissions are required for the app to function correctly.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Initializes the app features and UI components after permissions are granted.
+     */
+    private void initializeApp() {
+        Log.i(TAG, "Initializing the app...");
+
         // Initialize UI components
         btnAdd = findViewById(R.id.btn_add);
         beacons = findViewById(R.id.lv_beacons);
-        activity = this;
 
-        // avoid confusions about existing button
-        btnAdd.setOnClickListener(v -> {
-            // Display a toast message
-            Toast.makeText(this, "Feature not yet implemented", Toast.LENGTH_SHORT).show();
-        });
+        // Handle the floating action button click
+        btnAdd.setOnClickListener(v ->
+                Toast.makeText(this, "Feature not yet implemented", Toast.LENGTH_SHORT).show()
+        );
 
         // Initialize BeaconList and set adapter
         BeaconList beaconList = new BeaconList();
         beaconList.updateList();
 
-        //logWindow = findViewById(R.id.lv_log);
+        // Set the log window for the log system
         Log.setLogWindow(logWindow);
 
         // Handle window insets for modern devices
@@ -76,37 +105,28 @@ public class MainActivity extends AppCompatActivity {
         // Setup navigation drawer
         setupNavigationDrawer();
 
-        // Handle floating action button
+        // Handle back button press
         setupBackPressedHandler();
 
-        // hide the label when it there is something
-        //updateEmptyViewVisibilityBeforeUpdate();
+        // Check Bluetooth status
+        checkBluetoothStatus();
 
-
-        // minor checks
-        // Check if Bluetooth is enabled
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
-            Toast.makeText(this, "Bluetooth is not supported on this device.", Toast.LENGTH_LONG).show();
-        } else if (!bluetoothAdapter.isEnabled()) {
-            Toast.makeText(this, "Bluetooth is disabled. Please turn it on to connect with beacons.", Toast.LENGTH_LONG).show();
-        }
-
-
-
-        // portions that we don't need to repeat
-        if(wasCreatedBefore){
+        if (wasCreatedBefore) {
             return;
         }
+
         // Output starter logo to log window
         log("Geogram", Art.logo1());
 
         // Launch background service
         startBackgroundService();
+
         wasCreatedBefore = true;
     }
 
-
+    /**
+     * Setup the navigation drawer and its actions.
+     */
     private void setupNavigationDrawer() {
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.navigation_view);
@@ -115,32 +135,20 @@ public class MainActivity extends AppCompatActivity {
         ImageButton btnSettings = findViewById(R.id.btn_settings);
         btnSettings.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
-        // Handle navigation item clicks using if-else conditions
+        // Handle navigation item clicks
         navigationView.setNavigationItemSelectedListener(item -> {
             FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
 
             if (item.getItemId() == R.id.nav_settings) {
-                // Navigate to SettingsFragment
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
                 transaction.replace(R.id.main, new SettingsFragment());
-                transaction.addToBackStack(null);
-                transaction.commit();
-                btnAdd.hide(); // Hide FAB on settings screen
             } else if (item.getItemId() == R.id.nav_debug) {
-                // Navigate to DebugFragment
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
                 transaction.replace(R.id.main, new DebugFragment());
-                transaction.addToBackStack(null);
-                transaction.commit();
-                btnAdd.hide(); // Hide FAB when viewing Debug
             } else if (item.getItemId() == R.id.nav_about) {
-                // Navigate to AboutFragment
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
                 transaction.replace(R.id.main, new AboutFragment());
-                transaction.addToBackStack(null);
-                transaction.commit();
-                btnAdd.hide(); // Hide FAB when viewing About
             }
+            transaction.addToBackStack(null).commit();
+            btnAdd.hide(); // Hide FAB on navigating to any fragment
 
             // Close the drawer after an item is clicked
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -148,8 +156,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Setup the behavior for handling back button presses.
+     */
     private void setupBackPressedHandler() {
-        // Handle back press with OnBackPressedDispatcher
         this.getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -159,23 +169,35 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     finish(); // Exit the app if no fragments are in the back stack
                 }
-
-                // Ensure the Floating Action Button is visible when leaving About screen
-                btnAdd.show();
+                btnAdd.show(); // Ensure the Floating Action Button is visible when returning
             }
         });
     }
 
+    /**
+     * Start the background service.
+     */
     private void startBackgroundService() {
-
         serviceIntent = new Intent(this, BackgroundService.class);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             log(TAG, "Starting BackgroundService as a foreground service");
-            startForegroundService(serviceIntent); // For Android 8.0+ (API 26)
+            startForegroundService(serviceIntent);
         } else {
             log(TAG, "Starting BackgroundService as a normal service");
-            startService(serviceIntent); // For pre-Android 8.0
+            startService(serviceIntent);
+        }
+    }
+
+    /**
+     * Check the status of Bluetooth and notify the user if necessary.
+     */
+    private void checkBluetoothStatus() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, "Bluetooth is not supported on this device.", Toast.LENGTH_LONG).show();
+        } else if (!bluetoothAdapter.isEnabled()) {
+            Toast.makeText(this, "Bluetooth is disabled. Please turn it on to connect with beacons.", Toast.LENGTH_LONG).show();
         }
     }
 }

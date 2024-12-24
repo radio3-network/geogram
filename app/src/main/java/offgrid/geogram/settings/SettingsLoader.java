@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+
 public class SettingsLoader {
 
     private static final String SETTINGS_FILE_NAME = "settings.json";
@@ -35,12 +36,14 @@ public class SettingsLoader {
     }
 
     private static SettingsUser createDefaultSettings(Context context, Gson gson) {
+
+
         SettingsUser defaultSettings = new SettingsUser();
         defaultSettings.nickname = "User";
         defaultSettings.intro = "Welcome to Geogram!";
         defaultSettings.invisibleMode = false;
-        defaultSettings.npub = "001";
-        defaultSettings.nsec = "002";
+        defaultSettings.npub = "0001";
+        defaultSettings.nsec = "0002";
         defaultSettings.beaconType = "person";
         defaultSettings.idGroup = "00001";
         defaultSettings.idDevice = "00001";

@@ -172,6 +172,35 @@
                 android:backgroundTint="@color/material_dynamic_neutral40"
                 android:padding="8dp"
                 android:layout_marginTop="8dp" />
+
+            <!-- Debug Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Debug"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:paddingTop="16dp" />
+
+            <Button
+                android:id="@+id/btn_reset_settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Reset Settings"
+                android:backgroundTint="@color/material_dynamic_neutral40"
+                android:textColor="@color/white"
+                android:padding="8dp"
+                android:layout_marginTop="8dp" />
+
+            <Button
+                android:id="@+id/btn_shutdown_app"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Shutdown App"
+                android:backgroundTint="@color/material_dynamic_neutral40"
+                android:textColor="@color/white"
+                android:padding="8dp"
+                android:layout_marginTop="8dp" />
         </LinearLayout>
     </ScrollView>
 
