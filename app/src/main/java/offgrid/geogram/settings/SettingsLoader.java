@@ -50,24 +50,24 @@ public class SettingsLoader {
     }
 
     private static SettingsUser createDefaultSettings(Context context, Gson gson) {
-        // Generate identity keys
-        Identity user = Identity.generateRandomIdentity();
-        String nsec = user.getPrivateKey().toBech32String();
-        String npub = user.getPublicKey().toBech32String();
 
-        // Create default settings
-        SettingsUser defaultSettings = new SettingsUser();
-        defaultSettings.setNickname(NicknameGenerator.generateNickname());
-        defaultSettings.setIntro(NicknameGenerator.generateIntro());
-        defaultSettings.setInvisibleMode(false);
-        defaultSettings.setNsec(nsec);
-        defaultSettings.setNpub(npub);
-        defaultSettings.setBeaconType("person");
-        defaultSettings.setIdGroup(generateRandomNumber());
-        defaultSettings.setIdDevice(generateRandomNumber());
-        defaultSettings.setPreferredColor(selectRandomColor()); // Assign a random color
-        defaultSettings.setBeaconNickname(generateRandomBeaconNickname()); // Default beacon nickname
+            // Generate identity keys
+            Identity user = Identity.generateRandomIdentity();
+            String nsec = user.getPrivateKey().toBech32String();
+            String npub = user.getPublicKey().toBech32String();
 
+            // Create default settings
+            SettingsUser defaultSettings = new SettingsUser();
+            defaultSettings.setNickname(NicknameGenerator.generateNickname());
+            defaultSettings.setIntro(NicknameGenerator.generateIntro());
+            defaultSettings.setInvisibleMode(false);
+            defaultSettings.setNsec(nsec);
+            defaultSettings.setNpub(npub);
+            defaultSettings.setBeaconType("person");
+            defaultSettings.setIdGroup(generateRandomNumber());
+            defaultSettings.setIdDevice(generateRandomNumber());
+            defaultSettings.setPreferredColor(selectRandomColor()); // Assign a random color
+            defaultSettings.setBeaconNickname(generateRandomBeaconNickname()); // Default beacon nickname
         // Save default settings
         saveSettings(context, defaultSettings);
 

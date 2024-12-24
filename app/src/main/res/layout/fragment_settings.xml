@@ -90,7 +90,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Preferred Nickname"
-                android:maxLength="10"
+                android:maxLength="15"
                 android:inputType="text"
                 android:backgroundTint="@color/material_dynamic_neutral40"
                 android:padding="8dp" />
@@ -99,12 +99,16 @@
                 android:id="@+id/edit_intro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Intro (100 letters max)"
-                android:maxLength="100"
-                android:inputType="text"
+                android:hint="Intro (200 letters max)"
+                android:maxLength="200"
+                android:inputType="textMultiLine"
                 android:backgroundTint="@color/material_dynamic_neutral40"
                 android:padding="8dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:scrollHorizontally="false"
+                android:gravity="top|start"
+                android:minLines="3" />
+
 
             <!-- Preferred Color -->
             <LinearLayout
@@ -179,9 +183,11 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="NPUB"
-                    android:inputType="text"
+                    android:inputType="none"
                     android:backgroundTint="@color/material_dynamic_neutral40"
-                    android:padding="8dp" />
+                    android:padding="8dp"
+                    android:focusable="false"
+                    android:cursorVisible="false" />
 
                 <ImageButton
                     android:id="@+id/btn_copy_npub"

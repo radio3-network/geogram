@@ -59,7 +59,7 @@ public class SettingsUser {
         if (isValidText(nickname, 15)) { // Updated limit to 15
             this.nickname = nickname;
         } else {
-            //throw new IllegalArgumentException("Nickname must be up to 15 characters and contain only valid characters.");
+            throw new IllegalArgumentException("Nickname must be up to 15 characters with alphanumeric characters");
         }
     }
 
@@ -68,10 +68,10 @@ public class SettingsUser {
     }
 
     public void setIntro(String intro) {
-        if (isValidText(intro, 250)) {
+        if (isValidText(intro, 200)) {
             this.intro = intro;
         } else {
-            //throw new IllegalArgumentException("Intro must be up to 250 characters and contain only valid characters.");
+            throw new IllegalArgumentException("Intro must be up to 200 characters and contain only valid characters");
         }
     }
 
@@ -88,10 +88,10 @@ public class SettingsUser {
     }
 
     public void setNpub(String npub) {
-        if (isValidNostrKey(npub, "npub1")) {
+        if (npub != null && npub.startsWith("npub1")) {
             this.npub = npub;
         } else {
-            //throw new IllegalArgumentException("NPUB must start with 'npub1', be Base32 encoded, and meet length requirements.");
+            throw new IllegalArgumentException("NPUB must start with 'npub1' and meet length requirements");
         }
     }
 
@@ -100,11 +100,10 @@ public class SettingsUser {
     }
 
     public void setNsec(String nsec) {
-        if (isValidNostrKey(nsec, "nsec1")) {
-            this.nsec = nsec;
-        } else {
-           // throw new IllegalArgumentException("NSEC must start with 'nsec1', be Base32 encoded, and meet length requirements.");
+        if(nsec == null || !nsec.startsWith("nsec1") || nsec.length() != 63){
+            throw new IllegalArgumentException("NSEC must start with 'nsec1' and have 63 characters");
         }
+        this.nsec = nsec;
     }
 
     public String getBeaconNickname() {
@@ -115,7 +114,7 @@ public class SettingsUser {
         if (isValidText(beaconNickname, 20)) {
             this.beaconNickname = beaconNickname;
         } else {
-           // throw new IllegalArgumentException("Beacon nickname must be up to 20 characters and contain only valid characters.");
+            throw new IllegalArgumentException("Beacon nickname must be up to 20 characters and contain only valid characters.");
         }
     }
 
@@ -135,7 +134,7 @@ public class SettingsUser {
         if (isValidNumber(idGroup, 5)) {
             this.idGroup = idGroup;
         } else {
-            //throw new IllegalArgumentException("Group ID must be up to 5 digits and contain only numbers.");
+            throw new IllegalArgumentException("Group ID must be up to 5 digits and contain only numbers.");
         }
     }
 
@@ -147,7 +146,7 @@ public class SettingsUser {
         if (isValidNumber(idDevice, 5)) {
             this.idDevice = idDevice;
         } else {
-           // throw new IllegalArgumentException("Device ID must be up to 5 digits and contain only numbers.");
+            throw new IllegalArgumentException("Device ID must be up to 5 digits and contain only numbers.");
         }
     }
 
@@ -166,15 +165,7 @@ public class SettingsUser {
         return input.matches("\\d*");
     }
 
-    private boolean isValidNostrKey(String input, String prefix) {
-        if (input == null || !input.startsWith("n")) {
-            return false;
-        }
-        return true;
-//        String key = input.substring(prefix.length());
-//        return //key.matches("[a-z2-7]*") && key.length() >= 59 &&
-//                key.length() == 63; // Length checks for NOSTR spec
-    }
+
 
     // Pretty Printing with Gson
     @NonNull

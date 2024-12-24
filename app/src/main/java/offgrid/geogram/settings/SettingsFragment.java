@@ -1,5 +1,8 @@
 package offgrid.geogram.settings;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -120,6 +123,35 @@ public class SettingsFragment extends Fragment {
             requireActivity().finish();
             System.exit(0);
         });
+        
+        // Copy to clipboard button functionality
+        ImageButton btnCopyNSEC = view.findViewById(R.id.btn_copy_nsec);
+        btnCopyNSEC.setOnClickListener(v -> {
+            String textToCopy = nsec.getText().toString();
+            if (!textToCopy.isEmpty()) {
+                ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("NSEC", textToCopy);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(getContext(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Field is empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        ImageButton btnCopyNPUB = view.findViewById(R.id.btn_copy_npub);
+        btnCopyNPUB.setOnClickListener(v -> {
+            String textToCopy = npub.getText().toString();
+            if (!textToCopy.isEmpty()) {
+                ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("NPUB", textToCopy);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(getContext(), "Copied to clipboard", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Field is empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        
     }
 
     private void reloadSettings(View view) {
@@ -172,10 +204,10 @@ public class SettingsFragment extends Fragment {
             Toast.makeText(requireContext(), "Settings saved successfully", Toast.LENGTH_SHORT).show();
         } catch (IllegalArgumentException e) {
             // Handle invalid values
-            Toast.makeText(requireContext(), "Invalid input: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), "Invalid: " + e.getMessage(), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             // Handle other errors
-            Toast.makeText(requireContext(), "Error saving settings: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
