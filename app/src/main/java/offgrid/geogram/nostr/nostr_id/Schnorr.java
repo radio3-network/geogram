@@ -1,17 +1,8 @@
 package offgrid.geogram.nostr.nostr_id;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.security.Security;
-import java.security.interfaces.ECPrivateKey;
-import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
 
 public class Schnorr {

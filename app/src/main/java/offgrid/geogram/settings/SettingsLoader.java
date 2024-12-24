@@ -2,7 +2,6 @@ package offgrid.geogram.settings;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,13 +10,20 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Random;
 
 import offgrid.geogram.nostr.nostr_id.Identity;
-
+import offgrid.geogram.util.NicknameGenerator;
 
 public class SettingsLoader {
 
     private static final String SETTINGS_FILE_NAME = "settings.json";
+
+    // List of permitted colors
+    private static final String[] PERMITTED_COLORS = {
+            "Black", "Blue", "Green", "Cyan", "Red", "Magenta", "Pink", "Brown",
+            "Dark Gray", "Light Blue", "Light Green", "Light Cyan", "Light Red", "Yellow", "White"
+    };
 
     public static SettingsUser loadSettings(Context context) {
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
@@ -27,7 +33,12 @@ public class SettingsLoader {
 
         if (settingsFile.exists()) {
             try (FileReader reader = new FileReader(settingsFile)) {
-                return gson.fromJson(reader, SettingsUser.class);
+                SettingsUser settings = gson.fromJson(reader, SettingsUser.class);
+                if(settings.getNickname() == null || settings.getNickname().isEmpty()){
+                    throw new IllegalArgumentException("Nickname cannot be empty");
+                }
+                Log.i("SettingsLoader", "Settings loaded successfully.");
+                return settings;
             } catch (IOException e) {
                 Log.e("SettingsLoader", "Failed to read settings file, creating default settings.", e);
                 return createDefaultSettings(context, gson);
@@ -39,35 +50,62 @@ public class SettingsLoader {
     }
 
     private static SettingsUser createDefaultSettings(Context context, Gson gson) {
-
+        // Generate identity keys
         Identity user = Identity.generateRandomIdentity();
         String nsec = user.getPrivateKey().toBech32String();
         String npub = user.getPublicKey().toBech32String();
 
+        // Create default settings
         SettingsUser defaultSettings = new SettingsUser();
-        defaultSettings.nickname = "User";
-        defaultSettings.intro = "Welcome to Geogram!";
-        defaultSettings.invisibleMode = false;
-        defaultSettings.npub = nsec;
-        defaultSettings.nsec = npub;
-        defaultSettings.beaconType = "person";
-        defaultSettings.idGroup = "00001";
-        defaultSettings.idDevice = "00001";
+        defaultSettings.setNickname(NicknameGenerator.generateNickname());
+        defaultSettings.setIntro(NicknameGenerator.generateIntro());
+        defaultSettings.setInvisibleMode(false);
+        defaultSettings.setNsec(nsec);
+        defaultSettings.setNpub(npub);
+        defaultSettings.setBeaconType("person");
+        defaultSettings.setIdGroup(generateRandomNumber());
+        defaultSettings.setIdDevice(generateRandomNumber());
+        defaultSettings.setPreferredColor(selectRandomColor()); // Assign a random color
+        defaultSettings.setBeaconNickname(generateRandomBeaconNickname()); // Default beacon nickname
 
+        // Save default settings
         saveSettings(context, defaultSettings);
 
         return defaultSettings;
     }
 
-    public static void deleteSettings(Context context){
+    public static String generateRandomBeaconNickname() {
+        StringBuilder nickname = new StringBuilder("Beacon");
+        Random random = new Random();
+        for (int i = 0; i < 4; i++) {
+            char randomChar = (char) ('A' + random.nextInt(26)); // Generate random uppercase letter
+            nickname.append(randomChar);
+        }
+        return nickname.toString();
+    }
+
+    public static String generateRandomNumber() {
+        Random random = new Random();
+        int number = random.nextInt(100000); // Generates a number between 0 and 99999
+        return String.format("%05d", number); // Pads the number to ensure it is 5 digits
+    }
+
+    public static String selectRandomColor() {
+        Random random = new Random();
+        return PERMITTED_COLORS[random.nextInt(PERMITTED_COLORS.length)];
+    }
+
+    public static void deleteSettings(Context context) {
         File settingsFile = new File(context.getFilesDir(), SETTINGS_FILE_NAME);
-        if(settingsFile.exists() == false){
-            String message = "Settings file not found, cannot delete.";
-            Log.e("SettingsLoader", message);
+        if (!settingsFile.exists()) {
+            Log.e("SettingsLoader", "Settings file not found, cannot delete.");
             return;
         }
-        settingsFile.delete();
-        Log.e("SettingsLoader", "Settings file was deleted");
+        if (settingsFile.delete()) {
+            Log.i("SettingsLoader", "Settings file deleted successfully.");
+        } else {
+            Log.e("SettingsLoader", "Failed to delete settings file.");
+        }
     }
 
     public static void saveSettings(Context context, SettingsUser settings) {

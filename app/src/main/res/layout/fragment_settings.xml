@@ -66,7 +66,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Set as listen-only"
+                    android:text="Disable bluetooth beacon"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
 
@@ -106,6 +106,31 @@
                 android:padding="8dp"
                 android:layout_marginTop="8dp" />
 
+            <!-- Preferred Color -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Preferred Color"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
+
+                <Spinner
+                    android:id="@+id/spinner_preferred_color"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/color_options"
+                    android:backgroundTint="@color/material_dynamic_neutral40"
+                    android:padding="8dp" />
+            </LinearLayout>
+
             <!-- NOSTR Identity -->
             <TextView
                 android:layout_width="match_parent"
@@ -115,30 +140,65 @@
                 android:textStyle="bold"
                 android:paddingTop="16dp" />
 
-            <EditText
-                android:id="@+id/edit_npub"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="NPUB"
-                android:inputType="text"
-                android:backgroundTint="@color/material_dynamic_neutral40"
-                android:padding="8dp" />
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
 
-            <EditText
-                android:id="@+id/edit_nsec"
+                <EditText
+                    android:id="@+id/edit_nsec"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="NSEC"
+                    android:inputType="text"
+                    android:backgroundTint="@color/material_dynamic_neutral40"
+                    android:padding="8dp" />
+
+                <ImageButton
+                    android:id="@+id/btn_copy_nsec"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="Copy NSEC"
+                    android:src="@drawable/ic_copy"
+                    app:tint="@color/white"
+                    android:background="@android:color/transparent"
+                    android:padding="8dp" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="NSEC"
-                android:inputType="text"
-                android:backgroundTint="@color/material_dynamic_neutral40"
-                android:padding="8dp"
-                android:layout_marginTop="8dp" />
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/edit_npub"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="NPUB"
+                    android:inputType="text"
+                    android:backgroundTint="@color/material_dynamic_neutral40"
+                    android:padding="8dp" />
+
+                <ImageButton
+                    android:id="@+id/btn_copy_npub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="Copy NPUB"
+                    android:src="@drawable/ic_copy"
+                    app:tint="@color/white"
+                    android:background="@android:color/transparent"
+                    android:padding="8dp" />
+            </LinearLayout>
 
             <!-- Beacon Preferences -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Beacon Preferences"
+                android:text="Beacon Type"
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 android:paddingTop="16dp" />
@@ -150,6 +210,17 @@
                 android:entries="@array/beacon_types"
                 android:backgroundTint="@color/material_dynamic_neutral40"
                 android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/edit_beacon_nickname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nickname"
+                android:maxLength="20"
+                android:inputType="text"
+                android:backgroundTint="@color/material_dynamic_neutral40"
+                android:padding="8dp"
+                android:layout_marginTop="8dp" />
 
             <EditText
                 android:id="@+id/edit_group_id"

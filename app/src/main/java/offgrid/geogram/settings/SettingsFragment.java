@@ -1,7 +1,5 @@
 package offgrid.geogram.settings;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,28 +13,16 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-
-import com.google.gson.Gson;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 import offgrid.geogram.R;
 
 public class SettingsFragment extends Fragment {
 
-    private static final int REQUEST_WRITE_PERMISSION = 100;
-    SettingsUser settings = null;
+    private SettingsUser settings;
 
     public SettingsFragment() {
         // Required empty public constructor
-    }
-
-    private void loadSettings(){
-
     }
 
     @Nullable
@@ -49,100 +35,177 @@ public class SettingsFragment extends Fragment {
         btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
 
         // Load settings
-        settings = SettingsLoader.loadSettings(requireContext());
+        loadSettings();
 
+        // Initialize UI components and bind settings
+        initializeUI(view);
+
+        return view;
+    }
+
+    private void loadSettings() {
+        try {
+            settings = SettingsLoader.loadSettings(requireContext());
+        } catch (Exception e) {
+            settings = new SettingsUser(); // Default settings if loading fails
+            this.saveSettings(settings);
+            Toast.makeText(getContext(), "Failed to load settings. Using defaults.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void initializeUI(View view) {
         // Privacy Options
         Switch listenOnlySwitch = view.findViewById(R.id.switch_listen_only);
-        listenOnlySwitch.setChecked(settings.invisibleMode);
-
-        listenOnlySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            settings.invisibleMode = isChecked;
-            Toast.makeText(getContext(), isChecked ? "Listen-only enabled" : "Listen-only disabled", Toast.LENGTH_SHORT).show();
-        });
+        listenOnlySwitch.setChecked(settings.isInvisibleMode());
+        listenOnlySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> settings.setInvisibleMode(isChecked));
 
         // User Preferences
         EditText nickname = view.findViewById(R.id.edit_preferred_nickname);
-        EditText bio = view.findViewById(R.id.edit_intro);
-        nickname.setText(settings.nickname);
-        bio.setText(settings.intro);
+        EditText intro = view.findViewById(R.id.edit_intro);
+        nickname.setText(settings.getNickname());
+        intro.setText(settings.getIntro());
+
+        Spinner preferredColorSpinner = view.findViewById(R.id.spinner_preferred_color);
+        String[] colorOptions = getResources().getStringArray(R.array.color_options);
+        for (int i = 0; i < colorOptions.length; i++) {
+            if (colorOptions[i].equals(settings.getPreferredColor())) {
+                preferredColorSpinner.setSelection(i);
+                break;
+            }
+        }
 
         // NOSTR Identity
         EditText npub = view.findViewById(R.id.edit_npub);
         EditText nsec = view.findViewById(R.id.edit_nsec);
-        npub.setText(settings.npub);
-        nsec.setText(settings.nsec);
+        npub.setText(settings.getNpub());
+        nsec.setText(settings.getNsec());
 
         // Beacon Preferences
         Spinner beaconTypeSpinner = view.findViewById(R.id.spinner_beacon_type);
+        EditText beaconNickname = view.findViewById(R.id.edit_beacon_nickname);
         EditText groupId = view.findViewById(R.id.edit_group_id);
         EditText deviceId = view.findViewById(R.id.edit_device_id);
-        groupId.setText(settings.idGroup);
-        deviceId.setText(settings.idDevice);
+        beaconNickname.setText(settings.getBeaconNickname());
+        groupId.setText(settings.getIdGroup());
+        deviceId.setText(settings.getIdDevice());
 
-        // Populate the spinner with beacon types
         String[] beaconTypes = getResources().getStringArray(R.array.beacon_types);
         for (int i = 0; i < beaconTypes.length; i++) {
-            if (beaconTypes[i].equals(settings.beaconType)) {
+            if (beaconTypes[i].equals(settings.getBeaconType())) {
                 beaconTypeSpinner.setSelection(i);
                 break;
             }
         }
 
-        // Floating Action Button for saving settings
+        // Save Button
         View saveButton = view.findViewById(R.id.btn_save_settings);
-        saveButton.setOnClickListener(v -> {
-            saveSettings(nickname, bio, npub, nsec, beaconTypeSpinner, groupId, deviceId, listenOnlySwitch.isChecked());
-        });
+        saveButton.setOnClickListener(v -> saveSettings(nickname, intro, npub, nsec, preferredColorSpinner, beaconTypeSpinner, groupId, deviceId));
 
-        // button for resetting the settings
+        // Reset Button
         Button resetButton = view.findViewById(R.id.btn_reset_settings);
         resetButton.setOnClickListener(v -> {
-            SettingsLoader.deleteSettings(this.requireContext());
-            requireActivity().onBackPressed();
+            // Delete settings file
+            SettingsLoader.deleteSettings(requireContext());
+
+            // Reload settings and update the UI
+            settings = SettingsLoader.loadSettings(requireContext());
+            reloadSettings(view);
+
+            //Toast.makeText(requireContext(), "Settings reset to defaults.", Toast.LENGTH_SHORT).show();
         });
 
-        // Shutdown App Button
+        // Shutdown Button
         Button shutdownButton = view.findViewById(R.id.btn_shutdown_app);
         shutdownButton.setOnClickListener(v -> {
             requireActivity().finish();
             System.exit(0);
         });
-
-        return view;
     }
 
-    private void saveSettings(EditText nickname, EditText bio, EditText npub, EditText nsec,
-                              Spinner beaconTypeSpinner, EditText groupId, EditText deviceId, boolean listenOnly) {
+    private void reloadSettings(View view) {
+        // Privacy Options
+        Switch listenOnlySwitch = view.findViewById(R.id.switch_listen_only);
+        listenOnlySwitch.setChecked(settings.isInvisibleMode());
 
-        // Update settings object
-        settings.nickname = nickname.getText().toString();
-        settings.intro = bio.getText().toString();
-        settings.npub = npub.getText().toString();
-        settings.nsec = nsec.getText().toString();
-        settings.beaconType = beaconTypeSpinner.getSelectedItem().toString();
-        settings.idGroup = groupId.getText().toString();
-        settings.idDevice = deviceId.getText().toString();
-        settings.invisibleMode = listenOnly;
+        // User Preferences
+        EditText nickname = view.findViewById(R.id.edit_preferred_nickname);
+        EditText intro = view.findViewById(R.id.edit_intro);
+        nickname.setText(settings.getNickname());
+        intro.setText(settings.getIntro());
 
-        // Save to JSON file
-        File file = new File(requireContext().getFilesDir(), "settings.json");
-        try (FileWriter writer = new FileWriter(file)) {
-            Gson gson = new Gson();
-            writer.write(gson.toJson(settings));
+        Spinner preferredColorSpinner = view.findViewById(R.id.spinner_preferred_color);
+        String[] colorOptions = getResources().getStringArray(R.array.color_options);
+        for (int i = 0; i < colorOptions.length; i++) {
+            if (colorOptions[i].equals(settings.getPreferredColor())) {
+                preferredColorSpinner.setSelection(i);
+                break;
+            }
+        }
+
+        // NOSTR Identity
+        EditText npub = view.findViewById(R.id.edit_npub);
+        EditText nsec = view.findViewById(R.id.edit_nsec);
+        npub.setText(settings.getNpub());
+        nsec.setText(settings.getNsec());
+
+        // Beacon Preferences
+        Spinner beaconTypeSpinner = view.findViewById(R.id.spinner_beacon_type);
+        EditText beaconNickname = view.findViewById(R.id.edit_beacon_nickname);
+        EditText groupId = view.findViewById(R.id.edit_group_id);
+        EditText deviceId = view.findViewById(R.id.edit_device_id);
+        beaconNickname.setText(settings.getBeaconNickname());
+        groupId.setText(settings.getIdGroup());
+        deviceId.setText(settings.getIdDevice());
+
+        String[] beaconTypes = getResources().getStringArray(R.array.beacon_types);
+        for (int i = 0; i < beaconTypes.length; i++) {
+            if (beaconTypes[i].equals(settings.getBeaconType())) {
+                beaconTypeSpinner.setSelection(i);
+                break;
+            }
+        }
+    }
+
+    private void saveSettings(SettingsUser settings){
+        try{
+            SettingsLoader.saveSettings(requireContext(), settings);
             Toast.makeText(requireContext(), "Settings saved successfully", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
+        } catch (IllegalArgumentException e) {
+            // Handle invalid values
+            Toast.makeText(requireContext(), "Invalid input: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            // Handle other errors
             Toast.makeText(requireContext(), "Error saving settings: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_WRITE_PERMISSION && grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(requireContext(), "Permission granted. Press save again.", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(requireContext(), "Permission denied. Cannot save settings.", Toast.LENGTH_SHORT).show();
+
+
+    private void saveSettings(EditText nickname, EditText intro, EditText npub, EditText nsec,
+                              Spinner preferredColorSpinner, Spinner beaconTypeSpinner, EditText groupId, EditText deviceId) {
+
+        try {
+            // Update settings object with validation
+            settings.setNickname(nickname.getText().toString());
+            settings.setIntro(intro.getText().toString());
+            settings.setNpub(npub.getText().toString());
+            settings.setNsec(nsec.getText().toString());
+            settings.setPreferredColor(preferredColorSpinner.getSelectedItem().toString());
+            settings.setBeaconType(beaconTypeSpinner.getSelectedItem().toString());
+            settings.setBeaconNickname(((EditText) requireView().findViewById(R.id.edit_beacon_nickname)).getText().toString());
+            settings.setIdGroup(groupId.getText().toString());
+            settings.setIdDevice(deviceId.getText().toString());
+
+            // Save settings using SettingsLoader
+            SettingsLoader.saveSettings(requireContext(), settings);
+            Toast.makeText(requireContext(), "Settings saved successfully", Toast.LENGTH_SHORT).show();
+
+        } catch (IllegalArgumentException e) {
+            // Handle invalid values
+            Toast.makeText(requireContext(), "Invalid input: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            // Handle other errors
+            Toast.makeText(requireContext(), "Error saving settings: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 }
