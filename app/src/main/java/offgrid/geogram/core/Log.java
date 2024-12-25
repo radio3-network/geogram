@@ -2,6 +2,10 @@ package offgrid.geogram.core;
 
 import android.widget.EditText;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 public class Log {
 
     // the full log text
@@ -26,11 +30,18 @@ public class Log {
     }
 
     public static void log(int priority, String tag, String message) {
-        // Write to the system log
-        android.util.Log.println(priority, tag, message);
+        // Get the current timestamp
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
+                .format(Calendar.getInstance().getTime());
 
-        // archive the current text
-        currentText += "\n" + "[" + tag + "] " + message;
+        // Format the message with the timestamp
+        String formattedMessage = timestamp + " [" + tag + "] " + message;
+
+        // Write to the system log
+        android.util.Log.println(priority, tag, formattedMessage);
+
+        // Archive the current text
+        currentText += "\n" + formattedMessage;
         if (currentText.length() > 5000) { // Example: Keep last 5000 characters
             currentText = currentText.substring(currentText.length() - 5000);
         }
@@ -40,9 +51,9 @@ public class Log {
             return;
         }
         logWindow.post(() -> {
-                logWindow.setText(currentText);
-                logWindow.setSelection(logWindow.getText().length()); // Auto-scroll
-            });
+            logWindow.setText(currentText);
+            logWindow.setSelection(logWindow.getText().length()); // Auto-scroll
+        });
     }
 
     public static void d(String tag, String message) {
