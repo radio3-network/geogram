@@ -12,7 +12,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
-import offgrid.geogram.nostr.nostr_id.Identity;
+import offgrid.geogram.bluetooth.GenerateDeviceId;
+import offgrid.geogram.util.nostr.Identity;
 import offgrid.geogram.util.NicknameGenerator;
 
 public class SettingsLoader {
@@ -65,7 +66,9 @@ public class SettingsLoader {
             defaultSettings.setNpub(npub);
             defaultSettings.setBeaconType("person");
             defaultSettings.setIdGroup(generateRandomNumber());
-            defaultSettings.setIdDevice(generateRandomNumber());
+            // generate the device ID
+            String deviceId = GenerateDeviceId.generateInstanceId(context);
+            defaultSettings.setIdDevice(deviceId);
             defaultSettings.setPreferredColor(selectRandomColor()); // Assign a random color
             defaultSettings.setBeaconNickname(generateRandomBeaconNickname()); // Default beacon nickname
         // Save default settings

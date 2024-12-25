@@ -143,10 +143,10 @@ public class SettingsUser {
     }
 
     public void setIdDevice(String idDevice) {
-        if (isValidNumber(idDevice, 5)) {
+        if (isValidNumber(idDevice, 6)) {
             this.idDevice = idDevice;
         } else {
-            throw new IllegalArgumentException("Device ID must be up to 5 digits and contain only numbers.");
+            throw new IllegalArgumentException("Device ID must 6 digits and contain only numbers.");
         }
     }
 

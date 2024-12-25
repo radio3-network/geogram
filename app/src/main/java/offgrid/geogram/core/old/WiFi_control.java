@@ -1,4 +1,4 @@
-package offgrid.geogram.old;
+package offgrid.geogram.core.old;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import android.bluetooth.BluetoothAdapter;
 import android.provider.Settings;
 
-import offgrid.geogram.Central;
+import offgrid.geogram.core.Central;
 import offgrid.geogram.MainActivity;
 
 public class WiFi_control {

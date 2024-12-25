@@ -1,11 +1,11 @@
-package offgrid.geogram.old;
+package offgrid.geogram.core.old;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
-import offgrid.geogram.Central;
+import offgrid.geogram.core.Central;
 
 public class ServiceTIO extends Service {
 

@@ -1,16 +1,11 @@
 package offgrid.geogram.bluetooth;
 
-import static offgrid.geogram.MainActivity.*;
 import static offgrid.geogram.bluetooth.BeaconDefinitions.EDDYSTONE_SERVICE_UUID;
-import static offgrid.geogram.bluetooth.BeaconDefinitions.namespaceId;
-import static offgrid.geogram.bluetooth.BeaconFinder.bytesToHex;
 
 import android.bluetooth.le.ScanResult;
 import android.os.ParcelUuid;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +14,7 @@ import java.util.Objects;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
+import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.fragments.BeaconDetailsFragment;
 
@@ -30,7 +26,7 @@ public class BeaconList {
     // when was the window last time updated?
     private long lastUpdated = System.currentTimeMillis();
 
-    public static ArrayList<Beacon> beacons = new ArrayList<>();
+    public static ArrayList<BeaconReachable> beaconsDiscovered = new ArrayList<>();
     private static final String TAG = "BeaconList";
 
     public void processBeacon(ScanResult result) {
@@ -66,8 +62,8 @@ public class BeaconList {
         }
 
         // try to find an existing beacon of this kind
-        Beacon beacon = null;
-        for (Beacon b : beacons) {
+        BeaconReachable beacon = null;
+        for (BeaconReachable b : beaconsDiscovered) {
             if (b.getMacAddress().equals(deviceAddress)) {
                 beacon = b;
                 break;
@@ -76,7 +72,7 @@ public class BeaconList {
 
         // try to do this based on instanceId
         if(instanceId != null && beacon == null){
-            for (Beacon b : beacons) {
+            for (BeaconReachable b : beaconsDiscovered) {
                 // beacon is recognized, use it
                 if (b.getInstanceId().equals(instanceId)) {
                     beacon = b;
@@ -90,9 +86,9 @@ public class BeaconList {
 
         // we never saw it before, create a new one
         if (beacon == null) {
-            beacon = new Beacon();
+            beacon = new BeaconReachable();
             beacon.setMacAddress(deviceAddress);
-            beacons.add(beacon);
+            beaconsDiscovered.add(beacon);
             Log.i(TAG, "Beacon found: " + deviceAddress + ", RSSI: " + rssi);
             canUpdateList = true;
         } else {
@@ -183,10 +179,10 @@ public class BeaconList {
         }
 
         // Sort beacons by last seen time, most recent first
-        beacons.sort(Comparator.comparingLong(Beacon::getTimeLastFound).reversed());
+        beaconsDiscovered.sort(Comparator.comparingLong(BeaconReachable::getTimeLastFound).reversed());
 
         ArrayList<String> displayList = new ArrayList<>();
-        for (Beacon beacon : beacons) {
+        for (BeaconReachable beacon : beaconsDiscovered) {
             String displayText = beacon.getInstanceId() +
                     " | Distance: " + calculateDistance(beacon.getRssi());
             displayList.add(displayText);

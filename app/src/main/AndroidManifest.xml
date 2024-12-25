@@ -76,7 +76,7 @@
 
         <!-- Additional Service -->
         <service
-            android:name="offgrid.geogram.old.ServiceTIO"
+            android:name="offgrid.geogram.core.old.ServiceTIO"
             android:exported="false" />
 
     </application>

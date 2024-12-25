@@ -1,4 +1,4 @@
-package offgrid.geogram.nostr.nostr_id;
+package offgrid.geogram.util.nostr;
 
 // clone of org.apache.commons.lang3.tuple.Pair;
 

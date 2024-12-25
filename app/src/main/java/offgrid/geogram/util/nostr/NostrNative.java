@@ -4,7 +4,7 @@
  * Copyright (c) Nostrium contributors
  * License: Apache-2.0
  */
-package offgrid.geogram.nostr.nostr_id;
+package offgrid.geogram.util.nostr;
 
 
 /**

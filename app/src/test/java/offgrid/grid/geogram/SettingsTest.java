@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-import offgrid.geogram.nostr.nostr_id.Identity;
+import offgrid.geogram.util.nostr.Identity;
 import offgrid.geogram.settings.SettingsUser;
 
 /**

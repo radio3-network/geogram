@@ -1,8 +1,5 @@
-package offgrid.geogram.nostr.nostr_id;
+package offgrid.geogram.util.nostr;
 
-
-import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
 
 /**
  * @author squirrel

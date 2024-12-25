@@ -1,10 +1,10 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.things;
 
 /**
  * Defines information about a beacon that was
  * found by this device
  */
-public class Beacon {
+public class BeaconReachable {
     private String macAddress;
     private String namespaceId = null;
     private String instanceId = null;
@@ -29,7 +29,7 @@ public class Beacon {
         this.namespaceId = namespaceId;
     }
 
-    public Beacon() {
+    public BeaconReachable() {
         this.timeFirstFound = System.currentTimeMillis();
         this.timeLastFound = this.timeFirstFound;
     }

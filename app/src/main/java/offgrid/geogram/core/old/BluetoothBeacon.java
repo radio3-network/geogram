@@ -1,4 +1,4 @@
-package offgrid.geogram.old;
+package offgrid.geogram.core.old;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.AdvertiseCallback;

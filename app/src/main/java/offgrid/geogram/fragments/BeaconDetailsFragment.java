@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.Beacon;
+import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.bluetooth.BeaconList;
 
 public class BeaconDetailsFragment extends Fragment {
@@ -38,20 +38,7 @@ public class BeaconDetailsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_beacon_details, container, false);
 
-        Beacon beacon = null;
-
-        // Set beacon details text
-        TextView contentTextView = view.findViewById(R.id.beacon_details_content);
-        if (getArguments() != null) {
-            String beaconDetails = getArguments().getString(ARG_BEACON_DETAILS);
-            int position = getArguments().getInt(ARG_BEACON_POSITION);
-            beacon = BeaconList.beacons.get(position);
-            contentTextView.setText(
-                    beaconDetails
-                    + " -> "
-                    + beacon.getMacAddress()
-            );
-        }
+        BeaconReachable beaconDiscovered = null;
 
         // Handle back button
         ImageButton btnBack = view.findViewById(R.id.btn_back);
@@ -62,6 +49,34 @@ public class BeaconDetailsFragment extends Fragment {
         if (btnAdd != null) {
             btnAdd.hide();
         }
+
+        // Set beaconDiscovered details text
+        TextView beaconDescription = view.findViewById(R.id.tv_beacon_description);
+
+        // we need to have valid arguments
+        if (getArguments() == null) {
+            return view;
+        }
+
+        // get the beaconDiscovered data
+        int position = getArguments().getInt(ARG_BEACON_POSITION);
+        if (position < 0 || position >= BeaconList.beaconsDiscovered.size()) {
+            beaconDiscovered = BeaconList.beaconsDiscovered.get(position);
+        }else{
+            return view;
+        }
+
+        // this discovered beacon is already in our database?
+
+
+
+        // setup the title for this window
+        String beaconDetails = getArguments().getString(ARG_BEACON_DETAILS);
+        beaconDescription.setText(
+                beaconDetails
+                        + " -> "
+                        + beaconDiscovered.getMacAddress()
+        );
 
         return view;
     }

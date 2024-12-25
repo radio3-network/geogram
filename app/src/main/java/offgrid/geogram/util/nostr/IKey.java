@@ -1,4 +1,4 @@
-package offgrid.geogram.nostr.nostr_id;
+package offgrid.geogram.util.nostr;
 
 import java.io.Serializable;
 

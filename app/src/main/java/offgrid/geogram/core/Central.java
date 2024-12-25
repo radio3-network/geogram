@@ -1,4 +1,4 @@
-package offgrid.geogram;
+package offgrid.geogram.core;
 
 import static offgrid.geogram.core.Messages.log;
 
@@ -9,9 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import offgrid.geogram.core.BackgroundService;
-import offgrid.geogram.core.Log;
-import offgrid.geogram.old.WiFi_control;
+import offgrid.geogram.core.old.WiFi_control;
 
 public class Central {
 
