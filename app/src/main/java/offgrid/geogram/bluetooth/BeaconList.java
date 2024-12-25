@@ -30,7 +30,7 @@ public class BeaconList {
     // when was the window last time updated?
     private long lastUpdated = System.currentTimeMillis();
 
-    private ArrayList<Beacon> beacons = new ArrayList<>();
+    public static ArrayList<Beacon> beacons = new ArrayList<>();
     private static final String TAG = "BeaconList";
 
     public void processBeacon(ScanResult result) {
@@ -203,11 +203,12 @@ public class BeaconList {
         beaconWindow.setOnItemClickListener((parent, view, position, id) -> {
 
             String selectedBeaconDetails = displayList.get(position);
+            //Beacon beacon = beacons.get(position);
 
             // Replace the current fragment with the details fragment
             MainActivity.activity.getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.main, BeaconDetailsFragment.newInstance(selectedBeaconDetails))
+                    .replace(R.id.main, BeaconDetailsFragment.newInstance(selectedBeaconDetails, position))
                     .addToBackStack(null)
                     .commit();
         });

@@ -1,4 +1,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Navigation Drawer Menu
     <item
         android:id="@+id/nav_activity"
         android:icon="@drawable/ic_tap_and_play"
@@ -11,6 +12,7 @@
         android:id="@+id/nav_collections"
         android:icon="@drawable/ic_folder_shared"
         android:title="Collections" />
+    -->
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_settings"
