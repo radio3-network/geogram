@@ -17,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import offgrid.geogram.R;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.bluetooth.BeaconList;
+import offgrid.geogram.database.BeaconDatabase;
 
 public class BeaconDetailsFragment extends Fragment {
 
@@ -67,8 +68,10 @@ public class BeaconDetailsFragment extends Fragment {
         }
 
         // this discovered beacon is already in our database?
-
-
+        BeaconReachable beaconExisting = BeaconDatabase.getBeacon(beaconDiscovered.getDeviceId(), this.getContext());
+        if(beaconExisting != null){
+            beaconDiscovered.merge(beaconExisting);
+        }
 
         // setup the title for this window
         String beaconDetails = getArguments().getString(ARG_BEACON_DETAILS);

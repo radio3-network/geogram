@@ -3,6 +3,7 @@ package offgrid.geogram.bluetooth;
 import static offgrid.geogram.bluetooth.BeaconDefinitions.EDDYSTONE_SERVICE_UUID;
 
 import android.bluetooth.le.ScanResult;
+import android.content.Context;
 import android.os.ParcelUuid;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -14,6 +15,7 @@ import java.util.Objects;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
+import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.fragments.BeaconDetailsFragment;
@@ -26,10 +28,11 @@ public class BeaconList {
     // when was the window last time updated?
     private long lastUpdated = System.currentTimeMillis();
 
+    // the real list of beacons
     public static ArrayList<BeaconReachable> beaconsDiscovered = new ArrayList<>();
     private static final String TAG = "BeaconList";
 
-    public void processBeacon(ScanResult result) {
+    public void processBeacon(ScanResult result, Context context) {
 
         // only update after some time
         long timeNow = System.currentTimeMillis();
@@ -71,10 +74,10 @@ public class BeaconList {
         }
 
         // try to do this based on instanceId
-        if(instanceId != null && beacon == null){
+        if(beacon == null){
             for (BeaconReachable b : beaconsDiscovered) {
                 // beacon is recognized, use it
-                if (b.getInstanceId().equals(instanceId)) {
+                if (b.getDeviceId().equals(instanceId)) {
                     beacon = b;
                     beacon.setMacAddress(deviceAddress);
                     break;
@@ -102,7 +105,7 @@ public class BeaconList {
             canUpdateList = true;
         }
 
-        if(beacon.getInstanceId() == null && instanceId != null){
+        if(beacon.getDeviceId() == null){
             beacon.setNamespaceId(namespaceId);
             beacon.setInstanceId(instanceId);
             canUpdateList = true;
@@ -118,6 +121,9 @@ public class BeaconList {
 
             canUpdateList = true;
         }
+
+        // always save to disk
+        BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
 
         // can we update the GUI showing the beacons?
         if (canUpdateList) {
@@ -183,7 +189,7 @@ public class BeaconList {
 
         ArrayList<String> displayList = new ArrayList<>();
         for (BeaconReachable beacon : beaconsDiscovered) {
-            String displayText = beacon.getInstanceId() +
+            String displayText = beacon.getDeviceId() +
                     " | Distance: " + calculateDistance(beacon.getRssi());
             displayList.add(displayText);
         }

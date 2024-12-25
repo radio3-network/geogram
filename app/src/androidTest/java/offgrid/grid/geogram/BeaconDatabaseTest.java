@@ -1,6 +1,7 @@
 package offgrid.grid.geogram;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
@@ -23,7 +24,7 @@ import offgrid.geogram.things.BeaconReachable;
 @RunWith(AndroidJUnit4.class)
 public class BeaconDatabaseTest {
     @Test
-    public void useAppContext() {
+    public void testWritingToFolders() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         //assertEquals("off.grid.geogram", appContext.getPackageName());
@@ -40,6 +41,10 @@ public class BeaconDatabaseTest {
         // identifier based on Android
         beacon.setInstanceId("000000");
         beacon.setRssi(74);
+
+        File file = BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, appContext);
+        assertNotNull(file);
+        Log.i("BeaconDatabaseTest", "File exists: " + file.getAbsolutePath());
 
 
     }

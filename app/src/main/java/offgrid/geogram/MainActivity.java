@@ -26,6 +26,8 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.ArrayList;
+
 import offgrid.geogram.bluetooth.BeaconList;
 import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
@@ -36,6 +38,8 @@ import offgrid.geogram.fragments.DebugFragment;
 import offgrid.geogram.settings.SettingsFragment;
 import offgrid.geogram.settings.SettingsLoader;
 import offgrid.geogram.settings.SettingsUser;
+import offgrid.geogram.database.BeaconDatabase;
+import offgrid.geogram.things.BeaconReachable;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -64,7 +68,19 @@ public class MainActivity extends AppCompatActivity {
         // load the settings
         loadSettings();
 
+        // load all the beacons we have seen before
+        loadBeaconsOnDatabase();
+
         initializeApp();
+    }
+
+    /**
+     * Load all the beacons we have seen before from the database.
+     */
+    private void loadBeaconsOnDatabase() {
+        ArrayList<BeaconReachable> existingList = BeaconDatabase.getBeacons(this.getApplicationContext());
+        BeaconList.beaconsDiscovered.clear();
+        BeaconList.beaconsDiscovered.addAll(existingList);
     }
 
     @Override
@@ -226,9 +242,9 @@ public class MainActivity extends AppCompatActivity {
     private void checkBluetoothStatus() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
-            Toast.makeText(this, "Bluetooth is not supported on this device.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Bluetooth is not supported on this device", Toast.LENGTH_LONG).show();
         } else if (!bluetoothAdapter.isEnabled()) {
-            Toast.makeText(this, "Bluetooth is disabled. Please turn it on to connect with beacons.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Bluetooth is disabled. Please enable it to connect with beacons", Toast.LENGTH_LONG).show();
         }
     }
 }
