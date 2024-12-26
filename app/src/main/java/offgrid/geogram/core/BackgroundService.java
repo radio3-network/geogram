@@ -294,8 +294,6 @@ public class BackgroundService extends Service {
             checkIfBluetoothWasEnabled();
             time_last_updated_list = time_now;
             beaconFinder.beaconList.updateList();
-            // remove empty label
-            //activity.updateEmptyViewVisibilityBeforeUpdate();
         }
 
     }

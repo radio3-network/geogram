@@ -79,6 +79,10 @@ public class MainActivity extends AppCompatActivity {
      * Load all the beacons we have seen before from the database.
      */
     private void loadBeaconsOnDatabase() {
+        /**
+         * These beacons are updated every 20 seconds by the background service
+         *
+         */
         ArrayList<BeaconReachable> existingList = BeaconDatabase.getBeacons(this.getApplicationContext());
         BeaconList.beaconsDiscovered.clear();
         BeaconList.beaconsDiscovered.addAll(existingList);

@@ -1,6 +1,7 @@
 package offgrid.geogram.bluetooth;
 
 import static offgrid.geogram.bluetooth.BeaconDefinitions.EDDYSTONE_SERVICE_UUID;
+import static offgrid.geogram.util.DateUtils.getHumanReadableTime;
 
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
@@ -66,15 +67,15 @@ public class BeaconList {
 
         // try to find an existing beacon of this kind
         BeaconReachable beacon = null;
-        for (BeaconReachable b : beaconsDiscovered) {
-            if (b.getMacAddress().equals(deviceAddress)) {
-                beacon = b;
-                break;
-            }
-        }
+//        for (BeaconReachable b : beaconsDiscovered) {
+//            if (b.getMacAddress().equals(deviceAddress)) {
+//                beacon = b;
+//                break;
+//            }
+//        }
 
         // try to do this based on instanceId
-        if(beacon == null){
+//        if(beacon == null){
             for (BeaconReachable b : beaconsDiscovered) {
                 // beacon is recognized, use it
                 if (b.getDeviceId().equals(instanceId)) {
@@ -83,7 +84,7 @@ public class BeaconList {
                     break;
                 }
             }
-        }
+//        }
 
 
 
@@ -177,9 +178,6 @@ public class BeaconList {
     public void updateList() {
         ListView beaconWindow = MainActivity.beacons;
 
-        // remove empty label
-        //activity.updateEmptyViewVisibilityBeforeUpdate();
-
         if (beaconWindow == null) {
             return;
         }
@@ -189,8 +187,15 @@ public class BeaconList {
 
         ArrayList<String> displayList = new ArrayList<>();
         for (BeaconReachable beacon : beaconsDiscovered) {
-            String displayText = beacon.getDeviceId() +
-                    " | Distance: " + calculateDistance(beacon.getRssi());
+            // the text to be output
+            String distance = "Distance: " + calculateDistance(beacon.getRssi());
+
+            long lastSeen = System.currentTimeMillis() - beacon.getTimeLastFound();
+            if(lastSeen > 3 * 60_000){
+                distance = "Not reachable since " + getHumanReadableTime(beacon.getTimeLastFound());
+            }
+
+            String displayText = beacon.getDeviceId() + "\n" + distance;
             displayList.add(displayText);
         }
 
