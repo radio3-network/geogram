@@ -354,19 +354,24 @@ public class EddystoneBeacon {
         }
 
         List<BluetoothDevice> connectedDevices = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER);
+        Log.i(TAG, "Connected devices count: " + connectedDevices.size());
+
         for (BluetoothDevice device : connectedDevices) {
-            boolean notificationSent = gattServer.notifyCharacteristicChanged(device, characteristic, false);
-            if (notificationSent) {
-                Log.i(TAG, "Message broadcasted to device: " + device.getAddress());
-            } else {
-                Log.e(TAG, "Failed to broadcast message to device: " + device.getAddress());
+            try {
+                boolean notificationSent = gattServer.notifyCharacteristicChanged(device, characteristic, false);
+                if (notificationSent) {
+                    Log.i(TAG, "Message broadcasted to device: " + device.getAddress());
+                } else {
+                    Log.e(TAG, "Failed to broadcast message to device: " + device.getAddress());
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error broadcasting message to device: "
+                        + device.getAddress() + " " + e.getMessage());
             }
         }
 
         return true;
     }
-
-
 
 
 

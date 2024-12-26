@@ -1,6 +1,8 @@
 package offgrid.geogram.fragments;
 
 
+import static offgrid.geogram.bluetooth.BeaconList.calculateDistance;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,7 @@ import offgrid.geogram.R;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.bluetooth.BeaconList;
 import offgrid.geogram.database.BeaconDatabase;
+import offgrid.geogram.util.DateUtils;
 
 public class BeaconDetailsFragment extends Fragment {
 
@@ -53,6 +56,9 @@ public class BeaconDetailsFragment extends Fragment {
 
         // Set beaconDiscovered details text
         TextView beaconDescription = view.findViewById(R.id.tv_beacon_description);
+        TextView beaconDescriptionAdditional = view.findViewById(R.id.tv_beacon_additional_info);
+
+
 
         // we need to have valid arguments
         if (getArguments() == null) {
@@ -62,9 +68,9 @@ public class BeaconDetailsFragment extends Fragment {
         // get the beaconDiscovered data
         int position = getArguments().getInt(ARG_BEACON_POSITION);
         if (position < 0 || position >= BeaconList.beaconsDiscovered.size()) {
-            beaconDiscovered = BeaconList.beaconsDiscovered.get(position);
-        }else{
             return view;
+        }else{
+            beaconDiscovered = BeaconList.beaconsDiscovered.get(position);
         }
 
         // this discovered beacon is already in our database?
@@ -75,11 +81,31 @@ public class BeaconDetailsFragment extends Fragment {
 
         // setup the title for this window
         String beaconDetails = getArguments().getString(ARG_BEACON_DETAILS);
-        beaconDescription.setText(
-                beaconDetails
-                        + " -> "
-                        + beaconDiscovered.getMacAddress()
+
+        String macAddress = beaconDiscovered.getMacAddress();
+        String deviceId = beaconDiscovered.getDeviceId();
+        String timeFirstFound = DateUtils.formatTimestamp(
+                beaconDiscovered.getTimeFirstFound()
         );
+        String timeLastFound = DateUtils.getHumanReadableTime(beaconDiscovered.getTimeLastFound());
+        String rssi = String.valueOf(beaconDiscovered.getRssi());
+        String distance = calculateDistance(beaconDiscovered.getRssi());
+
+        String text = "Device Id: " + deviceId
+                + "\n"
+                + "Address: " + macAddress
+                + "\n"
+                + "Distance: " + distance + " (RSSI = " + rssi + ")"
+                + "\n"
+                + "First seen: " + timeFirstFound
+                + "\n"
+                + "Last seen: " + timeLastFound;
+
+        beaconDescription.setText("FlyingBarrel89" +
+                "\n" +
+                "On a mission to improve humankind");
+        beaconDescriptionAdditional.setText(text);
+
 
         return view;
     }

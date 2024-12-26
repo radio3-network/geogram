@@ -220,7 +220,7 @@ public class BeaconList {
     /**
      * Convert RSSI to a human-readable distance.
      */
-    private String calculateDistance(int rssi) {
+    public static String calculateDistance(int rssi) {
         double txPower = -59; // Default Tx Power for BLE beacons
         if (rssi == 0) {
             return "Unknown";
@@ -241,44 +241,4 @@ public class BeaconList {
         }
     }
 
-    /**
-     * Convert the last seen timestamp into a human-readable format.
-     */
-    private String getHumanReadableTime(long lastSeenTimestamp) {
-        long currentTime = System.currentTimeMillis();
-        long elapsedMillis = currentTime - lastSeenTimestamp;
-
-        long seconds = elapsedMillis / 1000;
-        if (seconds == 0) {
-            return ""; // Do not display 0 seconds ago or "Last Seen:" text
-        }
-        if (seconds < 60) {
-            return seconds + " seconds ago";
-        }
-
-        long minutes = seconds / 60;
-        if (minutes < 60) {
-            if(minutes == 1){
-                return minutes + " minute ago";
-            }else{
-                return minutes + " minutes ago";
-            }
-        }
-
-        long hours = minutes / 60;
-        if (hours < 24) {
-            if(hours == 1){
-                return hours + " hour ago";
-            }else{
-                return hours + " hours ago";
-            }
-        }
-
-        long days = hours / 24;
-        if(days == 1){
-            return days + " day ago";
-        }else{
-            return days + " days ago";
-        }
-    }
 }
