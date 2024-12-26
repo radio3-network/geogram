@@ -25,6 +25,7 @@ import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BeaconDefinitions;
 import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.EddystoneBeacon;
+import offgrid.geogram.bluetooth.EddystoneBeaconManager;
 import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
 import offgrid.geogram.wifi.WiFiDirectDiscovery;
@@ -150,6 +151,8 @@ public class BackgroundService extends Service {
         eddystoneBeacon = new EddystoneBeacon(this);
         // Start advertising
         eddystoneBeacon.startAdvertising(BeaconDefinitions.namespaceId);
+        // give access to this object outside the background service
+        EddystoneBeaconManager.getInstance().setEddystoneBeacon(eddystoneBeacon);
     }
 
     private void startBluetoothFinder() {

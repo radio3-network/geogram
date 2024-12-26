@@ -29,6 +29,7 @@ import com.google.android.material.navigation.NavigationView;
 import java.util.ArrayList;
 
 import offgrid.geogram.bluetooth.BeaconList;
+import offgrid.geogram.bluetooth.broadcast.BroadcastChatFragment;
 import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
 import offgrid.geogram.core.Log;
@@ -164,6 +165,8 @@ public class MainActivity extends AppCompatActivity {
 
             if (item.getItemId() == R.id.nav_settings) {
                 transaction.replace(R.id.main, new SettingsFragment());
+            } else if (item.getItemId() == R.id.nav_broadcast) {
+                transaction.replace(R.id.main, new BroadcastChatFragment());
             } else if (item.getItemId() == R.id.nav_debug) {
                 transaction.replace(R.id.main, new DebugFragment());
             } else if (item.getItemId() == R.id.nav_about) {

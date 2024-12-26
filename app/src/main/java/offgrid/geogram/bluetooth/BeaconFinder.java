@@ -139,23 +139,4 @@ public class BeaconFinder {
         }
     };
 
-//    private void processBeacon(ScanResult result) {
-//           String deviceAddress = result.getDevice().getAddress();
-//        int rssi = result.getRssi();
-//        byte[] serviceData = result.getScanRecord().getServiceData(ParcelUuid.fromString(EDDYSTONE_SERVICE_UUID));
-//
-//        Log.i(TAG, "Beacon found: " + deviceAddress + ", RSSI: " + rssi);
-//        if (serviceData != null) {
-//            Log.i(TAG, "Service Data: " + bytesToHex(serviceData));
-//        }
-//    }
-
-//    // Helper method to convert bytes to a hex string
-//    public static String bytesToHex(byte[] bytes) {
-//        StringBuilder sb = new StringBuilder();
-//        for (byte b : bytes) {
-//            sb.append(String.format("%02X", b));
-//        }
-//        return sb.toString();
-//    }
 }

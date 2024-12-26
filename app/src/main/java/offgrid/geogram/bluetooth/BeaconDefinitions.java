@@ -9,6 +9,6 @@ public class BeaconDefinitions {
 
           //namespaceId = "0123456789abcdef0123",
             namespaceId = "00000000000000000000",
-            instanceId = "abcdef123456";
+            deviceId = "abcdef123456";
 
 }

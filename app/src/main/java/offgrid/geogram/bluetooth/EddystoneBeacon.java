@@ -3,11 +3,13 @@ package offgrid.geogram.bluetooth;
 import static offgrid.geogram.bluetooth.GenerateMessage.generateShareSSID;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
@@ -16,6 +18,7 @@ import android.content.pm.PackageManager;
 import android.os.ParcelUuid;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.UUID;
 
 import offgrid.geogram.core.Log;
@@ -81,7 +84,7 @@ public class EddystoneBeacon {
         }
 
         // setup the name
-        setDeviceName("geogram");
+        //setDeviceName("geogram");
 
         advertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
         if (advertiser == null) {
@@ -164,7 +167,7 @@ public class EddystoneBeacon {
                     Log.i(TAG, "Eddystone beacon started successfully.");
                     Log.i(TAG, "Broadcasting Eddystone UID Frame:");
                     Log.i(TAG, "Namespace ID: " + namespaceId);
-                    Log.i(TAG, "Device ID: " + BeaconDefinitions.instanceId);
+                    Log.i(TAG, "Device ID: " + BeaconDefinitions.deviceId);
                 }
 
                 @Override
@@ -181,7 +184,6 @@ public class EddystoneBeacon {
             Log.e(TAG, "Unexpected error while starting advertising: ");
         }
     }
-
 
 
 
@@ -232,9 +234,6 @@ public class EddystoneBeacon {
         return hasAdvertisePermission && hasConnectPermission;
     }
 
-    /**
-     * Reaction when others are connecting to this bluetooth service
-     */
     private class GattServerCallback extends BluetoothGattServerCallback {
         @Override
         public void onConnectionStateChange(android.bluetooth.BluetoothDevice device, int status, int newState) {
@@ -258,7 +257,7 @@ public class EddystoneBeacon {
             }
 
             if (CUSTOM_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
-                String message = generateShareSSID(); //"Hello from Beacon";
+                String message = generateShareSSID();
                 gattServer.sendResponse(device, requestId, android.bluetooth.BluetoothGatt.GATT_SUCCESS, offset, message.getBytes());
                 Log.i(TAG, "Read request from " + device.getAddress());
             }
@@ -280,20 +279,18 @@ public class EddystoneBeacon {
             }
         }
     }
-
     private byte[] buildEddystoneUidFrame(String namespaceId) {
         if (namespaceId.length() != 20) {
-            throw new IllegalArgumentException("Namespace ID must be 20 hex characters and Instance ID must be 12 hex characters.");
+            throw new IllegalArgumentException("Namespace ID must be 20 hex characters.");
         }
 
         try {
             byte[] namespaceBytes = hexStringToByteArray(namespaceId);
 
-            // make a unique ID that based on Android ID for this cellphone
-            BeaconDefinitions.instanceId = GenerateDeviceId.generateInstanceId(context);
-            byte[] instanceBytes = hexStringToByteArray(BeaconDefinitions.instanceId);
+            // Generate a unique Instance ID
+            BeaconDefinitions.deviceId = GenerateDeviceId.generateInstanceId(context);
+            byte[] instanceBytes = hexStringToByteArray(BeaconDefinitions.deviceId);
 
-            // Fix: Allocate the correct buffer size (20 bytes)
             ByteBuffer buffer = ByteBuffer.allocate(20);
             buffer.put((byte) 0x00); // Frame type: UID
             buffer.put((byte) 0x00); // TX power level (placeholder)
@@ -304,12 +301,10 @@ public class EddystoneBeacon {
 
             return buffer.array();
         } catch (Exception e) {
-            Log.e(TAG, "Error building Eddystone UID Frame: ");
+            Log.e(TAG, "Error building Eddystone UID Frame: " + e.getMessage());
             throw e;
         }
     }
-
-
 
     private byte[] hexStringToByteArray(String hex) {
         int length = hex.length();
@@ -320,4 +315,60 @@ public class EddystoneBeacon {
         }
         return data;
     }
+
+    /**
+     * Broadcasts a message to all reachable EddyStone beacon devices.
+     * @param message
+     */
+    public boolean broadcastMessage(String message) {
+        if (gattServer == null) {
+            Log.e(TAG, "GATT server is not initialized.");
+            return false;
+        }
+
+        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission. Cannot broadcast message.");
+            return false;
+        }
+
+        BluetoothGattService service = gattServer.getService(CUSTOM_SERVICE_UUID);
+        if (service == null) {
+            Log.e(TAG, "Custom service not found.");
+            return false;
+        }
+
+        BluetoothGattCharacteristic characteristic = service.getCharacteristic(CUSTOM_CHARACTERISTIC_UUID);
+        if (characteristic == null) {
+            Log.e(TAG, "Custom characteristic not found.");
+            return false;
+        }
+
+        characteristic.setValue(message.getBytes());
+        Log.i(TAG, "Broadcasting message: " + message);
+
+        // Use BluetoothManager to get connected devices
+        BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (bluetoothManager == null) {
+            Log.e(TAG, "BluetoothManager is not available.");
+            return false;
+        }
+
+        List<BluetoothDevice> connectedDevices = bluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER);
+        for (BluetoothDevice device : connectedDevices) {
+            boolean notificationSent = gattServer.notifyCharacteristicChanged(device, characteristic, false);
+            if (notificationSent) {
+                Log.i(TAG, "Message broadcasted to device: " + device.getAddress());
+            } else {
+                Log.e(TAG, "Failed to broadcast message to device: " + device.getAddress());
+            }
+        }
+
+        return true;
+    }
+
+
+
+
+
+
 }
