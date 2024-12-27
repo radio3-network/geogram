@@ -1,7 +1,7 @@
 package offgrid.geogram.bluetooth;
 
 import static offgrid.geogram.bluetooth.BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
-import static offgrid.geogram.bluetooth.old.GenerateMessage.generateShareSSID;
+import static offgrid.geogram.bluetooth.BluetoothCentral.CUSTOM_SERVICE_UUID;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -57,12 +57,43 @@ public class AppBluetoothGattServer {
         if (bluetoothManager != null) {
             try {
                 gattServer = bluetoothManager.openGattServer(context, new CustomGattServerCallback());
-                Log.i(TAG, "GATT server initialized.");
+                if (gattServer == null) {
+                    Log.e(TAG, "Failed to open GATT server.");
+                } else {
+                    Log.i(TAG, "GATT server initialized.");
+                    setupGattServer();
+                }
             } catch (SecurityException e) {
                 Log.i(TAG, "SecurityException while initializing GATT server: " + e.getMessage());
             }
         } else {
             Log.i(TAG, "Failed to get BluetoothManager.");
+        }
+    }
+
+    private void setupGattServer() {
+        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission. Cannot add GATT service.");
+            return;
+        }
+
+        try {
+            BluetoothGattService customService = new BluetoothGattService(
+                    CUSTOM_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
+
+            BluetoothGattCharacteristic customCharacteristic = new BluetoothGattCharacteristic(
+                    CUSTOM_CHARACTERISTIC_UUID,
+                    BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_WRITE,
+                    BluetoothGattCharacteristic.PERMISSION_READ | BluetoothGattCharacteristic.PERMISSION_WRITE
+            );
+
+            customService.addCharacteristic(customCharacteristic);
+
+            gattServer.addService(customService);
+            Log.i(TAG, "GATT server setup complete. Custom service added.");
+        } catch (SecurityException e) {
+            Log.e(TAG, "SecurityException while adding GATT service: " + e.getMessage());
         }
     }
 
@@ -194,7 +225,7 @@ public class AppBluetoothGattServer {
         List<BluetoothDevice> connectedDevices = new ArrayList<>();
         try {
             for (BluetoothDevice device : bluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER)) {
-                BluetoothGattService service = gattServer.getService(BluetoothCentral.CUSTOM_SERVICE_UUID);
+                BluetoothGattService service = gattServer.getService(CUSTOM_SERVICE_UUID);
                 if (service != null) {
                     connectedDevices.add(device);
                     Log.i(TAG, "Eddystone device found: " + device.getAddress());
@@ -238,6 +269,7 @@ public class AppBluetoothGattServer {
             super.onConnectionStateChange(device, status, newState);
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.i(TAG, "Device connected: " + device.getAddress());
+
 //                if (!connectedDevices.contains(device)) {
 //                    connectedDevices.add(device);
 //                }
@@ -268,7 +300,7 @@ public class AppBluetoothGattServer {
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
             if (CUSTOM_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
-                String message = generateShareSSID();
+                String message = "Hello";//generateShareSSID();
                 try {
                     gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, message.getBytes());
                     Log.i(TAG, "Read request from " + device.getAddress());
@@ -290,7 +322,7 @@ public class AppBluetoothGattServer {
                     } catch (SecurityException e) {
                         Log.e(TAG, "SecurityException while sending write response: " + e.getMessage());
                     }
-                }
+               }
             }
         }
 

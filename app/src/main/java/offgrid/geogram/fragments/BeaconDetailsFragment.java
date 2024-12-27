@@ -1,11 +1,13 @@
 package offgrid.geogram.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,15 +15,12 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.BluetoothUtils;
+import offgrid.geogram.bluetooth.GetProfile;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.things.BeaconReachable;
-import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.util.DateUtils;
 
@@ -112,8 +111,44 @@ public class BeaconDetailsFragment extends Fragment {
                 "On a mission to improve humankind");
         beaconDescriptionAdditional.setText(text);
 
+        // Find the chat section
+        View chatSection = view.findViewById(R.id.chat_section);
+
+        // Set a click listener
+        chatSection.setOnClickListener(v -> launchMessage(beaconDiscovered));
 
         return view;
+    }
+
+    private void launchMessage(BeaconReachable beaconDiscovered) {
+        // Context from your activity or service
+        Context context = this.getContext();
+        Log.i("GetProfileExample", "Sending message to "
+                + beaconDiscovered.getMacAddress());
+
+        // MAC address of the Eddystone beacon you want to read data from
+        String macAddress = beaconDiscovered.getMacAddress();
+
+        // Create an instance of GetProfile
+        GetProfile getProfile = GetProfile.getInstance(context);
+
+        // Implement the callback
+        GetProfile.DataReadCallback callback = new GetProfile.DataReadCallback() {
+            @Override
+            public void onDataReadSuccess(String data) {
+                Log.i("GetProfileExample", "Data read successfully: " + data);
+            }
+
+            @Override
+            public void onDataReadError(String errorMessage) {
+                Log.e("GetProfileExample", "Error reading data: " + errorMessage);
+            }
+        };
+
+        // Attempt to read the data
+        getProfile.getDataRead(macAddress, callback);
+        Log.i("GetProfileExample", "Message sent");
+        Toast.makeText(getContext(), "Message sent", Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -2,6 +2,7 @@ package offgrid.geogram.bluetooth;
 
 import static offgrid.geogram.bluetooth.BluetoothCentral.EDDYSTONE_SERVICE_UUID;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
@@ -9,6 +10,10 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
+
+import androidx.core.app.ActivityCompat;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -162,6 +167,16 @@ public class BeaconFinder {
             // also save it do disk
             BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
             Log.i(TAG, "New Eddystone beacon found: " + instanceId);
+
+//            if (!checkPermissions()) {
+//                Log.i(TAG, "Missing required permissions to bond");
+//                return;
+//            }else{
+//                //boolean bonded = result.getDevice().createBond();
+//            }
+
+
+
         }
 
         // setup the usual data
@@ -218,4 +233,25 @@ public class BeaconFinder {
         }
         return hexString.toString();
     }
+
+    /**
+     * Checks if the required permissions are granted.
+     */
+    private boolean checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // API 31 or higher
+            boolean hasConnectPermission =
+                    context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+                            == PackageManager.PERMISSION_GRANTED;
+
+            if (!hasConnectPermission) {
+                Log.i(TAG, "Missing BLUETOOTH_CONNECT permission.");
+            }
+            return hasConnectPermission;
+        } else {
+            // Older Android versions do not require runtime permissions for Bluetooth
+            return true;
+        }
+    }
+
+
 }

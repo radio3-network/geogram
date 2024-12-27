@@ -79,13 +79,16 @@
 
             <!-- Chat -->
             <LinearLayout
+                android:id="@+id/chat_section"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
                 android:orientation="vertical"
                 android:gravity="center"
                 android:padding="8dp"
-                android:layout_margin="8dp">
+                android:layout_margin="8dp"
+                android:clickable="true"
+                android:focusable="true">
 
                 <ImageView
                     android:layout_width="48dp"
