@@ -37,7 +37,7 @@ public class BeaconListing {
     private long lastUpdated = System.currentTimeMillis();
 
     // list of beacons both reachable and past ones
-    public final HashMap<String, BeaconReachable> beacons = new HashMap<>();
+    //public final HashMap<String, BeaconReachable> beacons = new HashMap<>();
 
     // Private constructor for Singleton pattern
     private BeaconListing() {
@@ -201,8 +201,14 @@ public class BeaconListing {
                 distance = "Not reachable since " + getHumanReadableTime(beacon.getTimeLastFound());
             }
 
-            String displayText = beacon.getDeviceId() + "\n" + distance;
-            displayList.add(displayText);
+            String text = beacon.getDeviceId().substring(0, 6)
+                    + " ("
+                    + beacon.getMacAddress()
+                    + ")"
+                    + "\n"
+                    + distance;
+
+            displayList.add(text);
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -215,9 +221,25 @@ public class BeaconListing {
         // Add click listener to items
         beaconWindow.setOnItemClickListener((parent, view, position, id) -> {
             String selectedBeaconDetails = displayList.get(position);
+            String deviceId = selectedBeaconDetails.substring(0, 6);
+            BeaconReachable beacon = null;
+
+            Collection<BeaconReachable> beacons = BeaconFinder.getInstance(context).getBeaconMap().values();
+            for (BeaconReachable b : beacons) {
+                if (b.getDeviceId().startsWith(deviceId)) {
+                    beacon = b;
+                    break;
+                }
+            }
+            // cannot be null
+            if (beacon == null) {
+                Log.e(TAG, "Beacon not found: " + deviceId);
+                return;
+            }
+
             MainActivity.activity.getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.main, BeaconDetailsFragment.newInstance(selectedBeaconDetails, position))
+                    .replace(R.id.main, BeaconDetailsFragment.newInstance(beacon))
                     .addToBackStack(null)
                     .commit();
         });

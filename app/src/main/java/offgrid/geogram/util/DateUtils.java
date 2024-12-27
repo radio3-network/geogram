@@ -32,7 +32,7 @@ public class DateUtils {
 
         long seconds = elapsedMillis / 1000;
         if (seconds == 0) {
-            return ""; // Do not display 0 seconds ago or "Last Seen:" text
+            return "Reachable now"; // Do not display 0 seconds ago or "Last Seen:" text
         }
         if (seconds < 60) {
             return seconds + (seconds == 1 ? " second ago" : " seconds ago");

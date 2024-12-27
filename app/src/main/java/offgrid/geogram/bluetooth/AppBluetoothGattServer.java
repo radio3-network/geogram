@@ -27,7 +27,7 @@ public class AppBluetoothGattServer {
     private static AppBluetoothGattServer instance;
 
     private final Context context;
-    private BluetoothGattServer gattServer;
+    private BluetoothGattServer gattServer = null;
 
     private AppBluetoothGattServer(Context context) {
         this.context = context.getApplicationContext();
@@ -48,6 +48,11 @@ public class AppBluetoothGattServer {
      * Initializes the GATT server.
      */
     private void initializeGattServer() {
+        if (gattServer != null) {
+            //Log.i(TAG, "GATT server is was already initialized.");
+            return;
+        }
+        // proceed with initialization
         BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager != null) {
             try {
@@ -157,13 +162,14 @@ public class AppBluetoothGattServer {
             return new ArrayList<>();
         }
 
-        if (gattServer == null) {
-            Log.i(TAG, "GATT server is not initialized.");
+        BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (bluetoothManager == null) {
+            Log.i(TAG, "BluetoothManager is not available.");
             return new ArrayList<>();
         }
 
         try {
-            return gattServer.getConnectedDevices();
+            return bluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER);
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while getting connected devices: " + e.getMessage());
         } catch (Exception e) {
@@ -172,21 +178,22 @@ public class AppBluetoothGattServer {
         return new ArrayList<>();
     }
 
+
     public List<BluetoothDevice> getConnectedEddystoneDevices() {
         if (!checkPermissions()) {
             Log.i(TAG, "Missing required permissions to retrieve connected devices.");
             return new ArrayList<>();
         }
 
-        if (gattServer == null) {
-            Log.i(TAG, "GATT server is not initialized.");
+        BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (bluetoothManager == null) {
+            Log.i(TAG, "BluetoothManager is not available.");
             return new ArrayList<>();
         }
 
         List<BluetoothDevice> connectedDevices = new ArrayList<>();
         try {
-            for (BluetoothDevice device : gattServer.getConnectedDevices()) {
-                // Check if the device has the Eddystone service
+            for (BluetoothDevice device : bluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER)) {
                 BluetoothGattService service = gattServer.getService(BluetoothCentral.CUSTOM_SERVICE_UUID);
                 if (service != null) {
                     connectedDevices.add(device);
@@ -200,6 +207,7 @@ public class AppBluetoothGattServer {
         }
         return connectedDevices;
     }
+
 
 
     /**
@@ -230,10 +238,31 @@ public class AppBluetoothGattServer {
             super.onConnectionStateChange(device, status, newState);
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.i(TAG, "Device connected: " + device.getAddress());
+//                if (!connectedDevices.contains(device)) {
+//                    connectedDevices.add(device);
+//                }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "Device disconnected: " + device.getAddress());
+                //connectedDevices.remove(device);
+
+                // Cancel the connection with permission handling
+                if (checkPermissions()) {
+                    try {
+                        if (gattServer != null) {
+                            gattServer.cancelConnection(device);
+                            Log.i(TAG, "Connection canceled for device: " + device.getAddress());
+                        }
+                    } catch (SecurityException e) {
+                        Log.e(TAG, "SecurityException while canceling connection: " + e.getMessage());
+                    } catch (Exception e) {
+                        Log.e(TAG, "Unexpected error while canceling connection: " + e.getMessage());
+                    }
+                } else {
+                    Log.i(TAG, "Missing required permissions to cancel connection.");
+                }
             }
         }
+
 
         // Additional callbacks for characteristic read/write operations can be added here
         @Override

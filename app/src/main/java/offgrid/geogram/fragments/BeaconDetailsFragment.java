@@ -1,6 +1,5 @@
 package offgrid.geogram.fragments;
 
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +17,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import offgrid.geogram.R;
+import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.BluetoothUtils;
+import offgrid.geogram.core.Log;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.database.BeaconDatabase;
@@ -26,15 +27,15 @@ import offgrid.geogram.util.DateUtils;
 
 public class BeaconDetailsFragment extends Fragment {
 
-    private static final String
-            ARG_BEACON_DETAILS = "beacon_details",
-            ARG_BEACON_POSITION = "beacon_position";
+    private static final String TAG = "BeaconDetailsFragment";
 
-    public static BeaconDetailsFragment newInstance(String beaconDetails, int beaconPosition) {
+    private static final String
+            ARG_BEACON_DETAILS = "beacon_details";
+
+    public static BeaconDetailsFragment newInstance(BeaconReachable beaconDiscovered)  {
         BeaconDetailsFragment fragment = new BeaconDetailsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_BEACON_DETAILS, beaconDetails);
-        args.putInt(ARG_BEACON_POSITION, beaconPosition);
+        args.putString(ARG_BEACON_DETAILS, beaconDiscovered.getDeviceId());
         fragment.setArguments(args);
         return fragment;
     }
@@ -44,7 +45,6 @@ public class BeaconDetailsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_beacon_details, container, false);
 
-        BeaconReachable beaconDiscovered = null;
 
         // Handle back button
         ImageButton btnBack = view.findViewById(R.id.btn_back);
@@ -61,21 +61,25 @@ public class BeaconDetailsFragment extends Fragment {
         TextView beaconDescriptionAdditional = view.findViewById(R.id.tv_beacon_additional_info);
 
 
-
         // we need to have valid arguments
         if (getArguments() == null) {
+            Log.e(TAG, "Invalid arguments");
             return view;
         }
 
-        Collection<BeaconReachable> beacons = BeaconListing.getInstance().beacons.values();
-        ArrayList<BeaconReachable> beaconList = new ArrayList<>(beacons);
-
-        // get the beaconDiscovered data
-        int position = getArguments().getInt(ARG_BEACON_POSITION);
-        if (position < 0 || position >= beacons.size()) {
+        // get the device Id
+        String deviceId = getArguments().getString(ARG_BEACON_DETAILS);
+        if (deviceId == null) {
+            Log.e(TAG, "Invalid arguments: " + getArguments());
             return view;
-        }else{
-            beaconDiscovered = beaconList.get(position);
+        }
+
+        // get the beacon from the list
+        BeaconReachable beaconDiscovered =
+                BeaconFinder.getInstance(this.getContext()).getBeaconMap().get(deviceId);
+        if(beaconDiscovered == null){
+            Log.e(TAG, "Beacon not found: " + deviceId);
+            return view;
         }
 
         // this discovered beacon is already in our database?
@@ -85,10 +89,7 @@ public class BeaconDetailsFragment extends Fragment {
         }
 
         // setup the title for this window
-        String beaconDetails = getArguments().getString(ARG_BEACON_DETAILS);
-
         String macAddress = beaconDiscovered.getMacAddress();
-        String deviceId = beaconDiscovered.getDeviceId();
         String timeFirstFound = DateUtils.formatTimestamp(
                 beaconDiscovered.getTimeFirstFound()
         );

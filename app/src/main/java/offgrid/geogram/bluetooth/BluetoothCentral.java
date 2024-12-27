@@ -86,9 +86,12 @@ public class BluetoothCentral {
             return;
         }
 
-        if (gattServer != null) {
-            Log.i(TAG, "Starting GATT server.");
+        if (gattServer == null) {
+            Log.i(TAG,"Starting GATT server.");
+            //gattServer = AppBluetoothGattServer.getInstance(context);
         }
+        // always start the gatt server
+        gattServer = AppBluetoothGattServer.getInstance(context);
 
         if (beacon != null) {
             beacon.startBeacon();
