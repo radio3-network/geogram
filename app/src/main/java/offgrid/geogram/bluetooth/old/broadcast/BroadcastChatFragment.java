@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.broadcast;
+package offgrid.geogram.bluetooth.old.broadcast;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

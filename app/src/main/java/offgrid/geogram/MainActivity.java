@@ -28,8 +28,8 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 
-import offgrid.geogram.bluetooth.BeaconList;
-import offgrid.geogram.bluetooth.broadcast.BroadcastChatFragment;
+import offgrid.geogram.bluetooth.BeaconListing;
+import offgrid.geogram.bluetooth.old.broadcast.BroadcastChatFragment;
 import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
 import offgrid.geogram.core.Log;
@@ -79,13 +79,12 @@ public class MainActivity extends AppCompatActivity {
      * Load all the beacons we have seen before from the database.
      */
     private void loadBeaconsOnDatabase() {
-        /**
-         * These beacons are updated every 20 seconds by the background service
-         *
+        /*
+         * These beacons are updated every few seconds by the background service
          */
         ArrayList<BeaconReachable> existingList = BeaconDatabase.getBeacons(this.getApplicationContext());
-        BeaconList.beaconsDiscovered.clear();
-        BeaconList.beaconsDiscovered.addAll(existingList);
+        BeaconListing.beaconsDiscovered.clear();
+        BeaconListing.beaconsDiscovered.addAll(existingList);
     }
 
     @Override
@@ -114,10 +113,6 @@ public class MainActivity extends AppCompatActivity {
         btnAdd.setOnClickListener(v ->
                 Toast.makeText(this, "Feature not yet implemented", Toast.LENGTH_SHORT).show()
         );
-
-        // Initialize BeaconList and set adapter
-        BeaconList beaconList = new BeaconList();
-        beaconList.updateList();
 
         // Set the log window for the log system
         Log.setLogWindow(logWindow);
@@ -251,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
         if (bluetoothAdapter == null) {
             Toast.makeText(this, "Bluetooth is not supported on this device", Toast.LENGTH_LONG).show();
         } else if (!bluetoothAdapter.isEnabled()) {
-            Toast.makeText(this, "Bluetooth is disabled. Please enable it to connect with beacons", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Bluetooth is disabled. Please enable it", Toast.LENGTH_LONG).show();
         }
     }
 }

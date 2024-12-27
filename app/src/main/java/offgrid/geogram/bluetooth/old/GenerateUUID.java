@@ -1,6 +1,4 @@
-package offgrid.geogram.bluetooth;
-
-import java.util.UUID;
+package offgrid.geogram.bluetooth.old;
 
 /**
  * Generates a UUID for Bluetooth beacons.

@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.old;
 
 import offgrid.geogram.wifi.WiFiCommon;
 

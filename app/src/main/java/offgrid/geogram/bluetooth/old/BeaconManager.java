@@ -1,16 +1,16 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.old;
 
-public class EddystoneBeaconManager {
+public class BeaconManager {
 
-    private static EddystoneBeaconManager instance;
+    private static BeaconManager instance;
     private EddystoneBeacon eddystoneBeacon;
 
-    private EddystoneBeaconManager() {
+    private BeaconManager() {
     }
 
-    public static synchronized EddystoneBeaconManager getInstance() {
+    public static synchronized BeaconManager getInstance() {
         if (instance == null) {
-            instance = new EddystoneBeaconManager();
+            instance = new BeaconManager();
         }
         return instance;
     }

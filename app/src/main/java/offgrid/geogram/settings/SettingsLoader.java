@@ -12,7 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
-import offgrid.geogram.bluetooth.GenerateDeviceId;
+import offgrid.geogram.bluetooth.old.GenerateDeviceId;
 import offgrid.geogram.util.nostr.Identity;
 import offgrid.geogram.util.NicknameGenerator;
 

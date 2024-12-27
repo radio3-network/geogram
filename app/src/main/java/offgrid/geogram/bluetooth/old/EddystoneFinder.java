@@ -1,6 +1,5 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.old;
 
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
@@ -11,28 +10,23 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.ParcelUuid;
 
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.core.Log;
 
-public class BeaconFinder {
+public class EddystoneFinder {
 
     private static final String TAG = "BeaconFinder";
 
     // Eddystone Service UUID
     private static final String EDDYSTONE_SERVICE_UUID = "0000FEAA-0000-1000-8000-00805F9B34FB";
 
-    // list of beacons that we are finding
-    public BeaconList beaconList = new BeaconList();
-
     private final Context context;
     private android.bluetooth.le.BluetoothLeScanner scanner;
 
-    public BeaconFinder(Context context) {
+    public EddystoneFinder(Context context) {
         this.context = context;
         initializeBluetooth();
     }
@@ -121,7 +115,7 @@ public class BeaconFinder {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             // Log the beacon's details
-            beaconList.processBeacon(result, context);
+            BeaconListing.getInstance().processBeacon(result, context);
         }
 
         @Override

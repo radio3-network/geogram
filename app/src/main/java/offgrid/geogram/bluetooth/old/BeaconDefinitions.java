@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.old;
 
 public class BeaconDefinitions {
 

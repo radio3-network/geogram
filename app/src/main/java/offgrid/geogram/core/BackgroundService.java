@@ -15,17 +15,16 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.BeaconDefinitions;
-import offgrid.geogram.bluetooth.BeaconFinder;
-import offgrid.geogram.bluetooth.EddystoneBeacon;
-import offgrid.geogram.bluetooth.EddystoneBeaconManager;
+import offgrid.geogram.bluetooth.BeaconListing;
+import offgrid.geogram.bluetooth.BluetoothCentral;
+import offgrid.geogram.bluetooth.old.EddystoneFinder;
+import offgrid.geogram.bluetooth.old.EddystoneBeacon;
 import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
 import offgrid.geogram.wifi.WiFiDirectDiscovery;
@@ -39,18 +38,13 @@ public class BackgroundService extends Service {
 
     private WiFiDirectAdvertiser wifiDirectAdvertiser; // Wi-Fi Direct Advertiser instance
     private WiFiDirectDiscovery WifiDiscover = null;
-    private EddystoneBeacon eddystoneBeacon = null;
-    private BeaconFinder beaconFinder = null;
 
     // how long between scans
-    private long interval_seconds = 10;
+    private final long interval_seconds = 10;
 
-    private long time_last_updated_list = System.currentTimeMillis();
 
-    private boolean
-            wifi_advertise = true,
-            wifi_discover = true,
-            hasNecessaryPermissions = false;
+    private boolean wifi_discover = true;
+    private boolean hasNecessaryPermissions = false;
 
 
     @Override
@@ -102,11 +96,9 @@ public class BackgroundService extends Service {
 //        // Initialize the discovery of other apps
 //        startWiFiDiscover();
 
-        // initialize the bluetooth beacon
-        startBluetoothBeacon();
+        // initialize the bluetooth services
+        startBluetooth();
 
-        // initialize the bluetooth discovery
-        startBluetoothFinder();
 
         // start the web server
         Thread serverThread = new Thread(new SimpleSparkServer());
@@ -137,38 +129,22 @@ public class BackgroundService extends Service {
      * Notice that eddyStoneBeacon variable will no longer be null
      * when it is starting and running as expected.
      */
-    private void startBluetoothBeacon() {
+    private void startBluetooth() {
         // Check if Bluetooth is enabled
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
             //Toast.makeText(this, "Bluetooth is not supported on this device.", Toast.LENGTH_LONG).show();
             return;
         } else if (!bluetoothAdapter.isEnabled()) {
-            //Toast.makeText(this, "Bluetooth is disabled. Please turn it on to connect with beacons.", Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, "Bluetooth is disabled. Please turn it on", Toast.LENGTH_LONG).show();
             return;
         }
-        // Initialize the EddystoneBeacon
-        eddystoneBeacon = new EddystoneBeacon(this);
-        // Start advertising
-        eddystoneBeacon.startAdvertising(BeaconDefinitions.namespaceId);
-        // give access to this object outside the background service
-        EddystoneBeaconManager.getInstance().setEddystoneBeacon(eddystoneBeacon);
+
+        // Initialize and start BluetoothCentral
+        BluetoothCentral bluetoothCentral = BluetoothCentral.getInstance(this);
+        bluetoothCentral.start();
     }
 
-    private void startBluetoothFinder() {
-        // Check if Bluetooth is enabled
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
-            //Toast.makeText(this, "Bluetooth is not supported on this device.", Toast.LENGTH_LONG).show();
-            return;
-        } else if (!bluetoothAdapter.isEnabled()) {
-            //Toast.makeText(this, "Bluetooth is disabled. Please turn it on to connect with beacons.", Toast.LENGTH_LONG).show();
-            return;
-        }
-        // initialize the finder
-        beaconFinder = new BeaconFinder(this);
-        beaconFinder.startScanning();
-    }
 
 
         /**
@@ -186,6 +162,7 @@ public class BackgroundService extends Service {
     }
 
     private void startWiFiAdvertise() {
+        boolean wifi_advertise = true;
         if(wifi_advertise){
             wifiDirectAdvertiser = new WiFiDirectAdvertiser(this);
             wifiDirectAdvertiser.startAdvertising();
@@ -206,7 +183,7 @@ public class BackgroundService extends Service {
      * @param startId A unique integer representing this specific request to
      * start.  Use with {@link #stopSelfResult(int)}.
      *
-     * @return
+     * @return the type of start
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -247,16 +224,8 @@ public class BackgroundService extends Service {
         }
 
         // stop bluetooth
-        if(eddystoneBeacon != null){
-            eddystoneBeacon.stopAdvertising();
-            log(TAG_ID, "BLE beacon stopped");
-        }
-
-        if(beaconFinder != null){
-            beaconFinder.stopScanning();
-            log(TAG_ID, "BLE beacon finder stopped");
-        }
-
+        BluetoothCentral bluetoothCentral = BluetoothCentral.getInstance(this);
+        bluetoothCentral.stop();
 
         // Stop Wi-Fi Direct advertising
         if (wifiDirectAdvertiser != null) {
@@ -269,9 +238,6 @@ public class BackgroundService extends Service {
 //            discover.stopDiscovery();
 //            log(TAG_ID, "Wi-Fi discovery stopped");
 //        }
-
-
-
     }
 
     /**
@@ -288,36 +254,10 @@ public class BackgroundService extends Service {
         }
 
         // update the beacon list
-        long time_now = System.currentTimeMillis();
-        long time_passed = time_now - time_last_updated_list;
-        if(time_passed > 20_000){ // 20 seconds to update the beacon list
-            checkIfBluetoothWasEnabled();
-            time_last_updated_list = time_now;
-            beaconFinder.beaconList.updateList();
-        }
+        BeaconListing.getInstance().updateList();
 
     }
 
-    /**
-     * During runs it is possible for the user to enable or disable bluetooth.
-     * Therefore we check here if it is already running
-     */
-    private void checkIfBluetoothWasEnabled() {
-        // Check if Bluetooth is enabled
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null) {
-            return;
-        } else if (!bluetoothAdapter.isEnabled()) {
-            return;
-        }
-        // now check the variables
-        if(eddystoneBeacon == null){
-            startBluetoothBeacon();
-        }
-        if(beaconFinder == null){
-            startBluetoothFinder();
-        }
-    }
 
     private void listPeers() {
         if(peers == null){

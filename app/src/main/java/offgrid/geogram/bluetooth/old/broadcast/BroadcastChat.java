@@ -1,9 +1,9 @@
-package offgrid.geogram.bluetooth.broadcast;
+package offgrid.geogram.bluetooth.old.broadcast;
 
 import java.util.ArrayList;
 
-import offgrid.geogram.bluetooth.EddystoneBeacon;
-import offgrid.geogram.bluetooth.EddystoneBeaconManager;
+import offgrid.geogram.bluetooth.old.EddystoneBeacon;
+import offgrid.geogram.bluetooth.old.BeaconManager;
 import offgrid.geogram.core.Log;
 
 public class BroadcastChat {
@@ -19,7 +19,7 @@ public class BroadcastChat {
      */
     public static boolean broadcast(String message) {
         // get the running beacon
-        EddystoneBeacon beacon = EddystoneBeaconManager.getInstance().getEddystoneBeacon();
+        EddystoneBeacon beacon = BeaconManager.getInstance().getEddystoneBeacon();
         if (beacon == null) {
             Log.e(TAG_ID, "Eddystone beacon is not running");
             return false;

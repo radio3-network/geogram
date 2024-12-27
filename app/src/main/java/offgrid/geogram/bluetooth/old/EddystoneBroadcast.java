@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.old;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -16,7 +16,7 @@ import offgrid.geogram.core.PermissionsHelper;
 /**
  * Permit the exchange of information between two bluetooth devices.
  */
-public class BeaconCommunication {
+public class EddystoneBroadcast {
 
     private static final String TAG = "BeaconCommunication";
 

@@ -1,7 +1,7 @@
 package offgrid.geogram.fragments;
 
 
-import static offgrid.geogram.bluetooth.BeaconList.calculateDistance;
+import static offgrid.geogram.bluetooth.BeaconListing.calculateDistance;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,7 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import offgrid.geogram.R;
 import offgrid.geogram.things.BeaconReachable;
-import offgrid.geogram.bluetooth.BeaconList;
+import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.util.DateUtils;
 
@@ -67,10 +67,10 @@ public class BeaconDetailsFragment extends Fragment {
 
         // get the beaconDiscovered data
         int position = getArguments().getInt(ARG_BEACON_POSITION);
-        if (position < 0 || position >= BeaconList.beaconsDiscovered.size()) {
+        if (position < 0 || position >= BeaconListing.beaconsDiscovered.size()) {
             return view;
         }else{
-            beaconDiscovered = BeaconList.beaconsDiscovered.get(position);
+            beaconDiscovered = BeaconListing.beaconsDiscovered.get(position);
         }
 
         // this discovered beacon is already in our database?
