@@ -254,7 +254,7 @@ public class BackgroundService extends Service {
         }
 
         // update the beacon list
-        BeaconListing.getInstance().updateList();
+        BeaconListing.getInstance().updateList(this.getApplicationContext());
 
     }
 

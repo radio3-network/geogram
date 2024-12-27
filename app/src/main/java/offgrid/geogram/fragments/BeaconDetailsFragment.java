@@ -1,8 +1,6 @@
 package offgrid.geogram.fragments;
 
 
-import static offgrid.geogram.bluetooth.BeaconListing.calculateDistance;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +14,11 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import offgrid.geogram.R;
+import offgrid.geogram.bluetooth.BluetoothUtils;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.database.BeaconDatabase;
@@ -65,12 +67,15 @@ public class BeaconDetailsFragment extends Fragment {
             return view;
         }
 
+        Collection<BeaconReachable> beacons = BeaconListing.getInstance().beacons.values();
+        ArrayList<BeaconReachable> beaconList = new ArrayList<>(beacons);
+
         // get the beaconDiscovered data
         int position = getArguments().getInt(ARG_BEACON_POSITION);
-        if (position < 0 || position >= BeaconListing.beaconsDiscovered.size()) {
+        if (position < 0 || position >= beacons.size()) {
             return view;
         }else{
-            beaconDiscovered = BeaconListing.beaconsDiscovered.get(position);
+            beaconDiscovered = beaconList.get(position);
         }
 
         // this discovered beacon is already in our database?
@@ -89,7 +94,7 @@ public class BeaconDetailsFragment extends Fragment {
         );
         String timeLastFound = DateUtils.getHumanReadableTime(beaconDiscovered.getTimeLastFound());
         String rssi = String.valueOf(beaconDiscovered.getRssi());
-        String distance = calculateDistance(beaconDiscovered.getRssi());
+        String distance = BluetoothUtils.calculateDistance(beaconDiscovered.getRssi());
 
         String text = "Device Id: " + deviceId
                 + "\n"

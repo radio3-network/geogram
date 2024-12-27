@@ -115,7 +115,7 @@ public class EddystoneFinder {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             // Log the beacon's details
-            BeaconListing.getInstance().processBeacon(result, context);
+            //BeaconListing.getInstance().processBeacon(result, context);
         }
 
         @Override

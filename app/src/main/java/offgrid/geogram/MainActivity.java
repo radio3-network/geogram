@@ -83,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
          * These beacons are updated every few seconds by the background service
          */
         ArrayList<BeaconReachable> existingList = BeaconDatabase.getBeacons(this.getApplicationContext());
-        BeaconListing.beaconsDiscovered.clear();
-        BeaconListing.beaconsDiscovered.addAll(existingList);
+        //BeaconListing.beaconsDiscovered.clear();
+        //BeaconListing.beaconsDiscovered.addAll(existingList);
     }
 
     @Override
