@@ -25,6 +25,7 @@ import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.bluetooth.old.EddystoneFinder;
 import offgrid.geogram.bluetooth.old.EddystoneBeacon;
+import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
 import offgrid.geogram.wifi.WiFiDirectDiscovery;
@@ -252,7 +253,10 @@ public class BackgroundService extends Service {
             listPeers();
         }
 
-        // update the beacon list
+        // update the beacons found on disk
+        BeaconDatabase.updateBeacons(this.getApplicationContext());
+
+        // update the beacons list on the UI
         BeaconListing.getInstance().updateList(this.getApplicationContext());
 
     }

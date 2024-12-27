@@ -28,6 +28,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 
+import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.bluetooth.broadcast.BroadcastChatFragment;
 import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
@@ -78,12 +79,8 @@ public class MainActivity extends AppCompatActivity {
      * Load all the beacons we have seen before from the database.
      */
     private void loadBeaconsOnDatabase() {
-        /*
-         * These beacons are updated every few seconds by the background service
-         */
-        ArrayList<BeaconReachable> existingList = BeaconDatabase.getBeacons(this.getApplicationContext());
-        //BeaconListing.beaconsDiscovered.clear();
-        //BeaconListing.beaconsDiscovered.addAll(existingList);
+        BeaconDatabase.updateBeacons(this.getApplicationContext());
+        BeaconListing.getInstance().updateList(this.getApplicationContext());
     }
 
     @Override

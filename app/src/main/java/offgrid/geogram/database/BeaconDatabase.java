@@ -4,8 +4,9 @@ import android.content.Context;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Objects;
 
 import offgrid.geogram.core.Log;
 import offgrid.geogram.things.BeaconReachable;
@@ -18,6 +19,10 @@ public class BeaconDatabase {
     public static final String TAG = "BeaconDatabase";
     public static final String FOLDER_NAME = "beacons";
     public static final String FILE_NAME = "beacon.json";
+
+    // the most up to date list of beacons saved on our disk
+    public static HashMap<String, BeaconReachable> beacons = new HashMap<>();
+    private static long timeLastUpdated = -1;
 
     /**
      * Gets the base folder for beacon storage.
@@ -145,31 +150,48 @@ public class BeaconDatabase {
         return BeaconReachable.fromJson(file);
     }
 
+
+
+
+
     /**
      * Gets the list of beacons that have been discovered.
      * This list places on top the most recently found beacons.
      *
      * @param appContext The application context.
-     * @return A list of discovered beacons sorted by the most recently found.
      */
-    public static ArrayList<BeaconReachable> getBeacons(Context appContext) {
-        ArrayList<BeaconReachable> beacons = new ArrayList<>();
+    public static void updateBeacons(Context appContext) {
+
+        long timeNow = System.currentTimeMillis();
+        long timeElapsed = timeNow - timeLastUpdated;
+
+        // only permit to update the database once per minute
+        if(timeElapsed > 0 && timeElapsed < 60 * 1000){
+            return;
+        }
+        // proceed with the update
+        timeLastUpdated = timeNow;
         File baseFolder = getFolder(appContext);
 
         if (baseFolder == null || !baseFolder.exists()) {
             Log.e(TAG, "Base folder for beacons does not exist.");
-            return beacons;
+            return;
         }
 
-        for (File section : baseFolder.listFiles()) {
-            if (section.isDirectory()) {
-                for (File deviceFolder : section.listFiles()) {
+        if(baseFolder.listFiles() == null){
+            Log.e(TAG, "Base folder for beacons is empty.");
+            return;
+        }
+
+        for (File section : Objects.requireNonNull(baseFolder.listFiles())) {
+            if (section != null && section.isDirectory() && section.listFiles() != null) {
+                for (File deviceFolder : Objects.requireNonNull(section.listFiles())) {
                     if (deviceFolder.isDirectory()) {
                         File beaconFile = new File(deviceFolder, FILE_NAME);
                         if (beaconFile.exists()) {
                             BeaconReachable beacon = BeaconReachable.fromJson(beaconFile);
                             if (beacon != null) {
-                                beacons.add(beacon);
+                                beacons.put(beacon.getDeviceId(), beacon);
                             }
                         }
                     }
@@ -177,8 +199,7 @@ public class BeaconDatabase {
             }
         }
 
-        // Sort by most recently found
-        beacons.sort(Comparator.comparingLong(BeaconReachable::getTimeLastFound).reversed());
-        return beacons;
+//        // Sort by most recently found
+//        beacons.sort(Comparator.comparingLong(BeaconReachable::getTimeLastFound).reversed());
     }
 }
