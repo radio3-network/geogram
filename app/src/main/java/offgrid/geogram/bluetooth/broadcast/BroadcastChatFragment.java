@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.old.broadcast;
+package offgrid.geogram.bluetooth.broadcast;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -67,7 +67,7 @@ public class BroadcastChatFragment extends Fragment {
     private void addUserMessage(LinearLayout chatMessageContainer, String message) {
 
         // first let's broadcast the message
-        BroadcastChat.broadcast(message);
+        BroadcastChat.broadcast(message,  this.getContext());
 
         // Inflate the custom layout for user-sent messages
         View userMessageView = LayoutInflater.from(getContext())

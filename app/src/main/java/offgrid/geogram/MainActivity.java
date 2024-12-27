@@ -28,8 +28,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 
-import offgrid.geogram.bluetooth.BeaconListing;
-import offgrid.geogram.bluetooth.old.broadcast.BroadcastChatFragment;
+import offgrid.geogram.bluetooth.broadcast.BroadcastChatFragment;
 import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
 import offgrid.geogram.core.Log;

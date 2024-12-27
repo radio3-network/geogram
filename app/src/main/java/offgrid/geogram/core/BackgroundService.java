@@ -89,7 +89,6 @@ public class BackgroundService extends Service {
             return;
         }
 
-
 //        // Initialize Wi-Fi Direct Advertiser
 //        startWiFiAdvertise();
 //

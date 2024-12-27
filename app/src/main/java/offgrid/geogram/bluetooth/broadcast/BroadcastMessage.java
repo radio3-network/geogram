@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.old.broadcast;
+package offgrid.geogram.bluetooth.broadcast;
 
 /**
  * Stores a message that was broadcasted to all devices within reach

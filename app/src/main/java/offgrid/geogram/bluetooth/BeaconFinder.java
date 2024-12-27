@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import offgrid.geogram.core.Log;
+import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.things.BeaconReachable;
 
 public class BeaconFinder {
@@ -158,6 +159,8 @@ public class BeaconFinder {
             beacon.setNamespaceId(namespaceId);
             beacon.setMacAddress(result.getDevice().getAddress());
             beaconMap.put(instanceId, beacon);
+            // also save it do disk
+            BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
             Log.i(TAG, "New Eddystone beacon found: " + instanceId);
         }
 

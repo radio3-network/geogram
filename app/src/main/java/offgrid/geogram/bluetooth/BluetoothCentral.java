@@ -95,7 +95,9 @@ public class BluetoothCentral {
             Log.i(TAG, "Beacon started.");
         }
 
-        startScanning();
+        if (!isScanning){
+            startScanning();
+        }
     }
 
     /**
@@ -235,4 +237,24 @@ public class BluetoothCentral {
             stop();
         }
     }
+
+    /**
+     * Checks if Bluetooth is available and enabled on the device.
+     *
+     * @return true if Bluetooth is available and enabled, false otherwise.
+     */
+    public boolean isBluetoothAvailable() {
+        if (bluetoothAdapter == null) {
+            Log.i(TAG, "Bluetooth is not supported on this device.");
+            return false;
+        }
+
+        if (!bluetoothAdapter.isEnabled()) {
+            Log.i(TAG, "Bluetooth is not enabled.");
+            return false;
+        }
+
+        return true;
+    }
+
 }
