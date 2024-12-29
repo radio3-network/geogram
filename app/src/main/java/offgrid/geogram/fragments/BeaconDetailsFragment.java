@@ -18,7 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.BluetoothUtils;
-import offgrid.geogram.bluetooth.GetProfile;
+import offgrid.geogram.bluetooth.Bluecomm;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.database.BeaconDatabase;
@@ -130,23 +130,23 @@ public class BeaconDetailsFragment extends Fragment {
         String macAddress = beaconDiscovered.getMacAddress();
 
         // Create an instance of GetProfile
-        GetProfile getProfile = GetProfile.getInstance(context);
+        Bluecomm getProfile = Bluecomm.getInstance(context);
 
         // Implement the callback
-        GetProfile.DataReadCallback callback = new GetProfile.DataReadCallback() {
+        Bluecomm.DataCallback callback = new Bluecomm.DataCallback() {
             @Override
-            public void onDataReadSuccess(String data) {
-                Log.i("GetProfileExample", "Data read successfully: " + data);
+            public void onDataSuccess(String data) {
+                Log.i("GetProfileExample", "Data sent successfully: " + data);
             }
 
             @Override
-            public void onDataReadError(String errorMessage) {
-                Log.e("GetProfileExample", "Error reading data: " + errorMessage);
+            public void onDataError(String errorMessage) {
+                Log.e("GetProfileExample", "Error sending data: " + errorMessage);
             }
         };
 
         // Attempt to read the data
-        getProfile.getDataRead(macAddress, callback);
+        getProfile.writeData(macAddress, "test1", callback);
         Log.i("GetProfileExample", "Message sent");
         Toast.makeText(getContext(), "Message sent", Toast.LENGTH_SHORT).show();
     }
