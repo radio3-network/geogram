@@ -13,8 +13,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import androidx.core.app.ActivityCompat;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -163,20 +161,18 @@ public class BeaconFinder {
             beacon.setInstanceId(instanceId);
             beacon.setNamespaceId(namespaceId);
             beacon.setMacAddress(result.getDevice().getAddress());
+            beacon.setRssi(result.getRssi());
             beaconMap.put(instanceId, beacon);
             // also save it do disk
             BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
-            Log.i(TAG, "New Eddystone beacon found: " + instanceId);
-
-//            if (!checkPermissions()) {
-//                Log.i(TAG, "Missing required permissions to bond");
-//                return;
-//            }else{
-//                //boolean bonded = result.getDevice().createBond();
-//            }
-
-
-
+            Log.i(TAG, "New Eddystone beacon found: "
+                    + instanceId
+                    + " at "
+                    + result.getDevice().getAddress()
+            );
+            // update the list
+            BeaconListing.getInstance().updateList(this.context);
+            Log.i(TAG, "Updating beacon list on UI");
         }
 
         // setup the usual data

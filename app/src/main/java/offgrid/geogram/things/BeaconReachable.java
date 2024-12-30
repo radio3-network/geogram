@@ -234,8 +234,8 @@ public class BeaconReachable {
         if (this.serviceData == null) {
             this.serviceData = beaconFromFile.getServiceData();
         }
-        if (this.timeLastFound < beaconFromFile.getTimeLastFound()) {
-            this.timeLastFound = beaconFromFile.getTimeLastFound();
-        }
+//        if (this.timeLastFound < beaconFromFile.getTimeLastFound()) {
+//            this.timeLastFound = beaconFromFile.getTimeLastFound();
+//        }
     }
 }

@@ -119,7 +119,7 @@ public class BeaconDatabase {
                 Log.e(TAG, "Failed to save merged beacon data to file: " + file.getAbsolutePath() + " " + e.getMessage());
             }
         }
-
+        Log.i(TAG, "Saved beacon data to file: " + file.getAbsolutePath());
         return file;
     }
 
