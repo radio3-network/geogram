@@ -17,7 +17,7 @@ import offgrid.geogram.core.Log;
 
 public class Bluecomm {
 
-    private static final String TAG = "GetProfile";
+    private static final String TAG = "Bluecomm";
 
     private static Bluecomm instance;
 

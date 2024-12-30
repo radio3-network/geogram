@@ -2,6 +2,7 @@ package offgrid.geogram.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,11 +19,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.BluetoothUtils;
+import offgrid.geogram.bluetooth.comms.BlueRequest;
 import offgrid.geogram.bluetooth.comms.Bluecomm;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.util.DateUtils;
+import offgrid.geogram.bluetooth.comms.RequestTypes;
 
 public class BeaconDetailsFragment extends Fragment {
 
@@ -121,34 +124,33 @@ public class BeaconDetailsFragment extends Fragment {
     }
 
     private void launchMessage(BeaconReachable beaconDiscovered) {
-        // Context from your activity or service
-        Context context = this.getContext();
-        Log.i("GetProfileExample", "Sending message to "
-                + beaconDiscovered.getMacAddress());
-
-        // MAC address of the Eddystone beacon you want to read data from
-        String macAddress = beaconDiscovered.getMacAddress();
-
-        // Create an instance of GetProfile
-        Bluecomm getProfile = Bluecomm.getInstance(context);
 
         // Implement the callback
         Bluecomm.DataCallback callback = new Bluecomm.DataCallback() {
             @Override
             public void onDataSuccess(String data) {
-                Log.i("GetProfileExample", "Data arrived: " + data);
+                Log.i("GetUserFromDevice", "Data arrived: " + data);
+                Looper.prepare();
+                Toast.makeText(getContext(), data, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onDataError(String errorMessage) {
-                Log.e("GetProfileExample", "Error sending data: " + errorMessage);
+                Log.e("GetUserFromDevice", "Error sending data: " + errorMessage);
             }
         };
 
-        // Attempt to read the data
-        getProfile.writeData(macAddress, "test1", callback);
-        Log.i("GetProfileExample", "Message sent");
-        Toast.makeText(getContext(), "Message sent", Toast.LENGTH_SHORT).show();
+        // setup a new request
+        BlueRequest request = new BlueRequest();
+        // MAC address of the Eddystone beacon you want to read data from
+        String macAddress = beaconDiscovered.getMacAddress();
+        request.setMacAddress(macAddress);
+        // what we are requesting as data to the device
+        request.setRequest(RequestTypes.GET_USER_FROM_DEVICE);
+        // setup the callback
+        request.setCallback(callback);
+        // send the request
+        request.send(this.getContext());
     }
 
     @Override
