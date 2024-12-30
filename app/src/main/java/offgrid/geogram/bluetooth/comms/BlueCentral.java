@@ -1,6 +1,8 @@
 package offgrid.geogram.bluetooth.comms;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import offgrid.geogram.core.Log;
 
@@ -21,7 +23,7 @@ public class BlueCentral {
 
     // Private constructor to prevent instantiation from outside
     private BlueCentral() {
-        // Initialization logic if needed
+        startCleanupThread(); // Start cleanup thread upon initialization
     }
 
     /**
@@ -36,7 +38,6 @@ public class BlueCentral {
         return instance;
     }
 
-
     /**
      * A new request has arrived. First we run the request
      * and get the result. After that part we will ship the
@@ -49,7 +50,7 @@ public class BlueCentral {
      */
     public void startRequest(String address, String received) {
         // avoid null addresses
-        if(address == null){
+        if (address == null) {
             return;
         }
         // remove previous requests for this address (if any)
@@ -73,8 +74,42 @@ public class BlueCentral {
      * @param address MAC address of the bluetooth device
      * @return the associated request data or null when not found
      */
-    public BlueRequestData getRequest(String address){
+    public BlueRequestData getRequest(String address) {
         return requests.get(address);
     }
-}
 
+    /**
+     * Starts a background thread to clean up outdated requests
+     * that are older than 5 minutes (300,000 milliseconds).
+     */
+    private void startCleanupThread() {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(60000); // Check every minute
+                    cleanupOldRequests();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Cleanup thread interrupted: " + e.getMessage());
+                    break;
+                }
+            }
+        }).start();
+    }
+
+    /**
+     * Removes requests that are older than 5 minutes.
+     */
+    private synchronized void cleanupOldRequests() {
+        long currentTime = System.currentTimeMillis();
+        Iterator<Map.Entry<String, BlueRequestData>> iterator = requests.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<String, BlueRequestData> entry = iterator.next();
+            BlueRequestData requestData = entry.getValue();
+            if (currentTime - requestData.getTransmissionStartTime() > 300000) { // 5 minutes
+                Log.i(TAG, "Removing outdated request for address: " + entry.getKey());
+                iterator.remove();
+            }
+        }
+    }
+}

@@ -14,8 +14,6 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -378,66 +376,7 @@ public class AppBluetoothGattServer {
                     Log.e(TAG, "Error while sending notification: " + e.getMessage());
                 }
             }
-//            } else {
-//                Log.e(TAG, "Write request received for unknown characteristic: " + characteristic.getUuid());
-//                try {
-//                    if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-//                        gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null);
-//                    } else {
-//                        Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send failure response.");
-//                    }
-//                } catch (SecurityException e) {
-//                    Log.e(TAG, "SecurityException while sending failure response: " + e.getMessage());
-//                }
-//            }
-
         }
     }
-
-
-
-//                // Handle the request and prepare a response if needed
-//                if (responseNeeded) {
-//                    try {
-//                        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-//                            String responseMessage = "Your data: " + received;
-//                            gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, responseMessage.getBytes());
-//                            Log.i(TAG, "Response sent to " + device.getAddress() + ": " + responseMessage);
-//                        } else {
-//                            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send response.");
-//                        }
-//                    } catch (SecurityException e) {
-//                        Log.e(TAG, "SecurityException while sending write response: " + e.getMessage());
-//                    } catch (Exception e) {
-//                        Log.e(TAG, "Unexpected error while sending write response: " + e.getMessage());
-//                    }
-//                }
-//
-//                // Optionally notify the client if notifications are enabled
-//                if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
-//                    try {
-//                        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-//                            characteristic.setValue("Notification: " + received);
-//                            gattServer.notifyCharacteristicChanged(device, characteristic, false);
-//                            Log.i(TAG, "Notification sent to " + device.getAddress() + ": " + received);
-//                        } else {
-//                            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send notification.");
-//                        }
-//                    } catch (Exception e) {
-//                        Log.e(TAG, "Error while sending notification: " + e.getMessage());
-//                    }
-//                }
-//            } else {
-//                Log.e(TAG, "Write request received for unknown characteristic: " + characteristic.getUuid());
-//                try {
-//                    if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-//                        gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null);
-//                    } else {
-//                        Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send failure response.");
-//                    }
-//                } catch (SecurityException e) {
-//                    Log.e(TAG, "SecurityException while sending failure response: " + e.getMessage());
-//                }
-//            }
 
 }
