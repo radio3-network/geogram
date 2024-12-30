@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.car.ui.lib)
     implementation(libs.gson)
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 

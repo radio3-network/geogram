@@ -1,7 +1,6 @@
 package offgrid.grid.geogram;
 
 import org.junit.Test;
-
 import static org.junit.Assert.*;
 
 /**

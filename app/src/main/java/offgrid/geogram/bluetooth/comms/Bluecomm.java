@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.comms;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -12,6 +12,7 @@ import android.os.Build;
 
 import java.util.UUID;
 
+import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.core.Log;
 
 public class Bluecomm {
@@ -132,11 +133,11 @@ public class Bluecomm {
 
 
     /**
-     * Writes data to the custom characteristic on a specified device and waits for the target's response.
+     * Writes data to the custom characteristic on a specified device without waiting for a response.
      *
      * @param macAddress The MAC address of the device to connect to.
      * @param data       The data to write.
-     * @param callback   Callback to handle success or failure of the write operation and response.
+     * @param callback   Callback to handle success or failure of the write operation.
      */
     public void writeData(String macAddress, String data, DataCallback callback) {
         if (!checkPermissions()) {
@@ -193,12 +194,12 @@ public class Bluecomm {
                             return;
                         }
 
-                        // Enable notifications for the characteristic
-                        gatt.setCharacteristicNotification(characteristic, true);
-
                         characteristic.setValue(data);
                         boolean success = gatt.writeCharacteristic(characteristic);
-                        if (!success) {
+                        if (success) {
+                            Log.i(TAG, "Write operation initiated successfully.");
+                            callback.onDataSuccess("Write operation initiated.");
+                        } else {
                             Log.i(TAG, "Failed to initiate write operation.");
                             callback.onDataError("Failed to initiate write operation.");
                             gatt.disconnect();
@@ -209,35 +210,13 @@ public class Bluecomm {
                         gatt.disconnect();
                     }
                 }
-
-                @Override
-                public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-                    super.onCharacteristicWrite(gatt, characteristic, status);
-                    if (status == BluetoothGatt.GATT_SUCCESS) {
-                        Log.i(TAG, "Write operation completed. Waiting for response...");
-                    } else {
-                        Log.i(TAG, "Failed to write characteristic. Status: " + status);
-                        callback.onDataError("Failed to write characteristic.");
-                        gatt.disconnect();
-                    }
-                }
-
-                @Override
-                public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-                    super.onCharacteristicChanged(gatt, characteristic);
-                    if (CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
-                        String response = new String(characteristic.getValue());
-                        Log.i(TAG, "Received response: " + response);
-                        callback.onDataSuccess(response);
-                        gatt.disconnect();
-                    }
-                }
             });
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());
             callback.onDataError("Security exception occurred.");
         }
     }
+
 
 
 

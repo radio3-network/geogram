@@ -12,6 +12,7 @@ sparkCore = "2.9.4"
 carUiLib = "2.6.0"
 gson = "2.11.0"
 bcprovJdk15to18 = "1.79"
+junitJupiter = "5.8.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -26,6 +27,7 @@ spark-core = { group = "com.sparkjava", name = "spark-core", version.ref = "spar
 car-ui-lib = { group = "com.android.car.ui", name = "car-ui-lib", version.ref = "carUiLib" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 bcprov-jdk15to18 = { group = "org.bouncycastle", name = "bcprov-jdk15to18", version.ref = "bcprovJdk15to18" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

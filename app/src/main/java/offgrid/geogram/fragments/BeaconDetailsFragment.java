@@ -18,7 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.BluetoothUtils;
-import offgrid.geogram.bluetooth.Bluecomm;
+import offgrid.geogram.bluetooth.comms.Bluecomm;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.database.BeaconDatabase;
@@ -136,7 +136,7 @@ public class BeaconDetailsFragment extends Fragment {
         Bluecomm.DataCallback callback = new Bluecomm.DataCallback() {
             @Override
             public void onDataSuccess(String data) {
-                Log.i("GetProfileExample", "Data sent successfully: " + data);
+                Log.i("GetProfileExample", "Data arrived: " + data);
             }
 
             @Override

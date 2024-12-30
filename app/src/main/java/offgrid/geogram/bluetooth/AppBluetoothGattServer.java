@@ -311,20 +311,63 @@ public class AppBluetoothGattServer {
         }
 
         @Override
-        public void onCharacteristicWriteRequest(BluetoothDevice device, int requestId, BluetoothGattCharacteristic characteristic, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
+        public void onCharacteristicWriteRequest(
+                BluetoothDevice device,
+                int requestId,
+                BluetoothGattCharacteristic characteristic,
+                boolean preparedWrite,
+                boolean responseNeeded,
+                int offset,
+                byte[] value) {
             if (CUSTOM_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
                 String received = new String(value);
-                Log.i(TAG, "Write request from " + device.getAddress() + ": " + received);
+                Log.i(TAG, "Write request received from " + device.getAddress() + ": " + received);
+
+                // Handle the request and prepare a response if needed
                 if (responseNeeded) {
                     try {
-                        String message = "Thanks";
-                        gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, message.getBytes());
+                        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                            String responseMessage = "Your data: " + received;
+                            gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, responseMessage.getBytes());
+                            Log.i(TAG, "Response sent to " + device.getAddress() + ": " + responseMessage);
+                        } else {
+                            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send response.");
+                        }
                     } catch (SecurityException e) {
                         Log.e(TAG, "SecurityException while sending write response: " + e.getMessage());
+                    } catch (Exception e) {
+                        Log.e(TAG, "Unexpected error while sending write response: " + e.getMessage());
                     }
-               }
+                }
+
+                // Optionally notify the client if notifications are enabled
+                if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
+                    try {
+                        if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                            characteristic.setValue("Notification: " + received);
+                            gattServer.notifyCharacteristicChanged(device, characteristic, false);
+                            Log.i(TAG, "Notification sent to " + device.getAddress() + ": " + received);
+                        } else {
+                            Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send notification.");
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error while sending notification: " + e.getMessage());
+                    }
+                }
+            } else {
+                Log.e(TAG, "Write request received for unknown characteristic: " + characteristic.getUuid());
+                try {
+                    if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                        gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_FAILURE, offset, null);
+                    } else {
+                        Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send failure response.");
+                    }
+                } catch (SecurityException e) {
+                    Log.e(TAG, "SecurityException while sending failure response: " + e.getMessage());
+                }
             }
         }
+
 
 
     }
