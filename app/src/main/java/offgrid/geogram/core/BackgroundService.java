@@ -54,6 +54,9 @@ public class BackgroundService extends Service {
         log(TAG_ID, "Geogram is starting");
         log(TAG_ID, "Creating the background service");
 
+        // load the settings
+        Central.getInstance().loadSettings(this.getApplicationContext());
+
         // Create notification channel for Android 8.0+ (API 26)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel serviceChannel = new NotificationChannel(

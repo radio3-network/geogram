@@ -24,7 +24,7 @@ public class ServiceTIO extends Service {
         Log.d(TAG, "Service Started");
 
         // start the wifi
-        Central.initializeWiFiControl(this);
+        Central.getInstance().initializeWiFiControl(this);
 
         // Example background task (replace with actual logic)
         new Thread(new Runnable() {

@@ -217,9 +217,6 @@ public class Bluecomm {
         }
     }
 
-
-
-
     /**
      * Checks if the required permissions are granted.
      */
@@ -240,12 +237,5 @@ public class Bluecomm {
         }
     }
 
-    /**
-     * Callback interface for data read/write operations.
-     */
-    public interface DataCallback {
-        void onDataSuccess(String data);
 
-        void onDataError(String error);
-    }
 }

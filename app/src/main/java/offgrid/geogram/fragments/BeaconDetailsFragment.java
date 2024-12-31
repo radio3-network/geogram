@@ -1,6 +1,5 @@
 package offgrid.geogram.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -20,7 +19,7 @@ import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.BluetoothUtils;
 import offgrid.geogram.bluetooth.comms.BlueRequest;
-import offgrid.geogram.bluetooth.comms.Bluecomm;
+import offgrid.geogram.bluetooth.comms.DataCallback;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.database.BeaconDatabase;
@@ -126,9 +125,9 @@ public class BeaconDetailsFragment extends Fragment {
     private void launchMessage(BeaconReachable beaconDiscovered) {
 
         // Implement the callback
-        Bluecomm.DataCallback callback = new Bluecomm.DataCallback() {
+        DataCallback callback = new DataCallback() {
             @Override
-            public void onDataSuccess(String data) {
+            public void onDataSuccess(String data){
                 Log.i("GetUserFromDevice", "Data arrived: " + data);
                 Looper.prepare();
                 Toast.makeText(getContext(), data, Toast.LENGTH_SHORT).show();
@@ -145,6 +144,8 @@ public class BeaconDetailsFragment extends Fragment {
         // MAC address of the Eddystone beacon you want to read data from
         String macAddress = beaconDiscovered.getMacAddress();
         request.setMacAddress(macAddress);
+        callback.setMacAddress(macAddress);
+        callback.setDeviceId(beaconDiscovered.getDeviceId());
         // what we are requesting as data to the device
         request.setRequest(RequestTypes.GET_USER_FROM_DEVICE);
         // setup the callback

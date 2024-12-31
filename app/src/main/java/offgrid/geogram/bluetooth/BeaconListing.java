@@ -81,7 +81,13 @@ public class BeaconListing {
                 distance = "Not reachable since " + getHumanReadableTime(beacon.getTimeLastFound());
             }
 
-            String text = beacon.getDeviceId().substring(0, 6)
+            String profileName = beacon.getProfileName();
+            if(profileName == null){
+                profileName = beacon.getDeviceId().substring(0, 6);
+            }
+
+
+            String text = profileName
                     + " ("
                     + beacon.getMacAddress()
                     + ")"

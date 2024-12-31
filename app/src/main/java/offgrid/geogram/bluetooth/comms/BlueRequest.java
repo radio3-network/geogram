@@ -12,7 +12,7 @@ public class BlueRequest {
 
     private String macAddress = null;
     private String request = null;
-    private Bluecomm.DataCallback callback = null;
+    private DataCallback callback = null;
     private BlueRequestData requestData = null;
 
     private final String TAG = "BlueRequest";
@@ -31,7 +31,7 @@ public class BlueRequest {
         this.request = request.toString();
     }
 
-    public void setCallback(Bluecomm.DataCallback callback) {
+    public void setCallback(DataCallback callback) {
         this.callback = callback;
     }
 
@@ -44,7 +44,9 @@ public class BlueRequest {
         new Thread(() -> {
             try {
 
-                Bluecomm.DataCallback writeDataCallback = new Bluecomm.DataCallback() {
+                Thread.sleep(2000);
+
+                DataCallback writeDataCallback = new DataCallback() {
                     @Override
                     public void onDataSuccess(String data) {
                         Log.i(TAG, "Data sent: " + data);
@@ -62,7 +64,7 @@ public class BlueRequest {
                 Thread.sleep(2000);
 
                 // start looping for results
-                Bluecomm.DataCallback receiveDataCallback = new Bluecomm.DataCallback() {
+                DataCallback receiveDataCallback = new DataCallback() {
                     @Override
                     public void onDataSuccess(String data) {
                         Log.i(TAG, "Data received: " + data);

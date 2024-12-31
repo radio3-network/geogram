@@ -2,7 +2,6 @@ package offgrid.geogram.bluetooth;
 
 import static offgrid.geogram.bluetooth.BluetoothCentral.EDDYSTONE_SERVICE_UUID;
 
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
@@ -18,6 +17,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import offgrid.geogram.bluetooth.comms.BlueRequest;
+import offgrid.geogram.bluetooth.comms.BlueRequestData;
+import offgrid.geogram.bluetooth.comms.DataCallback;
+import offgrid.geogram.bluetooth.comms.RequestTypes;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.things.BeaconReachable;
@@ -163,6 +166,9 @@ public class BeaconFinder {
             beacon.setMacAddress(result.getDevice().getAddress());
             beacon.setRssi(result.getRssi());
             beaconMap.put(instanceId, beacon);
+            // get the profile info
+            getProfileInfo(beacon);
+
             // also save it do disk
             BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
             Log.i(TAG, "New Eddystone beacon found: "
@@ -180,6 +186,57 @@ public class BeaconFinder {
         beacon.setRssi(result.getRssi());
         beacon.setServiceData(serviceData);
         //Log.i(TAG, "Updated beacon: " + instanceId + " RSSI: " + result.getRssi());
+    }
+
+    /**
+     * Get the name used for this connected device
+     * @param beacon
+     */
+    private void getProfileInfo(BeaconReachable beacon) {
+        // setup a new request
+        BlueRequest request = new BlueRequest();
+        // MAC address of the Eddystone beacon you want to read data from
+        String macAddress = beacon.getMacAddress();
+        request.setMacAddress(macAddress);
+        // what we are requesting as data to the device
+        request.setRequest(RequestTypes.GET_USER_FROM_DEVICE);
+        // Implement the callback
+        DataCallback callback = new DataCallback() {
+            BlueRequestData requestData = null;
+            @Override
+            public void onDataSuccess(String data){
+                if(requestData == null){
+                    try {
+                        requestData = BlueRequestData.createReceiver(data);
+                    }catch (Exception e){
+                        Log.e(TAG, "Invalid data: " + e.getMessage());
+                    }
+                }else{
+                    requestData.receiveParcel(data);
+                }
+
+                Log.i(TAG, "Data arrived for device Id: " + data);
+                // save the data on the beacon
+                beacon.setProfileName(data);
+                BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
+
+                // when the message is complete
+                if(requestData != null && requestData.allParcelsReceivedAndValid()){
+                    Log.i(TAG, "This is the profile name: " + requestData.getData());
+                }
+
+            }
+            @Override
+            public void onDataError(String errorMessage) {
+                Log.e(TAG, "Failed to get profile info: " + errorMessage);
+            }
+        };
+        // setup the callback beacon details to update them later
+        callback.setDeviceId(beacon.getDeviceId());
+        callback.setMacAddress(beacon.getMacAddress());
+        request.setCallback(callback);
+        // send the request
+        request.send(context);
     }
 
     /**

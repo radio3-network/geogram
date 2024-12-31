@@ -65,7 +65,34 @@ public class BlueCentral {
         Log.i(TAG, "Request placed on queue: " + address + " - " + received);
     }
 
+    /**
+     * Process all commands arriving to the
+     * @param received
+     * @return
+     */
     private String processRequest(String received) {
+        RequestTypes command;
+
+        try{
+            // is this a valid command?
+            command = RequestTypes.valueOf(received);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Invalid command: " + received);
+            return "Invalid command";
+        }
+
+        switch (command) {
+            case GET_USER_FROM_DEVICE -> {
+                return getUserFromDevice();
+            }
+        }
+
+
+        return "Hello World!";
+    }
+
+    private String getUserFromDevice() {
+
         return "Hello World!";
     }
 

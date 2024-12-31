@@ -24,6 +24,8 @@ public class BeaconReachable {
     private byte[] serviceData;
     private final long timeFirstFound;
     private long timeLastFound;
+    private String profileName = null;
+    private String npub = null;
 
     /**
      * Constructor initializes the time the beacon was first found.
@@ -237,5 +239,19 @@ public class BeaconReachable {
 //        if (this.timeLastFound < beaconFromFile.getTimeLastFound()) {
 //            this.timeLastFound = beaconFromFile.getTimeLastFound();
 //        }
+    }
+
+    public String getProfileName() {
+        return profileName;
+    }
+
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
+    }
+    public String getNpub() {
+        return npub;
+    }
+    public void setNpub(String npub) {
+        this.npub = npub;
     }
 }

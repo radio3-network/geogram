@@ -49,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     public static EditText logWindow = null;
     public static ListView beacons = null;
     private Intent serviceIntent = null;
-    public static SettingsUser settings = null;
     private FloatingActionButton btnAdd;
     private static boolean wasCreatedBefore = false;
 
@@ -65,9 +64,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Permissions are not granted yet. Waiting for user response.");
             return; // Defer initialization until permissions are granted
         }
-
-        // load the settings
-        loadSettings();
 
         // load all the beacons we have seen before
         loadBeaconsOnDatabase();
@@ -206,17 +202,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             log(TAG, "Starting BackgroundService as a normal service");
             startService(serviceIntent);
-        }
-    }
-
-
-    private void loadSettings() {
-        try {
-            settings = SettingsLoader.loadSettings(this.getApplicationContext());
-        } catch (Exception e) {
-            settings = new SettingsUser(); // Default settings if loading fails
-            this.saveSettings(settings);
-            Toast.makeText(this.getApplicationContext(), "Failed to load settings. Using defaults.", Toast.LENGTH_SHORT).show();
         }
     }
 
