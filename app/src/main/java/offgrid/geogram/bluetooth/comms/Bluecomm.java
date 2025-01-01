@@ -133,6 +133,25 @@ public class Bluecomm {
 
 
     /**
+     * Just send a write event to a device without waiting for the reply
+     * This is useful for cases like broadcasting messages to devices
+     * @param macAddress address of the device within reach
+     * @param data text to be sent, attention to keep it short
+     */
+    public void writeData(String macAddress, String data) {
+        writeData(macAddress, data, new DataCallback() {
+            @Override
+            public void onDataSuccess(String data) {
+                Log.i(TAG, "Data sent: " + data);
+            }
+            @Override
+            public void onDataError(String errorMessage) {
+                Log.e(TAG, "Error sending data: " + errorMessage);
+            }
+        });
+    }
+
+    /**
      * Writes data to the custom characteristic on a specified device without waiting for a response.
      *
      * @param macAddress The MAC address of the device to connect to.

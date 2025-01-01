@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import offgrid.geogram.bluetooth.broadcast.BroadcastChat;
+import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 
@@ -46,24 +48,24 @@ public class BlueCentral {
      * Any previous requests from the same MAC address will
      * be erased from the queue.
      *
-     * @param address MAC address of the bluetooth device
-     * @param received request that was received
+     * @param macAddress MAC address of the bluetooth device
+     * @param receivedData request that was received
      */
-    public void startRequest(String address, String received) {
+    public void receivingDataFromDevice(String macAddress, String receivedData) {
         // avoid null addresses
-        if (address == null) {
+        if (macAddress == null) {
             return;
         }
         // remove previous requests for this address (if any)
-        requests.remove(address);
+        requests.remove(macAddress);
         // now we need to process the request
-        String answer = processRequest(received);
-        Log.i(TAG, "Request processed for " + address + ". Answer: " + answer);
+        String answer = processReceivedRequest(macAddress, receivedData);
+        Log.i(TAG, "Request processed from " + macAddress + ". Answer: " + answer);
         // prepare an answer to be shipped
         BlueRequestData requestData = BlueRequestData.createSender(answer);
         // place it on the queue
-        requests.put(address, requestData);
-        Log.i(TAG, "Request placed on queue: " + address + " - " + received);
+        requests.put(macAddress, requestData);
+        Log.i(TAG, "Request placed on queue: " + macAddress + " - " + receivedData);
     }
 
     /**
@@ -71,25 +73,50 @@ public class BlueCentral {
      * @param received
      * @return
      */
-    private String processRequest(String received) {
+    private String processReceivedRequest(String address, String received) {
         RequestTypes command;
 
         try{
             // is this a valid command?
-            command = RequestTypes.valueOf(received);
+            if(received.contains(":")){
+                // it has multiple parts inside
+                String[] data = received.split(":");
+                command = RequestTypes.valueOf(data[0]);
+            }else{
+                // single command
+                command = RequestTypes.valueOf(received);
+            }
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Invalid command: " + received);
             return "Invalid command";
         }
+        Log.i(TAG, "Received command: " + received);
 
         switch (command) {
             case GET_USER_FROM_DEVICE -> {
                 return getUserFromDevice();
             }
+            case B -> {
+                return receiveBroadCastMessage(address, received);
+            }
         }
 
 
         return "Unknown request";
+    }
+
+    private String receiveBroadCastMessage(String address, String received) {
+        String key = RequestTypes.B.toString() + ":";
+        if(!received.contains(key)){
+            return "Invalid broadcast message";
+        }
+        String messageText = received.substring(key.length());
+        // this message was written by someone else
+        BroadcastMessage messageObject = new BroadcastMessage(messageText, address, false);
+        // place the message on the list
+        BroadcastChat.messages.add(messageObject);
+
+        return "Received";
     }
 
     private String getUserFromDevice() {

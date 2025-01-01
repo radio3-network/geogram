@@ -7,10 +7,14 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.os.ParcelUuid;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import offgrid.geogram.bluetooth.comms.Bluecomm;
+import offgrid.geogram.bluetooth.comms.RequestTypes;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.things.BeaconReachable;
 
 public class BluetoothCentral {
 
@@ -175,15 +179,25 @@ public class BluetoothCentral {
         }
     }
 
+    /**
+     * Broadcasts a message to all Eddystone devices in reach.
+     * @param message The message to be sent, it needs to be within 20 characters
+     */
     public void broadcastMessageToAllEddystoneDevices(String message) {
-        List<BluetoothDevice> eddystoneDevices = gattServer.getConnectedEddystoneDevices();
-        if (eddystoneDevices.isEmpty()) {
+        Collection<BeaconReachable> devices = BeaconFinder.getInstance(this.context).getBeaconMap().values();
+        if (devices.isEmpty()) {
             Log.i(TAG, "No Eddystone devices to broadcast the message.");
             return;
         }
-
-        for (BluetoothDevice device : eddystoneDevices) {
-            sendMessageToDevice(device, message);
+        String text = RequestTypes.B.toString() + ":" + message;
+        for (BeaconReachable device : devices) {
+            Bluecomm.getInstance(this.context).writeData(device.getMacAddress(), text);
+            Log.i(TAG, "Message sent to Eddystone device: " + device.getMacAddress());
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Thread sleep interrupted: " + e.getMessage());
+            }
         }
     }
 

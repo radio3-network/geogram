@@ -343,7 +343,7 @@ public class AppBluetoothGattServer {
             String received = new String(value);
             Log.i(TAG, "Request received from " + device.getAddress() + ": " + received);
             BlueCentral central = BlueCentral.getInstance();
-            central.startRequest(device.getAddress(), received);
+            central.receivingDataFromDevice(device.getAddress(), received);
 
             // Handle the request and prepare a response if needed
             if (responseNeeded) {

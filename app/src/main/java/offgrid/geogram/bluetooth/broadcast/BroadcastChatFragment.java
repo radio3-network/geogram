@@ -1,6 +1,8 @@
 package offgrid.geogram.bluetooth.broadcast;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +17,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import offgrid.geogram.R;
+import java.util.ArrayList;
 
-public class BroadcastChatFragment extends Fragment {
+import offgrid.geogram.R;
+import offgrid.geogram.core.Log;
+
+public class BroadcastChatFragment extends Fragment implements BroadcastChat.MessageUpdateListener {
+
+    private final ArrayList<BroadcastMessage> displayedMessages = new ArrayList<>();
+    private LinearLayout chatMessageContainer;
+    private ScrollView chatScrollView;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private static final int REFRESH_INTERVAL_MS = 10000;
 
     public BroadcastChatFragment() {
         // Required empty public constructor
@@ -34,8 +45,8 @@ public class BroadcastChatFragment extends Fragment {
         ImageButton btnSend = view.findViewById(R.id.btn_send);
 
         // Initialize chat message container and scroll view
-        LinearLayout chatMessageContainer = view.findViewById(R.id.chat_message_container);
-        ScrollView chatScrollView = view.findViewById(R.id.chat_scroll_view);
+        chatMessageContainer = view.findViewById(R.id.chat_message_container);
+        chatScrollView = view.findViewById(R.id.chat_scroll_view);
 
         // Back button functionality
         ImageButton btnBack = view.findViewById(R.id.btn_back);
@@ -45,63 +56,103 @@ public class BroadcastChatFragment extends Fragment {
         btnSend.setOnClickListener(v -> {
             String message = messageInput.getText().toString().trim();
             if (!message.isEmpty()) {
-                addUserMessage(chatMessageContainer, message);
-                messageInput.setText("");
+                // Send the message via BroadcastChat
+                boolean success = BroadcastChat.broadcast(message, getContext());
+                if (success) {
+                    //addUserMessage(message);
+                    messageInput.setText("");
 
-                // Scroll to the bottom of the chat
-                chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
+                    // Scroll to the bottom of the chat
+                    chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
+                } else {
+                    Toast.makeText(getContext(), "Failed to send message. Please check Bluetooth.", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 Toast.makeText(getContext(), "Message cannot be empty", Toast.LENGTH_SHORT).show();
             }
         });
 
+        // Start message polling
+        startMessagePolling();
+
+        // Register the fragment as a listener for updates
+        BroadcastChat.setMessageUpdateListener(this);
+
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Stop message polling and unregister listener to avoid memory leaks
+        handler.removeCallbacksAndMessages(null);
+        BroadcastChat.removeMessageUpdateListener();
+    }
+
+    /**
+     * Starts polling the BroadcastChat.messages list every 10 seconds.
+     */
+    private void startMessagePolling() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateMessages();
+                handler.postDelayed(this, REFRESH_INTERVAL_MS);
+            }
+        }, REFRESH_INTERVAL_MS);
+    }
+
+    /**
+     * Updates the chat message container with new messages.
+     */
+    private void updateMessages() {
+        ArrayList<BroadcastMessage> currentMessages = new ArrayList<>(BroadcastChat.messages);
+        for (BroadcastMessage message : currentMessages) {
+            if (!displayedMessages.contains(message)) {
+                if (message.isWrittenByMe()) {
+                    Log.i("BroadcastChatFragment", "Adding user message: " + message.getMessage());
+                    addUserMessage(message.getMessage());
+                } else {
+                    Log.i("BroadcastChatFragment", "Adding received message: " + message.getMessage());
+                    addReceivedMessage(message.getMessage());
+                }
+                displayedMessages.add(message);
+            }
+        }
     }
 
     /**
      * Adds a user message to the chat message container.
      *
-     * @param chatMessageContainer The LinearLayout containing chat messages.
-     * @param message              The message to display.
+     * @param message The message to display.
      */
-    private void addUserMessage(LinearLayout chatMessageContainer, String message) {
-
-        // first let's broadcast the message
-        BroadcastChat.broadcast(message,  this.getContext());
-
-        // Inflate the custom layout for user-sent messages
+    private void addUserMessage(String message) {
         View userMessageView = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_user_message, chatMessageContainer, false);
-
-        // Find the TextView and set the message text
         TextView messageTextView = userMessageView.findViewById(R.id.message_user_self);
         messageTextView.setText(message);
-
-        // Add the user message to the chat container
         chatMessageContainer.addView(userMessageView);
+        chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
     }
-
 
     /**
      * Adds a received message to the chat message container.
-     * This can be called when a message is received from other users.
      *
-     * @param chatMessageContainer The LinearLayout containing chat messages.
-     * @param message              The message to display.
+     * @param message The message to display.
      */
-    public void addReceivedMessage(LinearLayout chatMessageContainer, String message) {
-        // Inflate the custom layout for received messages
+    private void addReceivedMessage(String message) {
         View receivedMessageView = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_received_message, chatMessageContainer, false);
-
-        // Find the TextView and set the message text
         TextView messageTextView = receivedMessageView.findViewById(R.id.message_user_1);
         messageTextView.setText(message);
-
-        // Apply the speech bubble background for received messages
         messageTextView.setBackgroundResource(R.drawable.balloon_left);
-
-        // Add the message view to the chat container
         chatMessageContainer.addView(receivedMessageView);
+        chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
+    }
+
+    @Override
+    public void onMessageUpdate() {
+        // Update the messages immediately when notified
+        updateMessages();
     }
 }
