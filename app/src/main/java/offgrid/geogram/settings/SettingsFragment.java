@@ -1,6 +1,5 @@
 package offgrid.geogram.settings;
 
-import static offgrid.geogram.MainActivity.settings;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -20,12 +19,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
+import offgrid.geogram.core.Central;
 
 public class SettingsFragment extends Fragment {
 
 
+    SettingsUser settings = null;
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -50,19 +50,29 @@ public class SettingsFragment extends Fragment {
     }
 
     private void loadSettings() {
+        settings = Central.getInstance().getSettings();
+        // settings already exist?
+        if(settings != null){
+            return;
+        }
         try {
             settings = SettingsLoader.loadSettings(this.requireContext());
         } catch (Exception e) {
             settings = new SettingsUser(); // Default settings if loading fails
             this.saveSettings(settings);
-            Toast.makeText(getContext(), "Failed to load settings. Using defaults.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(),
+                    "Failed to load settings. Using defaults.",
+                    Toast.LENGTH_LONG).show();
         }
+        // make sure to save the settings
+        Central.getInstance().setSettings(settings);
     }
 
     private void initializeUI(View view) {
         // Privacy Options
         Switch listenOnlySwitch = view.findViewById(R.id.switch_listen_only);
         listenOnlySwitch.setChecked(settings.isInvisibleMode());
+        listenOnlySwitch.setChecked(false);
         listenOnlySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> settings.setInvisibleMode(isChecked));
 
         // User Preferences

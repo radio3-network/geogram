@@ -109,4 +109,8 @@ public class Central {
         Toast.makeText(act, message, Toast.LENGTH_SHORT).show();
         Log.d(TAG, message);
     }
+
+    public void setSettings(SettingsUser settings) {
+        this.settings = settings;
+    }
 }

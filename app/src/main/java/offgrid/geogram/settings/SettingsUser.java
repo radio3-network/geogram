@@ -10,7 +10,7 @@ public class SettingsUser {
 
     // Privacy Options
     @Expose
-    private boolean invisibleMode;
+    private boolean invisibleMode = false;
 
     // User Preferences
     @Expose
