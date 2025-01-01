@@ -9,12 +9,10 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.ParcelUuid;
 
 import java.nio.ByteBuffer;
 
-import offgrid.geogram.bluetooth.old.BeaconDefinitions;
-import offgrid.geogram.bluetooth.old.GenerateDeviceId;
+import offgrid.geogram.core.old.old.GenerateDeviceId;
 import offgrid.geogram.core.Log;
 
 public class EddyBeaconAdvertise {

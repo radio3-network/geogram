@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat;
 
 import java.util.UUID;
 
-import offgrid.geogram.bluetooth.old.GenerateUUID;
+import offgrid.geogram.core.old.old.GenerateUUID;
 
 /**
  * Handles Bluetooth beacon functionality, including generating a unique UUID and starting BLE advertisement.

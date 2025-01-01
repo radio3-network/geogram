@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 
 /**
@@ -88,12 +89,11 @@ public class BlueCentral {
         }
 
 
-        return "Hello World!";
+        return "Unknown request";
     }
 
     private String getUserFromDevice() {
-
-        return "Hello World!";
+        return Central.getInstance().getSettings().getNickname();
     }
 
     /**

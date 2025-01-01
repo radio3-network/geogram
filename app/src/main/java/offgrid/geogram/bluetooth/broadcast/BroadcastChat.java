@@ -5,8 +5,6 @@ import android.content.Context;
 import java.util.ArrayList;
 
 import offgrid.geogram.bluetooth.BluetoothCentral;
-import offgrid.geogram.bluetooth.old.EddystoneBeacon;
-import offgrid.geogram.bluetooth.old.BeaconManager;
 import offgrid.geogram.core.Log;
 
 public class BroadcastChat {

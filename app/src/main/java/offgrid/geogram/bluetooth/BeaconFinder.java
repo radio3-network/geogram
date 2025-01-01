@@ -190,7 +190,7 @@ public class BeaconFinder {
 
     /**
      * Get the name used for this connected device
-     * @param beacon
+     * @param beacon to get the profile name from
      */
     private void getProfileInfo(BeaconReachable beacon) {
         // setup a new request

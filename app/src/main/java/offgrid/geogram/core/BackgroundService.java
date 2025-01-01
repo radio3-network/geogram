@@ -23,8 +23,6 @@ import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.bluetooth.BluetoothCentral;
-import offgrid.geogram.bluetooth.old.EddystoneFinder;
-import offgrid.geogram.bluetooth.old.EddystoneBeacon;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
