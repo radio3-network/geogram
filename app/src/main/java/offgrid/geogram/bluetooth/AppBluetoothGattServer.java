@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import offgrid.geogram.bluetooth.comms.BlueCentral;
-import offgrid.geogram.bluetooth.comms.BlueRequestData;
+import offgrid.geogram.bluetooth.comms.BlueFromOutside;
+import offgrid.geogram.bluetooth.comms.BluePackage;
 import offgrid.geogram.core.Log;
 
 public class AppBluetoothGattServer {
@@ -304,8 +304,8 @@ public class AppBluetoothGattServer {
                 return;
             }
             try {
-                BlueCentral blueCentral = BlueCentral.getInstance();
-                BlueRequestData request = blueCentral.getRequest(device.getAddress());
+                BlueFromOutside blueCentral = BlueFromOutside.getInstance();
+                BluePackage request = blueCentral.getRequest(device.getAddress());
                 if (request == null) {
                     Log.e(TAG, "Request not found for device: " + device.getAddress());
                     return;
@@ -342,8 +342,8 @@ public class AppBluetoothGattServer {
             // get the proper value for the request
             String received = new String(value);
             Log.i(TAG, "Request received from " + device.getAddress() + ": " + received);
-            BlueCentral central = BlueCentral.getInstance();
-            central.receivingDataFromDevice(device.getAddress(), received);
+            BlueFromOutside central = BlueFromOutside.getInstance();
+            central.receivingDataFromDevice(device.getAddress(), received, context);
 
             // Handle the request and prepare a response if needed
             if (responseNeeded) {

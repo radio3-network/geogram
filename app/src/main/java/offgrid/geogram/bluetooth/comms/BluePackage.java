@@ -1,5 +1,5 @@
 /**
- * The {@code BlueRequestData} class facilitates the transmission of large data as smaller parcels
+ * The {@code BluePackage} class facilitates the transmission of large data as smaller parcels
  * over a Bluetooth communication channel. It handles parcel splitting, parcel tracking, and provides
  * utility methods to manage and request specific parcels.
  *
@@ -23,7 +23,7 @@
  * }
  *
  * // Receiving side example:
- * BlueRequestData receiver = new BlueRequestData("AA:003"); // Header parcel received
+ * BluePackage receiver = new BlueRequestData("AA:003"); // Header parcel received
  * receiver.receiveParcel("AA001:DataPart1");
  * receiver.receiveParcel("AA003:DataPart3");
  * receiver.receiveParcel("AA002:DataPart2");
@@ -39,13 +39,13 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Arrays;
 
-public class BlueRequestData {
+public class BluePackage {
 
     // Random two bytes generated as ID
     private final String id;
 
     // The length of text per parcel
-    private static final int TEXT_LENGTH_PER_PARCEL = 15;
+    private static final int TEXT_LENGTH_PER_PARCEL = 10;
 
     // Total number of parcels in the message
     private final int messageParcelsTotal;
@@ -67,15 +67,20 @@ public class BlueRequestData {
     // Indicates whether data is still being transferred
     private boolean isTransferring;
 
-    public static BlueRequestData createSender(String data) {
-        return new BlueRequestData(data, true);
+    public static BluePackage createSender(String data) {
+        return new BluePackage(data, true);
     }
 
-    public static BlueRequestData createReceiver(String header) {
-        return new BlueRequestData(header, false);
+    /**
+     * Creates a new BluePackage instance for receiving data.
+     * @param header is the initial message received from the other device
+     * @return a new BluePackage instance for receiving data
+     */
+    public static BluePackage createReceiver(String header) {
+        return new BluePackage(header, false);
     }
 
-    private BlueRequestData(String input, boolean isSender) {
+    private BluePackage(String input, boolean isSender) {
         if (isSender) {
             if (input == null) {
                 throw new IllegalArgumentException("Data cannot be null");

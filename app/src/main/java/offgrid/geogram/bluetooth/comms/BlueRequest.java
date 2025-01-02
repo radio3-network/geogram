@@ -13,7 +13,7 @@ public class BlueRequest {
     private String macAddress = null;
     private String request = null;
     private DataCallback callback = null;
-    private BlueRequestData requestData = null;
+    private BluePackage requestData = null;
 
     private final String TAG = "BlueRequest";
     private boolean stopProcessing = false;
@@ -70,7 +70,7 @@ public class BlueRequest {
                         Log.i(TAG, "Data received: " + data);
                         try {
                             if(requestData == null){
-                                requestData = BlueRequestData.createReceiver(data);
+                                requestData = BluePackage.createReceiver(data);
                             }else{
                                 requestData.receiveParcel(data);
                             }

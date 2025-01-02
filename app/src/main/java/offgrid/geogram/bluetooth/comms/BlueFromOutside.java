@@ -1,9 +1,12 @@
 package offgrid.geogram.bluetooth.comms;
 
+import android.content.Context;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.broadcast.BroadcastChat;
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.core.Central;
@@ -15,17 +18,17 @@ import offgrid.geogram.core.Log;
  * in small little packages, this is where we keep track of
  * them.
  */
-public class BlueCentral {
+public class BlueFromOutside {
 
     // the requests currently active
-    private final HashMap<String, BlueRequestData> requests = new HashMap<>();
+    private final HashMap<String, BluePackage> requests = new HashMap<>();
 
     // Static instance of the singleton
-    private static BlueCentral instance;
+    private static BlueFromOutside instance;
     private static final String TAG = "BlueCentral";
 
     // Private constructor to prevent instantiation from outside
-    private BlueCentral() {
+    private BlueFromOutside() {
         startCleanupThread(); // Start cleanup thread upon initialization
     }
 
@@ -34,9 +37,9 @@ public class BlueCentral {
      *
      * @return The singleton instance of BlueCentral.
      */
-    public static synchronized BlueCentral getInstance() {
+    public static synchronized BlueFromOutside getInstance() {
         if (instance == null) {
-            instance = new BlueCentral();
+            instance = new BlueFromOutside();
         }
         return instance;
     }
@@ -51,18 +54,18 @@ public class BlueCentral {
      * @param macAddress MAC address of the bluetooth device
      * @param receivedData request that was received
      */
-    public void receivingDataFromDevice(String macAddress, String receivedData) {
+    public void receivingDataFromDevice(String macAddress, String receivedData, Context context) {
         // avoid null addresses
         if (macAddress == null) {
             return;
         }
-        // remove previous requests for this address (if any)
-        requests.remove(macAddress);
-        // now we need to process the request
-        String answer = processReceivedRequest(macAddress, receivedData);
+        // process the request
+        String answer = processReceivedRequest(macAddress, receivedData, context);
         Log.i(TAG, "Request processed from " + macAddress + ". Answer: " + answer);
         // prepare an answer to be shipped
-        BlueRequestData requestData = BlueRequestData.createSender(answer);
+        BluePackage requestData = BluePackage.createSender(answer);
+        // remove previous requests for this address (if any)
+        requests.remove(macAddress);
         // place it on the queue
         requests.put(macAddress, requestData);
         Log.i(TAG, "Request placed on queue: " + macAddress + " - " + receivedData);
@@ -73,7 +76,7 @@ public class BlueCentral {
      * @param received
      * @return
      */
-    private String processReceivedRequest(String address, String received) {
+    private String processReceivedRequest(String macAddress, String received, Context context) {
         RequestTypes command;
 
         try{
@@ -97,7 +100,7 @@ public class BlueCentral {
                 return getUserFromDevice();
             }
             case B -> {
-                return receiveBroadCastMessage(address, received);
+                return receiveBroadCastMessage(macAddress, received, context);
             }
         }
 
@@ -105,16 +108,20 @@ public class BlueCentral {
         return "Unknown request";
     }
 
-    private String receiveBroadCastMessage(String address, String received) {
+    private String receiveBroadCastMessage(String macAddress, String receivedText, Context context) {
         String key = RequestTypes.B.toString() + ":";
-        if(!received.contains(key)){
+        if(!receivedText.contains(key)){
             return "Invalid broadcast message";
         }
-        String messageText = received.substring(key.length());
+        String messageText = receivedText.substring(key.length());
         // this message was written by someone else
-        BroadcastMessage messageObject = new BroadcastMessage(messageText, address, false);
+        BroadcastMessage messageReceived = new BroadcastMessage(messageText, macAddress, false);
+        String deviceId = BeaconFinder.getInstance(context).getDeviceId(macAddress);
+        if(deviceId != null){
+            messageReceived.setDeviceId(deviceId);
+        }
         // place the message on the list
-        BroadcastChat.messages.add(messageObject);
+        BroadcastChat.messages.add(messageReceived);
 
         return "Received";
     }
@@ -128,7 +135,7 @@ public class BlueCentral {
      * @param address MAC address of the bluetooth device
      * @return the associated request data or null when not found
      */
-    public BlueRequestData getRequest(String address) {
+    public BluePackage getRequest(String address) {
         return requests.get(address);
     }
 
@@ -155,11 +162,11 @@ public class BlueCentral {
      */
     private synchronized void cleanupOldRequests() {
         long currentTime = System.currentTimeMillis();
-        Iterator<Map.Entry<String, BlueRequestData>> iterator = requests.entrySet().iterator();
+        Iterator<Map.Entry<String, BluePackage>> iterator = requests.entrySet().iterator();
 
         while (iterator.hasNext()) {
-            Map.Entry<String, BlueRequestData> entry = iterator.next();
-            BlueRequestData requestData = entry.getValue();
+            Map.Entry<String, BluePackage> entry = iterator.next();
+            BluePackage requestData = entry.getValue();
             if (currentTime - requestData.getTransmissionStartTime() > 300000) { // 5 minutes
                 Log.i(TAG, "Removing outdated request for address: " + entry.getKey());
                 iterator.remove();

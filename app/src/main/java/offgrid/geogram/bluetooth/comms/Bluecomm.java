@@ -138,7 +138,7 @@ public class Bluecomm {
      * @param macAddress address of the device within reach
      * @param data text to be sent, attention to keep it short
      */
-    public void writeData(String macAddress, String data) {
+    public synchronized void writeData(String macAddress, String data) {
         writeData(macAddress, data, new DataCallback() {
             @Override
             public void onDataSuccess(String data) {
@@ -158,7 +158,7 @@ public class Bluecomm {
      * @param data       The data to write.
      * @param callback   Callback to handle success or failure of the write operation.
      */
-    public void writeData(String macAddress, String data, DataCallback callback) {
+    public synchronized void writeData(String macAddress, String data, DataCallback callback) {
         if (!checkPermissions()) {
             Log.i(TAG, "Missing required permissions to perform Bluetooth operations.");
             callback.onDataError("Missing required permissions.");

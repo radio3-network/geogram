@@ -9,13 +9,13 @@
     <corners
         android:topLeftRadius="16dp"
         android:topRightRadius="16dp"
-        android:bottomLeftRadius="0dp"
+        android:bottomLeftRadius="4dp"
         android:bottomRightRadius="16dp" />
 
-    <!-- Optional padding -->
+    <!-- Enhanced padding -->
     <padding
-        android:left="8dp"
-        android:top="4dp"
-        android:right="8dp"
-        android:bottom="4dp" />
+        android:left="16dp"
+        android:top="8dp"
+        android:right="16dp"
+        android:bottom="8dp" />
 </shape>

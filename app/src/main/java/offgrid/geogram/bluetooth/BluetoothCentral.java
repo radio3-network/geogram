@@ -164,20 +164,6 @@ public class BluetoothCentral {
         return isScanning;
     }
 
-    /**
-     * Broadcasts a message to all connected devices.
-     */
-    public void broadcastMessageToAll(String message) {
-        List<BluetoothDevice> connectedDevices = gattServer.getConnectedDevices();
-        if (connectedDevices.isEmpty()) {
-            Log.i(TAG, "No connected devices to broadcast the message.");
-            return;
-        }
-
-        for (BluetoothDevice device : connectedDevices) {
-            sendMessageToDevice(device, message);
-        }
-    }
 
     /**
      * Broadcasts a message to all Eddystone devices in reach.
@@ -191,7 +177,9 @@ public class BluetoothCentral {
         }
         String text = RequestTypes.B.toString() + ":" + message;
         for (BeaconReachable device : devices) {
+            // send the message
             Bluecomm.getInstance(this.context).writeData(device.getMacAddress(), text);
+
             Log.i(TAG, "Message sent to Eddystone device: " + device.getMacAddress());
             try {
                 Thread.sleep(500);
@@ -201,24 +189,6 @@ public class BluetoothCentral {
         }
     }
 
-    /**
-     * Sends a message to a specific device and receives a response.
-     */
-    public void sendMessageToDevice(BluetoothDevice device, String message) {
-        BluetoothGattCharacteristic characteristic = gattServer.getCharacteristic(CUSTOM_SERVICE_UUID, CUSTOM_CHARACTERISTIC_UUID);
-
-        if (characteristic == null) {
-            Log.i(TAG, "Custom characteristic not found.");
-            return;
-        }
-
-        boolean success = gattServer.writeCharacteristic(device, characteristic);
-        if (success) {
-            Log.i(TAG, "Message sent to device: " + device.getAddress());
-        } else {
-            Log.i(TAG, "Failed to send message to device: " + device.getAddress());
-        }
-    }
 
     /**
      * Updates the beacon's namespace and instance ID dynamically.

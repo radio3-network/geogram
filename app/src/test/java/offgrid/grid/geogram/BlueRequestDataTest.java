@@ -3,13 +3,13 @@ package offgrid.grid.geogram;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import offgrid.geogram.bluetooth.comms.BlueRequestData;
+import offgrid.geogram.bluetooth.comms.BluePackage;
 
 public class BlueRequestDataTest {
 
     @Test
     public void testRandomId() {
-        BlueRequestData sender = BlueRequestData.createSender("HelloWorldThisIsATest");
+        BluePackage sender = BluePackage.createSender("HelloWorldThisIsATest");
         String randomId = sender.generateRandomId();
         assertNotNull(randomId);
         assertEquals(2, randomId.length());
@@ -18,7 +18,7 @@ public class BlueRequestDataTest {
 
     @Test
     public void testCreateSender() {
-        BlueRequestData sender = BlueRequestData.createSender("HelloWorldThisIsATest");
+        BluePackage sender = BluePackage.createSender("HelloWorldThisIsATest");
 
         assertNotNull(sender);
         assertEquals("HelloWorldThisIsATest", sender.getData());
@@ -30,7 +30,7 @@ public class BlueRequestDataTest {
     @Test
     public void testReceiverReconstruction1() {
 
-        BlueRequestData sender = BlueRequestData.createSender("HelloWorldThisIsATestThatGoesAroundAndShouldBreakToMultipleMessagesOK?");
+        BluePackage sender = BluePackage.createSender("HelloWorldThisIsATestThatGoesAroundAndShouldBreakToMultipleMessagesOK?");
 
         String parcel = sender.getNextParcel();
         String id = parcel.substring(0, 2);
@@ -42,7 +42,7 @@ public class BlueRequestDataTest {
         String parcel1 = sender.getNextParcel();
         String parcel2 = sender.getNextParcel();
 
-        BlueRequestData receiver = BlueRequestData.createReceiver("ab:003");
+        BluePackage receiver = BluePackage.createReceiver("ab:003");
 
         receiver.receiveParcel("ab001:DataPart1");
         receiver.receiveParcel("ab003:DataPart3");
@@ -58,13 +58,13 @@ public class BlueRequestDataTest {
     @Test
     public void testReceiverReconstruction2() {
 
-        BlueRequestData sender = BlueRequestData.createSender("HelloWorldThisIsATestThatGoesAroundAndShouldBreakToMultipleMessagesOK?");
+        BluePackage sender = BluePackage.createSender("HelloWorldThisIsATestThatGoesAroundAndShouldBreakToMultipleMessagesOK?");
 
         // we assume the first parcel as the header
-        BlueRequestData receiver = null;
+        BluePackage receiver = null;
         String initialHeader = sender.getNextParcel();
         try {
-            receiver = BlueRequestData.createReceiver(initialHeader);
+            receiver = BluePackage.createReceiver(initialHeader);
         } catch (Exception e) {
             fail("Invalid header format");
         }

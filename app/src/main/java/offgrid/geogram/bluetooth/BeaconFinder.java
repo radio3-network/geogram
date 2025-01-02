@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import offgrid.geogram.bluetooth.comms.BlueRequest;
-import offgrid.geogram.bluetooth.comms.BlueRequestData;
+import offgrid.geogram.bluetooth.comms.BluePackage;
 import offgrid.geogram.bluetooth.comms.DataCallback;
 import offgrid.geogram.bluetooth.comms.RequestTypes;
 import offgrid.geogram.core.Log;
@@ -202,12 +202,12 @@ public class BeaconFinder {
         request.setRequest(RequestTypes.GET_USER_FROM_DEVICE);
         // Implement the callback
         DataCallback callback = new DataCallback() {
-            BlueRequestData requestData = null;
+            BluePackage requestData = null;
             @Override
             public void onDataSuccess(String data){
                 if(requestData == null){
                     try {
-                        requestData = BlueRequestData.createReceiver(data);
+                        requestData = BluePackage.createReceiver(data);
                     }catch (Exception e){
                         Log.e(TAG, "Invalid data: " + e.getMessage());
                     }
@@ -306,5 +306,20 @@ public class BeaconFinder {
         }
     }
 
+    /**
+     * Retrieves the device ID based on the given MAC address.
+     * Attention that MAC addresses tend to change often for the
+     * case of android devices. Make sure your search is fresh.
+     * @param macAddress MAC address of the bluetooth device
+     * @return device ID or null when not found
+     */
+    public String getDeviceId(String macAddress) {
+        for (BeaconReachable beacon : getBeaconMap().values()) {
+            if (beacon.getMacAddress().equals(macAddress)) {
+                return beacon.getDeviceId();
+            }
+        }
+        return null;
+    }
 
 }

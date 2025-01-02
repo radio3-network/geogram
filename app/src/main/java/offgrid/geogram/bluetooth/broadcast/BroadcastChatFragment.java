@@ -55,21 +55,31 @@ public class BroadcastChatFragment extends Fragment implements BroadcastChat.Mes
         // Send button functionality
         btnSend.setOnClickListener(v -> {
             String message = messageInput.getText().toString().trim();
-            if (!message.isEmpty()) {
+            if(message.isEmpty() || message.isBlank()){
+                //Toast.makeText(getContext(), "Message cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // add this message to our list of sent messages
+            BroadcastMessage messageToBroadcast = new BroadcastMessage(message, null, true);
+            BroadcastChat.addMessage(messageToBroadcast);
+
+
+            new Thread(() -> {
                 // Send the message via BroadcastChat
                 boolean success = BroadcastChat.broadcast(message, getContext());
-                if (success) {
-                    //addUserMessage(message);
-                    messageInput.setText("");
+                requireActivity().runOnUiThread(() -> {
+                    if (success) {
+                        //addUserMessage(message);
+                        messageInput.setText("");
 
-                    // Scroll to the bottom of the chat
-                    chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
-                } else {
-                    Toast.makeText(getContext(), "Failed to send message. Please check Bluetooth.", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(getContext(), "Message cannot be empty", Toast.LENGTH_SHORT).show();
-            }
+                        // Scroll to the bottom of the chat
+                        chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
+                    } else {
+                        Toast.makeText(getContext(), "Failed to send message. Please check Bluetooth.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }).start();
+
         });
 
         // Start message polling
@@ -77,6 +87,9 @@ public class BroadcastChatFragment extends Fragment implements BroadcastChat.Mes
 
         // Register the fragment as a listener for updates
         BroadcastChat.setMessageUpdateListener(this);
+
+        // update the message right now on the chat box
+        updateMessages();
 
         return view;
     }
@@ -114,7 +127,9 @@ public class BroadcastChatFragment extends Fragment implements BroadcastChat.Mes
                     addUserMessage(message.getMessage());
                 } else {
                     Log.i("BroadcastChatFragment", "Adding received message: " + message.getMessage());
-                    addReceivedMessage(message.getMessage());
+                    addReceivedMessage(message.getDeviceId(), message.getMessage());
+                    // Scroll to the bottom of the chat
+                    chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
                 }
                 displayedMessages.add(message);
             }
@@ -140,12 +155,23 @@ public class BroadcastChatFragment extends Fragment implements BroadcastChat.Mes
      *
      * @param message The message to display.
      */
-    private void addReceivedMessage(String message) {
+    public void addReceivedMessage(String sender, String message) {
         View receivedMessageView = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_received_message, chatMessageContainer, false);
+
+        // Set the sender's name
+        TextView senderNameTextView = receivedMessageView.findViewById(R.id.sender_name);
+        if(sender != null){
+            senderNameTextView.setText(sender);
+        }else{
+            senderNameTextView.setText("");
+        }
+
+        // Set the message content
         TextView messageTextView = receivedMessageView.findViewById(R.id.message_user_1);
         messageTextView.setText(message);
-        messageTextView.setBackgroundResource(R.drawable.balloon_left);
+
+        // Add the view to the container
         chatMessageContainer.addView(receivedMessageView);
         chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
     }
