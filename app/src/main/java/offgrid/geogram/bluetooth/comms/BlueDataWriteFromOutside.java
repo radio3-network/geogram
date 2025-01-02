@@ -6,10 +6,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.broadcast.BroadcastChat;
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
-import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 
 /**
@@ -23,9 +21,14 @@ public class BlueDataWriteFromOutside {
     // the requests currently active
     private final HashMap<String, BluePackage> requests = new HashMap<>();
 
+    // the write actions from outside devices
+    // <UID, BluePackage>
+    private final HashMap<String, BluePackage> writeActions = new HashMap<>();
+
+
     // Static instance of the singleton
     private static BlueDataWriteFromOutside instance;
-    private static final String TAG = "BlueCentral";
+    private static final String TAG = "BlueDataWriteFromOutside";
 
     // Private constructor to prevent instantiation from outside
     private BlueDataWriteFromOutside() {
@@ -57,78 +60,111 @@ public class BlueDataWriteFromOutside {
     public void receivingDataFromDevice(String macAddress, String receivedData, Context context) {
         // avoid null addresses
         if (macAddress == null) {
+            Log.e(TAG, "Null MAC address received");
             return;
         }
-        // process the request
-        String answer = processReceivedRequest(macAddress, receivedData, context);
-        Log.i(TAG, "Request processed from " + macAddress + ". Answer: " + answer);
-        // prepare an answer to be shipped
-        BluePackage requestData = BluePackage.createSender(answer);
-        // remove previous requests for this address (if any)
-        requests.remove(macAddress);
-        // place it on the queue
-        requests.put(macAddress, requestData);
-        Log.i(TAG, "Request placed on queue: " + macAddress + " - " + receivedData);
+
+        // output a log of what is received
+        Log.i(TAG, "Received data from " + macAddress + ": " + receivedData);
+
+        // needs to always contain an :
+        if(!receivedData.contains(":")){
+            Log.e(TAG, "Invalid data received: " + receivedData);
+            return;
+        }
+        String[] data = receivedData.split(":");
+        String UID = data[0].substring(0, 2);
+
+        // with a valid device, is there already a write request?
+        BluePackage writeAction = null;
+        if(writeActions.containsKey(UID)){
+            writeAction = writeActions.get(UID);
+        }else{
+            writeAction = BluePackage.createReceiver(receivedData);
+            // first message should be a header, is it valid?
+            if(writeAction.isValidHeader()){
+                writeActions.put(UID, writeAction);
+                // no need to continue, first message is the header
+                return;
+            }else{
+                Log.e(TAG, "Invalid header received for write operation: " + receivedData);
+                return;
+            }
+        }
+        // at this point our write action should NOT be null
+        if(writeAction == null){
+            Log.e(TAG, "Null write action received");
+            return;
+        }
+
+        // avoid replay actions, this parcel is complete
+        if(writeAction.allParcelsReceivedAndValid()){
+            return;
+        }
+
+        // next messages should be an increment
+        writeAction.receiveParcel(receivedData);
+
+        // when the message is complete, process the command inside
+        if(writeAction.allParcelsReceivedAndValid()){
+            processReceivedRequest(macAddress, writeAction, context);
+            Log.i(TAG, "Request processed from " + macAddress);
+        }
+
+//        // process the request
+//        String answer = processReceivedRequest(macAddress, receivedData, context);
+//        Log.i(TAG, "Request processed from " + macAddress + ". Answer: " + answer);
+//        // prepare an answer to be shipped
+//        BluePackage requestData = BluePackage.createSender(answer);
+//        // remove previous requests for this address (if any)
+//        requests.remove(macAddress);
+//        // place it on the queue
+//        requests.put(macAddress, requestData);
+//        Log.i(TAG, "Request placed on queue: " + macAddress + " - " + receivedData);
     }
 
     /**
      * Process all commands arriving to the
-     * @param received
-     * @return
+     * @return the answer to the request
      */
-    private String processReceivedRequest(String macAddress, String received, Context context) {
-        DataType command;
+    private void processReceivedRequest(
+            String deviceId,
+            BluePackage writeAction,
+            Context context) {
 
-        try{
-            // is this a valid command?
-            if(received.contains(":")){
-                // it has multiple parts inside
-                String[] data = received.split(":");
-                command = DataType.valueOf(data[0]);
-            }else{
-                // single command
-                command = DataType.valueOf(received);
-            }
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "Invalid command: " + received);
-            return "Invalid command";
-        }
-        Log.i(TAG, "Received command: " + received);
 
-        switch (command) {
+        //Log.i(TAG, "Received command: " + received);
+
+        switch (writeAction.getCommand()) {
             case G -> {
-                return getUserFromDevice();
             }
             case B -> {
-                return receiveBroadCastMessage(macAddress, received, context);
+                writeBroadCastMessage(deviceId, writeAction, context);
+            }
+            default -> {
             }
         }
-
-
-        return "Unknown request";
     }
 
-    private String receiveBroadCastMessage(String macAddress, String receivedText, Context context) {
-        String key = DataType.B.toString() + ":";
-        if(!receivedText.contains(key)){
-            return "Invalid broadcast message";
-        }
-        String messageText = receivedText.substring(key.length());
+    /**
+     * Handle the broadcast message when being received from the outside
+     * @param context
+     * @return
+     */
+    private void writeBroadCastMessage(
+            String deviceId,
+            BluePackage writeAction,
+            Context context) {
+
+        String messageText = writeAction.getData();
         // this message was written by someone else
-        BroadcastMessage messageReceived = new BroadcastMessage(messageText, macAddress, false);
-        String deviceId = BeaconFinder.getInstance(context).getDeviceId(macAddress);
-        if(deviceId != null){
-            messageReceived.setDeviceId(deviceId);
-        }
+        BroadcastMessage messageReceived = new BroadcastMessage(messageText, deviceId, false);
+        messageReceived.setDeviceId(deviceId);
         // place the message on the list
         BroadcastChat.messages.add(messageReceived);
-
-        return "Received";
     }
 
-    private String getUserFromDevice() {
-        return Central.getInstance().getSettings().getNickname();
-    }
+
 
     /**
      * Provides the request data for the given MAC address.

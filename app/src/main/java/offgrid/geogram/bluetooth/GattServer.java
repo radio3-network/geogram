@@ -319,7 +319,7 @@ public class GattServer {
 
         }
 
-        // a request to this device was made
+        // write request to this device was made
         @Override
         public void onCharacteristicWriteRequest(
                 BluetoothDevice device,
@@ -342,8 +342,10 @@ public class GattServer {
             // get the proper value for the request
             String received = new String(value);
             Log.i(TAG, "Request received from " + device.getAddress() + ": " + received);
-            BlueDataWriteFromOutside central = BlueDataWriteFromOutside.getInstance();
-            central.receivingDataFromDevice(device.getAddress(), received, context);
+
+            // Handle the request and prepare a response if needed
+            BlueDataWriteFromOutside dataWriteFromOutside = BlueDataWriteFromOutside.getInstance();
+            dataWriteFromOutside.receivingDataFromDevice(device.getAddress(), received, context);
 
             // Handle the request and prepare a response if needed
             if (responseNeeded) {

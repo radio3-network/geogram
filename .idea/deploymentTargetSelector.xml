@@ -3,7 +3,7 @@
   <component name="deploymentTargetSelector">
     <selectionStates>
       <SelectionState runConfigName="app">
-        <option name="selectionMode" value="DROPDOWN" />
+        <option name="selectionMode" value="DIALOG" />
         <DropdownSelection timestamp="2025-01-01T23:46:20.050511125Z">
           <Target type="DEFAULT_BOOT">
             <handle>
@@ -27,7 +27,21 @@
         </DialogSelection>
       </SelectionState>
       <SelectionState runConfigName="BeaconDatabaseTest">
-        <option name="selectionMode" value="DROPDOWN" />
+        <option name="selectionMode" value="DIALOG" />
+        <DialogSelection>
+          <targets>
+            <Target type="DEFAULT_BOOT">
+              <handle>
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=TANK200000007933" />
+              </handle>
+            </Target>
+            <Target type="DEFAULT_BOOT">
+              <handle>
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=f3d78b3e" />
+              </handle>
+            </Target>
+          </targets>
+        </DialogSelection>
       </SelectionState>
     </selectionStates>
   </component>

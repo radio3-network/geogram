@@ -3,6 +3,7 @@ package offgrid.geogram.bluetooth.comms;
 import androidx.annotation.NonNull;
 
 public enum DataType {
+            NONE,
             X, // generic usage
             G, // get user from device
             C,  // chat with device

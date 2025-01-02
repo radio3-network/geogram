@@ -20,7 +20,9 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 
 import offgrid.geogram.R;
+import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.core.old.old.GenerateDeviceId;
 
 public class BroadcastChatFragment extends Fragment implements BroadcastChat.MessageUpdateListener {
 
@@ -60,7 +62,8 @@ public class BroadcastChatFragment extends Fragment implements BroadcastChat.Mes
                 return;
             }
             // add this message to our list of sent messages
-            BroadcastMessage messageToBroadcast = new BroadcastMessage(message, null, true);
+            String deviceId = GenerateDeviceId.generateInstanceId(this.getContext());
+            BroadcastMessage messageToBroadcast = new BroadcastMessage(message, deviceId, true);
             BroadcastChat.addMessage(messageToBroadcast);
 
 

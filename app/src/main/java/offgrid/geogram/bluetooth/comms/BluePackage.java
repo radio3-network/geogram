@@ -68,6 +68,7 @@ public class BluePackage {
 
     // Indicates whether data is still being transferred
     private boolean isTransferring;
+    private boolean validHeader = true;
 
     public static BluePackage createSender(String data) {
         DataType command = DataType.X;
@@ -110,7 +111,17 @@ public class BluePackage {
             // Example:
             // AA:003:A4GD:B
             if (parts.length != 4) {
-                throw new IllegalArgumentException("Invalid header format");
+                // this header isn't valid, invalidate the whole package
+                validHeader = false;
+                id = null;
+                messageParcelsTotal = 0;
+                dataParcels = null;
+                this.data = null;
+                this.messageParcelCurrent = -1;
+                this.command = DataType.NONE;
+                this.transmissionStartTime = -1;
+                this.checksum = null;
+                return;
             }
             this.id = parts[0];
             this.messageParcelsTotal = Integer.parseInt(parts[1]);
@@ -171,6 +182,10 @@ public class BluePackage {
         char firstChar = (char) ('A' + random.nextInt(26)); // Random letter A-Z
         char secondChar = (char) ('A' + random.nextInt(26)); // Random letter A-Z
         return "" + firstChar + secondChar;
+    }
+
+    public boolean isValidHeader() {
+        return validHeader;
     }
 
     /**
@@ -336,5 +351,9 @@ public class BluePackage {
             sum /= 26; // Shift to the next letter
         }
         return new String(checksum);
+    }
+
+    public DataType getCommand() {
+        return command;
     }
 }

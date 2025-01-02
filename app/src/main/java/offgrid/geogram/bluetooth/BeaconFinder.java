@@ -152,30 +152,33 @@ public class BeaconFinder {
             return;
         }
 
-        String instanceId = extractInstanceId(serviceData);
+        String deviceId = extractInstanceId(serviceData);
         String namespaceId = extractNamespaceId(serviceData);
 
         // is this beacon already on our hashmap?
-        BeaconReachable beacon = beaconMap.get(instanceId);
+        BeaconReachable beacon = beaconMap.get(deviceId);
 
         // seems like a new one
         if (beacon == null) {
             beacon = new BeaconReachable();
-            beacon.setInstanceId(instanceId);
+            beacon.setInstanceId(deviceId);
             beacon.setNamespaceId(namespaceId);
             beacon.setMacAddress(result.getDevice().getAddress());
             beacon.setRssi(result.getRssi());
-            beaconMap.put(instanceId, beacon);
+            beaconMap.put(deviceId, beacon);
             // get the profile info
             //getProfileInfo(beacon);
 
             // also save it do disk
             BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
             Log.i(TAG, "New Eddystone beacon found: "
-                    + instanceId
+                    + deviceId
                     + " at "
                     + result.getDevice().getAddress()
             );
+            
+            
+            
             // update the list
             BeaconListing.getInstance().updateList(this.context);
             Log.i(TAG, "Updating beacon list on UI");

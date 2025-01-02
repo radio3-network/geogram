@@ -120,39 +120,52 @@ public class BroadcastChat {
      * @param message The message to be sent, it needs to be within 20 characters
      */
     public static void broadcastMessageToAllEddystoneDevices(String message, Context context) {
-        Collection<BeaconReachable> devices = BeaconFinder.getInstance(context).getBeaconMap().values();
-        if (devices.isEmpty()) {
-            Log.i(TAG_ID, "No Eddystone devices to broadcast the message.");
-            return;
-        }
-        // create the package to send
-        BluePackage packageToSend = BluePackage.createSender(DataType.B, message);
-        // iterate over the devices
-        //String text = DataTypes.B.toString() + ":" + message;
-        for (BeaconReachable device : devices) {
-            // send the message
-            sendtoDevice(device, packageToSend, context);
-        }
+        Thread thread = new Thread(() -> {
+            try {
+                Collection<BeaconReachable> devices = BeaconFinder.getInstance(context).getBeaconMap().values();
+                if (devices.isEmpty()) {
+                    Log.i(TAG_ID, "No Eddystone devices to broadcast the message.");
+                    return;
+                }
+                // create the package to send
+                BluePackage packageToSend = BluePackage.createSender(DataType.B, message);
+                // iterate over the devices
+                for (BeaconReachable device : devices) {
+                    // send the message
+                    sendToDevice(device, packageToSend, context);
+                }
+                Thread.sleep(500); // Pause for a bit
+            } catch (InterruptedException e) {
+                Log.e(TAG_ID, "Thread interrupted: " + e.getMessage());
+            }
+
+        });
+        thread.start(); // Starts the thread
+
     }
 
     /**
      * Sends a message to a specific Eddystone device.
      * When the message is large, it will break into multiple portions
-     * @param device
-     * @param packageToSend
-     * @param context
+     * @param device The Eddystone device to send the message to
+     * @param packageToSend The message to be sent
+     * @param context The application context
      */
-    private static void sendtoDevice(BeaconReachable device,
+    private static void sendToDevice(BeaconReachable device,
                                      BluePackage packageToSend,
                                      Context context) {
         try {
-            for(int i = 0; i < packageToSend.getMessageParcelsTotal(); i++){
+            // reset the counter for this package
+            packageToSend.resetParcelCounter();
+            // send all parcels of the package to the other device
+            for(int i = 0; i <= packageToSend.getMessageParcelsTotal(); i++){
                 String text = packageToSend.getNextParcel();
+                Log.i(TAG_ID, "Sending message to " + device.getMacAddress() + " with data: " + text);
                 Bluecomm.getInstance(context).writeData(device.getMacAddress(), text);
+                Thread.sleep(500);
             }
-
             Log.i(TAG_ID, "Message sent to Eddystone device: " + device.getMacAddress());
-            Thread.sleep(500);
+            //Thread.sleep(500);
 
         } catch (InterruptedException e) {
             Log.e(TAG_ID, "Thread sleep interrupted: " + e.getMessage());

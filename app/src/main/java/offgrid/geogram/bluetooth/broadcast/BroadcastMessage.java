@@ -9,15 +9,14 @@ import offgrid.geogram.things.BeaconReachable;
  */
 public class BroadcastMessage {
     private final String message;
-    private final String macAddress;
     private final long timestamp;
     private final boolean writtenByMe;
     private String deviceId = null;
     private ArrayList<BeaconReachable> devicesThatReadMessage = new ArrayList<>();
 
-    public BroadcastMessage(String message, String macAddress, boolean writtenByMe) {
+    public BroadcastMessage(String message, String deviceId, boolean writtenByMe) {
         this.message = message;
-        this.macAddress = macAddress;
+        this.deviceId = deviceId;
         this.timestamp = System.currentTimeMillis();
         this.writtenByMe = writtenByMe;
     }
@@ -39,9 +38,6 @@ public class BroadcastMessage {
     }
     public String getMessage() {
         return message;
-    }
-    public String getMacAddress() {
-        return macAddress;
     }
     public long getTimestamp() {
         return timestamp;
