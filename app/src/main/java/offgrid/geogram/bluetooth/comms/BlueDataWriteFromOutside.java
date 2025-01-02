@@ -18,17 +18,17 @@ import offgrid.geogram.core.Log;
  * in small little packages, this is where we keep track of
  * them.
  */
-public class BlueFromOutside {
+public class BlueDataWriteFromOutside {
 
     // the requests currently active
     private final HashMap<String, BluePackage> requests = new HashMap<>();
 
     // Static instance of the singleton
-    private static BlueFromOutside instance;
+    private static BlueDataWriteFromOutside instance;
     private static final String TAG = "BlueCentral";
 
     // Private constructor to prevent instantiation from outside
-    private BlueFromOutside() {
+    private BlueDataWriteFromOutside() {
         startCleanupThread(); // Start cleanup thread upon initialization
     }
 
@@ -37,9 +37,9 @@ public class BlueFromOutside {
      *
      * @return The singleton instance of BlueCentral.
      */
-    public static synchronized BlueFromOutside getInstance() {
+    public static synchronized BlueDataWriteFromOutside getInstance() {
         if (instance == null) {
-            instance = new BlueFromOutside();
+            instance = new BlueDataWriteFromOutside();
         }
         return instance;
     }
@@ -77,17 +77,17 @@ public class BlueFromOutside {
      * @return
      */
     private String processReceivedRequest(String macAddress, String received, Context context) {
-        DataTypes command;
+        DataType command;
 
         try{
             // is this a valid command?
             if(received.contains(":")){
                 // it has multiple parts inside
                 String[] data = received.split(":");
-                command = DataTypes.valueOf(data[0]);
+                command = DataType.valueOf(data[0]);
             }else{
                 // single command
-                command = DataTypes.valueOf(received);
+                command = DataType.valueOf(received);
             }
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Invalid command: " + received);
@@ -109,7 +109,7 @@ public class BlueFromOutside {
     }
 
     private String receiveBroadCastMessage(String macAddress, String receivedText, Context context) {
-        String key = DataTypes.B.toString() + ":";
+        String key = DataType.B.toString() + ":";
         if(!receivedText.contains(key)){
             return "Invalid broadcast message";
         }

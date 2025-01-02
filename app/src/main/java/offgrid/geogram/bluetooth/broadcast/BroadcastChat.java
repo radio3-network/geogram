@@ -4,9 +4,15 @@ import android.content.Context;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 
+import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.BluetoothCentral;
+import offgrid.geogram.bluetooth.comms.BluePackage;
+import offgrid.geogram.bluetooth.comms.Bluecomm;
+import offgrid.geogram.bluetooth.comms.DataType;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.things.BeaconReachable;
 
 /*
 
@@ -31,7 +37,7 @@ import offgrid.geogram.core.Log;
     4) BroadcastChat.broadcast(message, getContext()) will check if bluetooth
     is available
 
-    5) From there it will go to BlueCentral and message all connected devices
+    5) From there it will launch a message all connected devices
     using broadcastMessageToAllEddystoneDevices(String message).
 
     6) A message of type B: (broadcast) is created and is called from Bluecomm.java
@@ -45,7 +51,7 @@ import offgrid.geogram.core.Log;
 
      === Receiver side ===
 
-     1) Incoming messages are captured at AppBluetoothGattServer because it runs
+     1) Incoming messages are captured at GattServer because it runs
      a GATT server that is pooling for incoming messages. When a new message
      arrives then it triggers the onCharacteristicWriteRequest() that will then
      call the BlueCentral central = BlueCentral.getInstance(); and send data to
@@ -103,10 +109,54 @@ public class BroadcastChat {
         }
 
         // Send the message
-        bluetoothCentral.broadcastMessageToAllEddystoneDevices(message);
+        broadcastMessageToAllEddystoneDevices(message, context);
         Log.i(TAG_ID, "Message sent to all Eddystone devices: " + message);
 
         return true;
+    }
+
+    /**
+     * Broadcasts a message to all Eddystone devices in reach.
+     * @param message The message to be sent, it needs to be within 20 characters
+     */
+    public static void broadcastMessageToAllEddystoneDevices(String message, Context context) {
+        Collection<BeaconReachable> devices = BeaconFinder.getInstance(context).getBeaconMap().values();
+        if (devices.isEmpty()) {
+            Log.i(TAG_ID, "No Eddystone devices to broadcast the message.");
+            return;
+        }
+        // create the package to send
+        BluePackage packageToSend = BluePackage.createSender(DataType.B, message);
+        // iterate over the devices
+        //String text = DataTypes.B.toString() + ":" + message;
+        for (BeaconReachable device : devices) {
+            // send the message
+            sendtoDevice(device, packageToSend, context);
+        }
+    }
+
+    /**
+     * Sends a message to a specific Eddystone device.
+     * When the message is large, it will break into multiple portions
+     * @param device
+     * @param packageToSend
+     * @param context
+     */
+    private static void sendtoDevice(BeaconReachable device,
+                                     BluePackage packageToSend,
+                                     Context context) {
+        try {
+            for(int i = 0; i < packageToSend.getMessageParcelsTotal(); i++){
+                String text = packageToSend.getNextParcel();
+                Bluecomm.getInstance(context).writeData(device.getMacAddress(), text);
+            }
+
+            Log.i(TAG_ID, "Message sent to Eddystone device: " + device.getMacAddress());
+            Thread.sleep(500);
+
+        } catch (InterruptedException e) {
+            Log.e(TAG_ID, "Thread sleep interrupted: " + e.getMessage());
+        }
     }
 
     /**

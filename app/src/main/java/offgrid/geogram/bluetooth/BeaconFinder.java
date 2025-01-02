@@ -17,10 +17,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import offgrid.geogram.bluetooth.comms.BlueRequest;
+import offgrid.geogram.bluetooth.comms.BlueDataWriteAndReadToOutside;
 import offgrid.geogram.bluetooth.comms.BluePackage;
-import offgrid.geogram.bluetooth.comms.DataCallback;
-import offgrid.geogram.bluetooth.comms.DataTypes;
+import offgrid.geogram.bluetooth.comms.DataCallbackTemplate;
+import offgrid.geogram.bluetooth.comms.DataType;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.things.BeaconReachable;
@@ -194,14 +194,14 @@ public class BeaconFinder {
      */
     private void getProfileInfo(BeaconReachable beacon) {
         // setup a new request
-        BlueRequest request = new BlueRequest();
+        BlueDataWriteAndReadToOutside request = new BlueDataWriteAndReadToOutside();
         // MAC address of the Eddystone beacon you want to read data from
         String macAddress = beacon.getMacAddress();
         request.setMacAddress(macAddress);
         // what we are requesting as data to the device
-        request.setRequest(DataTypes.G);
+        request.setRequest(DataType.G);
         // Implement the callback
-        DataCallback callback = new DataCallback() {
+        DataCallbackTemplate callback = new DataCallbackTemplate() {
             BluePackage requestData = null;
             @Override
             public void onDataSuccess(String data){

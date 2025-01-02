@@ -18,13 +18,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.BluetoothUtils;
-import offgrid.geogram.bluetooth.comms.BlueRequest;
-import offgrid.geogram.bluetooth.comms.DataCallback;
+import offgrid.geogram.bluetooth.comms.BlueDataWriteAndReadToOutside;
+import offgrid.geogram.bluetooth.comms.DataCallbackTemplate;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.util.DateUtils;
-import offgrid.geogram.bluetooth.comms.DataTypes;
+import offgrid.geogram.bluetooth.comms.DataType;
 
 public class BeaconDetailsFragment extends Fragment {
 
@@ -125,7 +125,7 @@ public class BeaconDetailsFragment extends Fragment {
     private void launchMessage(BeaconReachable beaconDiscovered) {
 
         // Implement the callback
-        DataCallback callback = new DataCallback() {
+        DataCallbackTemplate callback = new DataCallbackTemplate() {
             @Override
             public void onDataSuccess(String data){
                 Log.i("GetUserFromDevice", "Data arrived: " + data);
@@ -140,14 +140,14 @@ public class BeaconDetailsFragment extends Fragment {
         };
 
         // setup a new request
-        BlueRequest request = new BlueRequest();
+        BlueDataWriteAndReadToOutside request = new BlueDataWriteAndReadToOutside();
         // MAC address of the Eddystone beacon you want to read data from
         String macAddress = beaconDiscovered.getMacAddress();
         request.setMacAddress(macAddress);
         callback.setMacAddress(macAddress);
         callback.setDeviceId(beaconDiscovered.getDeviceId());
         // what we are requesting as data to the device
-        request.setRequest(DataTypes.G);
+        request.setRequest(DataType.G);
         // setup the callback
         request.setCallback(callback);
         // send the request

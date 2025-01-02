@@ -44,7 +44,7 @@ public class BluePackage {
     // Random two bytes generated as ID
     private final String id;
 
-    private final DataTypes command;
+    private final DataType command;
 
     // The length of text per parcel
     private static final int TEXT_LENGTH_PER_PARCEL = 10;
@@ -70,11 +70,11 @@ public class BluePackage {
     private boolean isTransferring;
 
     public static BluePackage createSender(String data) {
-        DataTypes command = DataTypes.X;
+        DataType command = DataType.X;
         return new BluePackage(command, data, true);
     }
 
-    public static BluePackage createSender(DataTypes command, String data) {
+    public static BluePackage createSender(DataType command, String data) {
         return new BluePackage(command, data, true);
     }
 
@@ -87,7 +87,8 @@ public class BluePackage {
         return new BluePackage(null, header, false);
     }
 
-    private BluePackage(DataTypes command, String data, boolean isSender) {
+    private BluePackage(DataType command, String data, boolean isSender) {
+        // we are sending this package to another device
         if (isSender) {
             if (data == null) {
                 throw new IllegalArgumentException("Data cannot be null");
@@ -102,6 +103,7 @@ public class BluePackage {
             this.checksum = calculateChecksum(data);
             splitDataIntoParcels();
         } else {
+            // we are receiving this package from someone outside
             String[] parts = data.split(":");
             // expected format:
             // uid:parceltotal:datachecksum:commandId
@@ -117,7 +119,7 @@ public class BluePackage {
             this.data = null;
             this.messageParcelCurrent = -1;
             // get the command type
-            this.command = DataTypes.valueOf(parts[3]);
+            this.command = DataType.valueOf(parts[3]);
             // setup the transmission time
             this.transmissionStartTime = System.currentTimeMillis();
             this.isTransferring = true;
@@ -177,19 +179,26 @@ public class BluePackage {
      * @return The next parcel as a string, or {@code null} if all parcels have been sent.
      */
     public String getNextParcel() {
-
+        // first message is the header
         if (messageParcelCurrent == -1) {
             messageParcelCurrent++;
             // First parcel is the header with ID and total parcel count
-            return String.format(Locale.US, "%s:%03d:%s", id, messageParcelsTotal, checksum);
+            return String.format(Locale.US, "%s:%03d:%s:%s", id, messageParcelsTotal, checksum, command);
         } else if (messageParcelCurrent < messageParcelsTotal) {
-            // Subsequent parcels contain the data
+            // Subsequent parcels contain just the id, parcel number and data
             String parcelId = String.format(Locale.US, "%s%03d", id, messageParcelCurrent);
             String parcelData = dataParcels[messageParcelCurrent];
             messageParcelCurrent++;
             return parcelId + ":" + parcelData  ;
         }
         return null;
+    }
+
+    /**
+     * Permits to send again this package
+     */
+    public void resetParcelCounter(){
+        this.messageParcelCurrent = -1;
     }
 
 
@@ -207,14 +216,6 @@ public class BluePackage {
         return null;
     }
 
-    /**
-     * Checks whether all parcels have been sent in sequence.
-     *
-     * @return {@code true} if all parcels are sent, {@code false} otherwise.
-     */
-    public boolean hasSentAllParcelsOnce() {
-        return messageParcelCurrent >= messageParcelsTotal;
-    }
 
     /**
      * Checks whether all parcels have been received.
@@ -235,15 +236,6 @@ public class BluePackage {
         String data = String.join("", dataParcels);;
         String checksumReceived = calculateChecksum(data);
         return checksumReceived.equals(this.checksum);
-    }
-
-    /**
-     * Marks the transfer as complete or still ongoing.
-     *
-     * @param transferring {@code true} if data is still being transferred, {@code false} otherwise.
-     */
-    public void setTransferring(boolean transferring) {
-        this.isTransferring = transferring;
     }
 
     /**

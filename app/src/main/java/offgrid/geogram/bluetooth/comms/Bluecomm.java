@@ -47,7 +47,7 @@ public class Bluecomm {
      *
      * @param macAddress The MAC address of the device to connect to.
      */
-    public void getDataRead(String macAddress, DataCallback callback) {
+    public void getDataRead(String macAddress, DataCallbackTemplate callback) {
         if (!checkPermissions()) {
             Log.i(TAG, "Missing required permissions to perform Bluetooth operations.");
             callback.onDataError("Missing required permissions.");
@@ -139,7 +139,8 @@ public class Bluecomm {
      * @param data text to be sent, attention to keep it short
      */
     public synchronized void writeData(String macAddress, String data) {
-        writeData(macAddress, data, new DataCallback() {
+        // send data with just logging and no further reaction
+        writeData(macAddress, data, new DataCallbackTemplate() {
             @Override
             public void onDataSuccess(String data) {
                 Log.i(TAG, "Data sent: " + data);
@@ -158,7 +159,7 @@ public class Bluecomm {
      * @param data       The data to write.
      * @param callback   Callback to handle success or failure of the write operation.
      */
-    public synchronized void writeData(String macAddress, String data, DataCallback callback) {
+    public synchronized void writeData(String macAddress, String data, DataCallbackTemplate callback) {
         if (!checkPermissions()) {
             Log.i(TAG, "Missing required permissions to perform Bluetooth operations.");
             callback.onDataError("Missing required permissions.");

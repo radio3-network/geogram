@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.old;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import offgrid.geogram.bluetooth.GattServer;
 import offgrid.geogram.core.Log;
 
 public class EddyBroadcast {
@@ -21,12 +22,12 @@ public class EddyBroadcast {
     private static final UUID EDDYSTONE_SERVICE_UUID = UUID.fromString("0000FEAA-0000-1000-8000-00805F9B34FB");
     private static final UUID MESSAGE_CHARACTERISTIC_UUID = UUID.fromString("abcdef12-3456-7890-abcd-ef1234567890");
 
-    private final AppBluetoothGattServer gattServer;
+    private final GattServer gattServer;
     private final List<BluetoothDevice> discoveredDevices = new ArrayList<>();
 
     private EddyBroadcast(Context context) {
         this.context = context.getApplicationContext(); // Use application context to avoid leaks
-        this.gattServer = AppBluetoothGattServer.getInstance(context); // Reuse GATT server
+        this.gattServer = GattServer.getInstance(context); // Reuse GATT server
     }
 
     /**

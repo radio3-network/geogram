@@ -19,19 +19,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import offgrid.geogram.bluetooth.comms.BlueFromOutside;
+import offgrid.geogram.bluetooth.comms.BlueDataWriteFromOutside;
 import offgrid.geogram.bluetooth.comms.BluePackage;
 import offgrid.geogram.core.Log;
 
-public class AppBluetoothGattServer {
+public class GattServer {
 
     private static final String TAG = "AppBluetoothGattServer";
-    private static AppBluetoothGattServer instance;
+    private static GattServer instance;
 
     private final Context context;
     private BluetoothGattServer gattServer = null;
 
-    private AppBluetoothGattServer(Context context) {
+    private GattServer(Context context) {
         this.context = context.getApplicationContext();
         initializeGattServer();
     }
@@ -39,9 +39,9 @@ public class AppBluetoothGattServer {
     /**
      * Singleton access to the AppBluetoothGattServer instance.
      */
-    public static synchronized AppBluetoothGattServer getInstance(Context context) {
+    public static synchronized GattServer getInstance(Context context) {
         if (instance == null) {
-            instance = new AppBluetoothGattServer(context);
+            instance = new GattServer(context);
         }
         return instance;
     }
@@ -304,7 +304,7 @@ public class AppBluetoothGattServer {
                 return;
             }
             try {
-                BlueFromOutside blueCentral = BlueFromOutside.getInstance();
+                BlueDataWriteFromOutside blueCentral = BlueDataWriteFromOutside.getInstance();
                 BluePackage request = blueCentral.getRequest(device.getAddress());
                 if (request == null) {
                     Log.e(TAG, "Request not found for device: " + device.getAddress());
@@ -342,7 +342,7 @@ public class AppBluetoothGattServer {
             // get the proper value for the request
             String received = new String(value);
             Log.i(TAG, "Request received from " + device.getAddress() + ": " + received);
-            BlueFromOutside central = BlueFromOutside.getInstance();
+            BlueDataWriteFromOutside central = BlueDataWriteFromOutside.getInstance();
             central.receivingDataFromDevice(device.getAddress(), received, context);
 
             // Handle the request and prepare a response if needed

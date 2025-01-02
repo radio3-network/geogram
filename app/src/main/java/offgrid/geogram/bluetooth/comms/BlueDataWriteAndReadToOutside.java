@@ -8,11 +8,11 @@ import offgrid.geogram.core.Log;
  * Initiates a request to a specific device
  * and waits for the appropriate response.
  */
-public class BlueRequest {
+public class BlueDataWriteAndReadToOutside {
 
     private String macAddress = null;
     private String request = null;
-    private DataCallback callback = null;
+    private DataCallbackTemplate callback = null;
     private BluePackage requestData = null;
 
     private final String TAG = "BlueRequest";
@@ -27,11 +27,11 @@ public class BlueRequest {
      * to the other device
      * @param request for example: "getProfile"
      */
-    public void setRequest(DataTypes request) {
+    public void setRequest(DataType request) {
         this.request = request.toString();
     }
 
-    public void setCallback(DataCallback callback) {
+    public void setCallback(DataCallbackTemplate callback) {
         this.callback = callback;
     }
 
@@ -46,7 +46,7 @@ public class BlueRequest {
 
                 Thread.sleep(2000);
 
-                DataCallback writeDataCallback = new DataCallback() {
+                DataCallbackTemplate writeDataCallback = new DataCallbackTemplate() {
                     @Override
                     public void onDataSuccess(String data) {
                         Log.i(TAG, "Data sent: " + data);
@@ -64,7 +64,7 @@ public class BlueRequest {
                 Thread.sleep(2000);
 
                 // start looping for results
-                DataCallback receiveDataCallback = new DataCallback() {
+                DataCallbackTemplate receiveDataCallback = new DataCallbackTemplate() {
                     @Override
                     public void onDataSuccess(String data) {
                         Log.i(TAG, "Data received: " + data);

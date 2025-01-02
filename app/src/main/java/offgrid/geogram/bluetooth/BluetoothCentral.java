@@ -6,14 +6,11 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.os.ParcelUuid;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import offgrid.geogram.bluetooth.comms.Bluecomm;
-import offgrid.geogram.bluetooth.comms.DataTypes;
+import offgrid.geogram.bluetooth.old.BluetoothStateReceiver;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.things.BeaconReachable;
 
 public class BluetoothCentral {
 
@@ -22,7 +19,7 @@ public class BluetoothCentral {
     private static BluetoothCentral instance;
 
     private final Context context;
-    private AppBluetoothGattServer gattServer;
+    private GattServer gattServer;
     private EddyBeaconAdvertise beacon;
     private BluetoothAdapter bluetoothAdapter;
     private boolean isReceiverRegistered = false;
@@ -57,7 +54,7 @@ public class BluetoothCentral {
      */
     private void initialize() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        gattServer = AppBluetoothGattServer.getInstance(context);
+        gattServer = GattServer.getInstance(context);
         beacon = EddyBeaconAdvertise.getInstance(context);
 
         registerBluetoothStateReceiver();
@@ -94,7 +91,7 @@ public class BluetoothCentral {
             //gattServer = AppBluetoothGattServer.getInstance(context);
         }
         // always start the gatt server
-        gattServer = AppBluetoothGattServer.getInstance(context);
+        gattServer = GattServer.getInstance(context);
 
         if (beacon != null) {
             beacon.startBeacon();
@@ -162,32 +159,6 @@ public class BluetoothCentral {
     public boolean isScanningActive() {
         return isScanning;
     }
-
-
-    /**
-     * Broadcasts a message to all Eddystone devices in reach.
-     * @param message The message to be sent, it needs to be within 20 characters
-     */
-    public void broadcastMessageToAllEddystoneDevices(String message) {
-        Collection<BeaconReachable> devices = BeaconFinder.getInstance(this.context).getBeaconMap().values();
-        if (devices.isEmpty()) {
-            Log.i(TAG, "No Eddystone devices to broadcast the message.");
-            return;
-        }
-        String text = DataTypes.B.toString() + ":" + message;
-        for (BeaconReachable device : devices) {
-            // send the message
-            Bluecomm.getInstance(this.context).writeData(device.getMacAddress(), text);
-
-            Log.i(TAG, "Message sent to Eddystone device: " + device.getMacAddress());
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Thread sleep interrupted: " + e.getMessage());
-            }
-        }
-    }
-
 
     /**
      * Updates the beacon's namespace and instance ID dynamically.

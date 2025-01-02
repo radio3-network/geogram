@@ -3,7 +3,7 @@ package offgrid.geogram.bluetooth.comms;
 /**
  * Abstract class for data read/write operations.
  */
-public abstract class DataCallback {
+public abstract class DataCallbackTemplate {
 
     protected String macAddress = null;
     protected String deviceId = null;
