@@ -2,7 +2,6 @@ package offgrid.geogram.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.os.ParcelUuid;
@@ -12,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 import offgrid.geogram.bluetooth.comms.Bluecomm;
-import offgrid.geogram.bluetooth.comms.RequestTypes;
+import offgrid.geogram.bluetooth.comms.DataTypes;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.things.BeaconReachable;
 
@@ -175,7 +174,7 @@ public class BluetoothCentral {
             Log.i(TAG, "No Eddystone devices to broadcast the message.");
             return;
         }
-        String text = RequestTypes.B.toString() + ":" + message;
+        String text = DataTypes.B.toString() + ":" + message;
         for (BeaconReachable device : devices) {
             // send the message
             Bluecomm.getInstance(this.context).writeData(device.getMacAddress(), text);

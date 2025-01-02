@@ -24,7 +24,7 @@ import offgrid.geogram.core.Log;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.util.DateUtils;
-import offgrid.geogram.bluetooth.comms.RequestTypes;
+import offgrid.geogram.bluetooth.comms.DataTypes;
 
 public class BeaconDetailsFragment extends Fragment {
 
@@ -147,7 +147,7 @@ public class BeaconDetailsFragment extends Fragment {
         callback.setMacAddress(macAddress);
         callback.setDeviceId(beaconDiscovered.getDeviceId());
         // what we are requesting as data to the device
-        request.setRequest(RequestTypes.GET_USER_FROM_DEVICE);
+        request.setRequest(DataTypes.G);
         // setup the callback
         request.setCallback(callback);
         // send the request

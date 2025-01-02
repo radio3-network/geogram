@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 
 import offgrid.geogram.bluetooth.comms.BluePackage;
 
-public class BlueRequestDataTest {
+public class BluePackageTest {
 
     @Test
     public void testRandomId() {

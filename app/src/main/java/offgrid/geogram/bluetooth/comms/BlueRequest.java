@@ -27,7 +27,7 @@ public class BlueRequest {
      * to the other device
      * @param request for example: "getProfile"
      */
-    public void setRequest(RequestTypes request) {
+    public void setRequest(DataTypes request) {
         this.request = request.toString();
     }
 

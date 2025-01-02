@@ -1,7 +1,8 @@
 package offgrid.geogram.bluetooth.comms;
 
-public enum RequestTypes {
-            GET_USER_FROM_DEVICE,
+public enum DataTypes {
+            X, // generic usage
+            G, // get user from device
             C,  // chat with device
             B;  // broadcast to device
 }

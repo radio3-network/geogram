@@ -44,6 +44,8 @@ public class BluePackage {
     // Random two bytes generated as ID
     private final String id;
 
+    private final DataTypes command;
+
     // The length of text per parcel
     private static final int TEXT_LENGTH_PER_PARCEL = 10;
 
@@ -68,7 +70,12 @@ public class BluePackage {
     private boolean isTransferring;
 
     public static BluePackage createSender(String data) {
-        return new BluePackage(data, true);
+        DataTypes command = DataTypes.X;
+        return new BluePackage(command, data, true);
+    }
+
+    public static BluePackage createSender(DataTypes command, String data) {
+        return new BluePackage(command, data, true);
     }
 
     /**
@@ -77,35 +84,43 @@ public class BluePackage {
      * @return a new BluePackage instance for receiving data
      */
     public static BluePackage createReceiver(String header) {
-        return new BluePackage(header, false);
+        return new BluePackage(null, header, false);
     }
 
-    private BluePackage(String input, boolean isSender) {
+    private BluePackage(DataTypes command, String data, boolean isSender) {
         if (isSender) {
-            if (input == null) {
+            if (data == null) {
                 throw new IllegalArgumentException("Data cannot be null");
             }
             this.id = generateRandomId();
-            this.data = input;
+            this.command = command;
+            this.data = data;
             this.messageParcelCurrent = -1;
             this.transmissionStartTime = System.currentTimeMillis();
             this.isTransferring = true;
             this.messageParcelsTotal = (int) Math.ceil((double) this.data.length() / TEXT_LENGTH_PER_PARCEL);
-            this.checksum = calculateChecksum(input);
+            this.checksum = calculateChecksum(data);
             splitDataIntoParcels();
         } else {
-            String[] parts = input.split(":");
-            if (parts.length != 3) {
+            String[] parts = data.split(":");
+            // expected format:
+            // uid:parceltotal:datachecksum:commandId
+            // Example:
+            // AA:003:A4GD:B
+            if (parts.length != 4) {
                 throw new IllegalArgumentException("Invalid header format");
             }
             this.id = parts[0];
             this.messageParcelsTotal = Integer.parseInt(parts[1]);
+            this.checksum = parts[2]; // don't calculate the checksum initially
             this.dataParcels = new String[messageParcelsTotal];
             this.data = null;
             this.messageParcelCurrent = -1;
+            // get the command type
+            this.command = DataTypes.valueOf(parts[3]);
+            // setup the transmission time
             this.transmissionStartTime = System.currentTimeMillis();
             this.isTransferring = true;
-            this.checksum = parts[2]; // don't calculate the checksum initially
         }
     }
 

@@ -20,7 +20,7 @@ import java.util.Map;
 import offgrid.geogram.bluetooth.comms.BlueRequest;
 import offgrid.geogram.bluetooth.comms.BluePackage;
 import offgrid.geogram.bluetooth.comms.DataCallback;
-import offgrid.geogram.bluetooth.comms.RequestTypes;
+import offgrid.geogram.bluetooth.comms.DataTypes;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.things.BeaconReachable;
@@ -167,7 +167,7 @@ public class BeaconFinder {
             beacon.setRssi(result.getRssi());
             beaconMap.put(instanceId, beacon);
             // get the profile info
-            getProfileInfo(beacon);
+            //getProfileInfo(beacon);
 
             // also save it do disk
             BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
@@ -199,7 +199,7 @@ public class BeaconFinder {
         String macAddress = beacon.getMacAddress();
         request.setMacAddress(macAddress);
         // what we are requesting as data to the device
-        request.setRequest(RequestTypes.GET_USER_FROM_DEVICE);
+        request.setRequest(DataTypes.G);
         // Implement the callback
         DataCallback callback = new DataCallback() {
             BluePackage requestData = null;

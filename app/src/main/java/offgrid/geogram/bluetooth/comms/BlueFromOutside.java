@@ -77,17 +77,17 @@ public class BlueFromOutside {
      * @return
      */
     private String processReceivedRequest(String macAddress, String received, Context context) {
-        RequestTypes command;
+        DataTypes command;
 
         try{
             // is this a valid command?
             if(received.contains(":")){
                 // it has multiple parts inside
                 String[] data = received.split(":");
-                command = RequestTypes.valueOf(data[0]);
+                command = DataTypes.valueOf(data[0]);
             }else{
                 // single command
-                command = RequestTypes.valueOf(received);
+                command = DataTypes.valueOf(received);
             }
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Invalid command: " + received);
@@ -96,7 +96,7 @@ public class BlueFromOutside {
         Log.i(TAG, "Received command: " + received);
 
         switch (command) {
-            case GET_USER_FROM_DEVICE -> {
+            case G -> {
                 return getUserFromDevice();
             }
             case B -> {
@@ -109,7 +109,7 @@ public class BlueFromOutside {
     }
 
     private String receiveBroadCastMessage(String macAddress, String receivedText, Context context) {
-        String key = RequestTypes.B.toString() + ":";
+        String key = DataTypes.B.toString() + ":";
         if(!receivedText.contains(key)){
             return "Invalid broadcast message";
         }
