@@ -154,6 +154,9 @@ public class BlueDataWriteFromOutside {
         if(receivedData.startsWith(">B:")){
             String parcelId = receivedData.substring(3);
             // what do we do now?
+            String id = parcelId.substring(0, 2);
+            Log.i(TAG, "Received gap request with id: "
+                    + id + " for parcel " + parcelId.substring(2));
         }
 
     }

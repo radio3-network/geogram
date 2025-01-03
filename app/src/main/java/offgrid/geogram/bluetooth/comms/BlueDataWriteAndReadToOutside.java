@@ -1,5 +1,8 @@
 package offgrid.geogram.bluetooth.comms;
 
+import static offgrid.geogram.bluetooth.comms.Bluecomm.timeBetweenChecks;
+import static offgrid.geogram.bluetooth.comms.Bluecomm.timeBetweenMessages;
+
 import android.content.Context;
 
 import offgrid.geogram.core.Log;
@@ -44,7 +47,7 @@ public class BlueDataWriteAndReadToOutside {
         new Thread(() -> {
             try {
 
-                Thread.sleep(2000);
+                Thread.sleep(timeBetweenChecks);
 
                 DataCallbackTemplate writeDataCallback = new DataCallbackTemplate() {
                     @Override
@@ -59,9 +62,9 @@ public class BlueDataWriteAndReadToOutside {
 
                 // send the message, wait for the reply
                 Log.i(TAG, "Request sent: " + this.request);
-                Bluecomm.getInstance(context).writeData(macAddress, request, writeDataCallback);
+                Bluecomm.getInstance(context).writeData(macAddress, request);
                 // wait 2 seconds
-                Thread.sleep(2000);
+                Thread.sleep(timeBetweenChecks);
 
                 // start looping for results
                 DataCallbackTemplate receiveDataCallback = new DataCallbackTemplate() {
@@ -92,7 +95,7 @@ public class BlueDataWriteAndReadToOutside {
                 bluecomm.getDataRead(this.macAddress, receiveDataCallback);
 
                 // small delay necessary to wait for first message
-                Thread.sleep(500);
+                Thread.sleep(timeBetweenChecks);
 
                 // request data needs to be valid
                 if(requestData == null || stopProcessing){
@@ -103,7 +106,7 @@ public class BlueDataWriteAndReadToOutside {
                 // repeat in loop until all parcels are received
                 for(int i = 0; i < requestData.getMessageParcelsTotal(); i++){
                     bluecomm.getDataRead(this.macAddress, receiveDataCallback);
-                    Thread.sleep(500);
+                    Thread.sleep(timeBetweenMessages);
                     if(stopProcessing){
                         break;
                     }

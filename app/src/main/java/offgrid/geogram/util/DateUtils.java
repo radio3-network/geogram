@@ -1,6 +1,9 @@
 package offgrid.geogram.util;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
@@ -22,6 +25,13 @@ public class DateUtils {
             // Format the date and return it as a string
             return formatter.format(date);
         }
+
+
+    public static String convertTimestampForChatMessage(long timestamp) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                .withZone(ZoneId.systemDefault());
+        return formatter.format(Instant.ofEpochMilli(timestamp));
+    }
 
     /**
      * Convert the last seen timestamp into a human-readable format.

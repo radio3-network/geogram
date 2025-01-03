@@ -28,4 +28,15 @@
         android:padding="10dp"
         android:textColor="#000000"
         android:textSize="16sp" />
+
+    <!-- Timestamp -->
+    <TextView
+        android:id="@+id/message_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="12:34 PM"
+        android:textColor="#757575"
+        android:textSize="12sp"
+        android:layout_marginTop="4dp"
+        android:gravity="end" />
 </LinearLayout>

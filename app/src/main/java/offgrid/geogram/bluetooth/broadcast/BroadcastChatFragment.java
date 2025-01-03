@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import offgrid.geogram.R;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.core.old.old.GenerateDeviceId;
+import offgrid.geogram.util.DateUtils;
 
 public class BroadcastChatFragment extends Fragment implements BroadcastSendMessage.MessageUpdateListener {
 
@@ -125,10 +126,10 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
             if (!displayedMessages.contains(message)) {
                 if (message.isWrittenByMe()) {
                     Log.i("BroadcastChatFragment", "Adding user message: " + message.getMessage());
-                    addUserMessage(message.getMessage());
+                    addUserMessage(message);
                 } else {
                     Log.i("BroadcastChatFragment", "Adding received message: " + message.getMessage());
-                    addReceivedMessage(message.getDeviceId(), message.getMessage());
+                    addReceivedMessage(message);
                     // Scroll to the bottom of the chat
                     chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
                 }
@@ -142,11 +143,23 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
      *
      * @param message The message to display.
      */
-    private void addUserMessage(String message) {
+    private void addUserMessage(BroadcastMessage message) {
         View userMessageView = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_user_message, chatMessageContainer, false);
         TextView messageTextView = userMessageView.findViewById(R.id.message_user_self);
-        messageTextView.setText(message);
+        messageTextView.setText(message.getMessage());
+
+        // add the other details
+        TextView textBoxUpper = userMessageView.findViewById(R.id.upper_text);
+        TextView textBoxLower = userMessageView.findViewById(R.id.lower_text);
+
+        long timeStamp = message.getTimestamp();
+        String dateText = DateUtils.convertTimestampForChatMessage(timeStamp);
+        textBoxUpper.setText(dateText);
+        textBoxLower.setText("delivered");
+
+
+
         chatMessageContainer.addView(userMessageView);
         chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
     }
@@ -156,21 +169,29 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
      *
      * @param message The message to display.
      */
-    public void addReceivedMessage(String sender, String message) {
+    public void addReceivedMessage(BroadcastMessage message) {
         View receivedMessageView = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_received_message, chatMessageContainer, false);
 
+        // Get the objects
+        TextView textBoxUpper = receivedMessageView.findViewById(R.id.sender_name);
+        TextView textBoxLower = receivedMessageView.findViewById(R.id.message_timestamp);
+
         // Set the sender's name
-        TextView senderNameTextView = receivedMessageView.findViewById(R.id.sender_name);
-        if(sender != null){
-            senderNameTextView.setText(sender);
+        if(message.getDeviceId() != null){
+            textBoxLower.setText(message.getDeviceId());
         }else{
-            senderNameTextView.setText("");
+            textBoxLower.setText("");
         }
+        // now add the time stamp
+        long timeStamp = message.getTimestamp();
+        String dateText = DateUtils.convertTimestampForChatMessage(timeStamp);
+        textBoxUpper.setText(dateText);
+
 
         // Set the message content
         TextView messageTextView = receivedMessageView.findViewById(R.id.message_user_1);
-        messageTextView.setText(message);
+        messageTextView.setText(message.getMessage());
 
         // Add the view to the container
         chatMessageContainer.addView(receivedMessageView);

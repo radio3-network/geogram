@@ -29,7 +29,7 @@ public class Bluecomm {
     private static final UUID SERVICE_UUID = BluetoothCentral.CUSTOM_SERVICE_UUID;
     private static final UUID CHARACTERISTIC_UUID = BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
 
-    private final int
+    public static final int
             timeBetweenChecks = 1000,
             timeBetweenMessages = 1000;
 
@@ -178,18 +178,6 @@ public class Bluecomm {
     public synchronized void writeData(String macAddress, String data) {
         BlueQueueItem item = new BlueQueueItem(macAddress, data);
         queue.add(item);
-
-//        // send data with just logging and no further reaction
-//        writeData(macAddress, data, new DataCallbackTemplate() {
-//            @Override
-//            public void onDataSuccess(String data) {
-//                Log.i(TAG, "Data sent: " + data);
-//            }
-//            @Override
-//            public void onDataError(String errorMessage) {
-//                Log.e(TAG, "Error sending data: " + errorMessage);
-//            }
-//        });
     }
 
     /**
