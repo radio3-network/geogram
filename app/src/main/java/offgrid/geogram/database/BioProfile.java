@@ -31,6 +31,7 @@ public class BioProfile {
     @Expose
     private String macAddress;
 
+    private String extra;
 
     /**
      * Converts this BioProfile object to a compact JSON string.
@@ -138,5 +139,17 @@ public class BioProfile {
 //        if (this.nickname == null) {
 //            this.nickname = bioProfileFromFile.getNickname();
 //        }
+    }
+
+    /**
+     * Extra is just used internally
+     * @return
+     */
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
     }
 }

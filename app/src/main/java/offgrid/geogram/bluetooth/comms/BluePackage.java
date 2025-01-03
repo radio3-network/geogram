@@ -410,4 +410,23 @@ public class BluePackage {
         return null; // No gaps found
     }
 
+    /**
+     * Retrieves a parcel by its index, given as a string in the format "000", "001", etc.
+     *
+     * @param indexString The index of the parcel as a zero-padded string.
+     * @return The parcel in the format "AA###:parcelText", or {@code null} if the index is invalid or the parcel is missing.
+     */
+    public String getParcelByIndex(String indexString) {
+        try {
+            int index = Integer.parseInt(indexString);
+            if (index < 0 || index >= messageParcelsTotal || dataParcels[index] == null) {
+                return null; // Index out of bounds or parcel missing
+            }
+            return String.format(Locale.US, "%s%03d:%s", id, index, dataParcels[index]);
+        } catch (NumberFormatException e) {
+            return null; // Invalid index format
+        }
+    }
+
+
 }

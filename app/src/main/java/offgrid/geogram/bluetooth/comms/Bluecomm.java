@@ -30,25 +30,39 @@ public class Bluecomm {
     private static final UUID CHARACTERISTIC_UUID = BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
 
     public static final int
-            timeBetweenChecks = 1000,
-            timeBetweenMessages = 1000,
+            timeBetweenChecks = 2000,
+            timeBetweenMessages = 700,
             maxSizeOfMessages = 14
     ;
+
+    public static final String
+            gapBroadcast = ">B:";
+
+    // queue to store individual one-line messages to be sent
+    private final CopyOnWriteArrayList<BlueQueueItem> queue = new CopyOnWriteArrayList<>();
+    private Thread queueThread = null;
 
 
     private Bluecomm(Context context) {
         this.context = context.getApplicationContext();
-        if(cleanupThread == null){
-            startCleanupThread();
+        if(queueThread == null){
+            startThreadToSendMessagesInQueue();
         }
     }
 
-    private final CopyOnWriteArrayList<BlueQueueItem> queue = new CopyOnWriteArrayList<>();
-    private Thread cleanupThread = null;
+    /**
+     * Singleton access to the GetProfile instance.
+     */
+    public static synchronized Bluecomm getInstance(Context context) {
+        if (instance == null) {
+            instance = new Bluecomm(context);
+        }
+        return instance;
+    }
 
 
-    private void startCleanupThread() {
-        cleanupThread = new Thread(() -> {
+    private void startThreadToSendMessagesInQueue() {
+        queueThread = new Thread(() -> {
             try {
                 while(true) {
                     Thread.sleep(timeBetweenChecks); // Pause for a bit
@@ -68,17 +82,7 @@ public class Bluecomm {
             }
 
         });
-        cleanupThread.start(); // Starts the thread
-    }
-
-    /**
-     * Singleton access to the GetProfile instance.
-     */
-    public static synchronized Bluecomm getInstance(Context context) {
-        if (instance == null) {
-            instance = new Bluecomm(context);
-        }
-        return instance;
+        queueThread.start(); // Starts the thread
     }
 
     /**
@@ -208,6 +212,9 @@ public class Bluecomm {
      * @param callback   Callback to handle success or failure of the write operation.
      */
     public synchronized void writeData(String macAddress, String data, DataCallbackTemplate callback) {
+        // wait a bit until unlocked
+        Mutex.getInstance().waitUntilUnlocked();
+
         if (!checkPermissions()) {
             Log.i(TAG, "Missing required permissions to perform Bluetooth operations.");
             callback.onDataError("Missing required permissions.");
@@ -229,6 +236,10 @@ public class Bluecomm {
         }
 
         try {
+            // wait a bit until unlocked
+            Mutex.getInstance().waitUntilUnlocked();
+            Mutex.getInstance().lock();
+
             bluetoothGatt = device.connectGatt(context, false, new BluetoothGattCallback() {
                 @Override
                 public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -272,6 +283,7 @@ public class Bluecomm {
                             callback.onDataError("Failed to initiate write operation.");
                             gatt.disconnect();
                         }
+
                     } else {
                         Log.i(TAG, "Failed to discover services. Status: " + status);
                         callback.onDataError("Failed to discover services.");
@@ -282,7 +294,9 @@ public class Bluecomm {
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());
             callback.onDataError("Security exception occurred.");
+            Mutex.getInstance().unlock();
         }
+        Mutex.getInstance().unlock();
     }
 
     /**

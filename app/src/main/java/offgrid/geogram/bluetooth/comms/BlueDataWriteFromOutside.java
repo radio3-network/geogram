@@ -1,5 +1,7 @@
 package offgrid.geogram.bluetooth.comms;
 
+import static offgrid.geogram.bluetooth.comms.Bluecomm.gapBroadcast;
+
 import android.content.Context;
 
 import java.util.HashMap;
@@ -153,12 +155,29 @@ public class BlueDataWriteFromOutside {
         // example of what we expect to receive
         // >B:XY001
         // this means: broadcast message with identification XY requests parcel 1
-        if(receivedData.startsWith(">B:")){
+        if(receivedData.startsWith(gapBroadcast)){
             String parcelId = receivedData.substring(3);
             // what do we do now?
             String id = parcelId.substring(0, 2);
-            Log.i(TAG, "Received gap request with id: "
-                    + id + " for parcel " + parcelId.substring(2));
+            String parcelNumber = parcelId.substring(2);
+            Log.i(TAG, "Gap data: received request with id: "
+                    + id + " for parcel " + parcelNumber);
+            // send back the parcel to the other device
+            BluePackage writeAction = writeActions.get(id);
+            if(writeAction == null){
+                Log.e(TAG, "GapData: No write action found for id: " + id);
+                return;
+            }
+            int value;
+            try {
+                value = Integer.parseInt(parcelNumber);
+            } catch (NumberFormatException e){
+                Log.e(TAG, "GapData: Invalid parcel number received: " + parcelNumber);
+                return;
+            }
+            String textToSendAgain = writeAction.getSpecificParcel(value);
+            Log.i(TAG, "GapData: Sending parcel: " + textToSendAgain);
+            Bluecomm.getInstance(context).writeData(macAddress, textToSendAgain);
         }
 
         // single command is not yet supported

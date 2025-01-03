@@ -226,8 +226,11 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
 
         // Set the message content
         String text = message.getMessage();
-        if(text.startsWith(tagBio)){
-            text = ASCII.getRandomOneliner();
+        if(text.startsWith(tagBio) && profile != null){
+            if(profile.getExtra() == null){
+                profile.setExtra(ASCII.getRandomOneliner());
+            }
+            text = profile.getExtra();
         }
         TextView messageTextView = receivedMessageView.findViewById(R.id.message_user_1);
         messageTextView.setText(text);

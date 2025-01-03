@@ -20,6 +20,7 @@ import java.util.Map;
 
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
+import offgrid.geogram.bluetooth.comms.Mutex;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
@@ -150,7 +151,11 @@ public class BeaconFinder {
             return;
         }
 
+        // wait for write operations to be over
+        Mutex.getInstance().waitUntilUnlocked();
+        Mutex.getInstance().lock();
         byte[] serviceData = result.getScanRecord().getServiceData(EDDYSTONE_SERVICE_UUID);
+        Mutex.getInstance().unlock();
         if (serviceData == null) {
             return;
         }
@@ -242,39 +247,7 @@ public class BeaconFinder {
         return hexString.toString();
     }
 
-    /**
-     * Checks if the required permissions are granted.
-     */
-    private boolean checkPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // API 31 or higher
-            boolean hasConnectPermission =
-                    context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
-                            == PackageManager.PERMISSION_GRANTED;
 
-            if (!hasConnectPermission) {
-                Log.i(TAG, "Missing BLUETOOTH_CONNECT permission.");
-            }
-            return hasConnectPermission;
-        } else {
-            // Older Android versions do not require runtime permissions for Bluetooth
-            return true;
-        }
-    }
 
-    /**
-     * Retrieves the device ID based on the given MAC address.
-     * Attention that MAC addresses tend to change often for the
-     * case of android devices. Make sure your search is fresh.
-     * @param macAddress MAC address of the bluetooth device
-     * @return device ID or null when not found
-     */
-    public String getDeviceId(String macAddress) {
-        for (BeaconReachable beacon : getBeaconMap().values()) {
-            if (beacon.getMacAddress().equals(macAddress)) {
-                return beacon.getDeviceId();
-            }
-        }
-        return null;
-    }
 
 }

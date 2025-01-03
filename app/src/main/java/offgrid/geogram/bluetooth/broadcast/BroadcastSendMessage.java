@@ -1,5 +1,7 @@
 package offgrid.geogram.bluetooth.broadcast;
 
+import static offgrid.geogram.bluetooth.comms.Bluecomm.gapBroadcast;
+
 import android.content.Context;
 
 import java.lang.ref.WeakReference;
@@ -160,9 +162,9 @@ public class BroadcastSendMessage {
                                           String gapIndex,
                                           Context context) {
         // create a single broadcast command
-        String text = ">B:" + gapIndex;
+        String text = gapBroadcast + gapIndex;
         // send it over the wire
-        Log.i(TAG_ID, "Sending gap request to " + macAddress + " with data: " + text);
+        Log.i(TAG_ID, "GapData: Sending gap data request to " + macAddress + " with: " + text);
         Bluecomm.getInstance(context).writeData(macAddress, text);
     }
 
