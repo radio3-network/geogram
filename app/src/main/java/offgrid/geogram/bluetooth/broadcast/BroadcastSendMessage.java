@@ -76,10 +76,11 @@ import offgrid.geogram.things.BeaconReachable;
 
  */
 
-public class BroadcastChat {
-    private static final String TAG_ID = "offgrid-broadcast";
+public class BroadcastSendMessage {
+    private static final String TAG_ID = "BroadcastSendMessage";
 
-    // Messages that were broadcast
+    // These are the messages visible from the UI
+    // This gets updated even when the UI is not selected
     public static ArrayList<BroadcastMessage> messages = new ArrayList<>();
 
     // Listener for message updates
@@ -93,10 +94,10 @@ public class BroadcastChat {
     /**
      * Tries to send a message to all Eddystone beacon devices in reach.
      *
-     * @param message a short text message
+     * @param messageToBroadcast a short text message
      * @return false when something went wrong (e.g., Bluetooth not available)
      */
-    public static boolean broadcast(String message, Context context) {
+    public static boolean broadcast(BroadcastMessage messageToBroadcast, Context context) {
 
         BluetoothCentral bluetoothCentral = BluetoothCentral.getInstance(context);
         if (bluetoothCentral.isBluetoothAvailable()) {
@@ -109,17 +110,17 @@ public class BroadcastChat {
         }
 
         // Send the message
-        broadcastMessageToAllEddystoneDevices(message, context);
-        Log.i(TAG_ID, "Message sent to all Eddystone devices: " + message);
+        broadcastMessageToAllEddystoneDevices(messageToBroadcast, context);
+        Log.i(TAG_ID, "Message sent to all Eddystone devices: " + messageToBroadcast.getMessage());
 
         return true;
     }
 
     /**
      * Broadcasts a message to all Eddystone devices in reach.
-     * @param message The message to be sent, it needs to be within 20 characters
+     * @param messageToBroadcast The message to be sent, it needs to be within 20 characters
      */
-    public static void broadcastMessageToAllEddystoneDevices(String message, Context context) {
+    public static void broadcastMessageToAllEddystoneDevices(BroadcastMessage messageToBroadcast, Context context) {
         Thread thread = new Thread(() -> {
             try {
                 Collection<BeaconReachable> devices = BeaconFinder.getInstance(context).getBeaconMap().values();
@@ -128,11 +129,12 @@ public class BroadcastChat {
                     return;
                 }
                 // create the package to send
-                BluePackage packageToSend = BluePackage.createSender(DataType.B, message);
+                BluePackage packageToSend = BluePackage.createSender(DataType.B, messageToBroadcast.getMessage());
+                messageToBroadcast.setPackage(packageToSend);
                 // iterate over the devices
                 for (BeaconReachable device : devices) {
                     // send the message
-                    sendToDevice(device, packageToSend, context);
+                    sendPackageToDevice(device, packageToSend, context);
                 }
                 Thread.sleep(500); // Pause for a bit
             } catch (InterruptedException e) {
@@ -145,15 +147,31 @@ public class BroadcastChat {
     }
 
     /**
+     * This is used for asking the other device to send a parcel that is missing
+     * @param macAddress MAC address of the device
+     * @param gapIndex index of the missing parcel
+     * @param context application context
+     */
+    public static void sendParcelToDevice(String macAddress,
+                                          String gapIndex,
+                                          Context context) {
+        // create a single broadcast command
+        String text = ">B:" + gapIndex;
+        // send it over the wire
+        Log.i(TAG_ID, "Sending gap request to " + macAddress + " with data: " + text);
+        Bluecomm.getInstance(context).writeData(macAddress, text);
+    }
+
+    /**
      * Sends a message to a specific Eddystone device.
      * When the message is large, it will break into multiple portions
      * @param device The Eddystone device to send the message to
      * @param packageToSend The message to be sent
      * @param context The application context
      */
-    private static void sendToDevice(BeaconReachable device,
-                                     BluePackage packageToSend,
-                                     Context context) {
+    private static void sendPackageToDevice(BeaconReachable device,
+                                            BluePackage packageToSend,
+                                            Context context) {
         try {
             // reset the counter for this package
             packageToSend.resetParcelCounter();

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import offgrid.geogram.bluetooth.broadcast.BroadcastChat;
+import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.core.Log;
 
@@ -68,10 +68,17 @@ public class BlueDataWriteFromOutside {
         Log.i(TAG, "Received data from " + macAddress + ": " + receivedData);
 
         // needs to always contain an :
-        if(!receivedData.contains(":")){
+        if(receivedData == null || !receivedData.contains(":")){
             Log.e(TAG, "Invalid data received: " + receivedData);
             return;
         }
+
+        // is this a single command?
+        if(receivedData.startsWith(">")){
+            processSingleCommandReceived(macAddress, receivedData, context);
+            return;
+        }
+
         String[] data = receivedData.split(":");
         String UID = data[0].substring(0, 2);
 
@@ -105,10 +112,21 @@ public class BlueDataWriteFromOutside {
         // next messages should be an increment
         writeAction.receiveParcel(receivedData);
 
+        if(writeAction.hasGaps()){
+            // get the first gap that is missing
+            String gapIndex = writeAction.getFirstGapParcel();
+            // send this request back to the other device
+            BroadcastSendMessage.sendParcelToDevice(macAddress, gapIndex, context);
+            // all done
+            return;
+        }
+
         // when the message is complete, process the command inside
         if(writeAction.allParcelsReceivedAndValid()){
             processReceivedRequest(macAddress, writeAction, context);
             Log.i(TAG, "Request processed from " + macAddress);
+            // remove this message from the queue
+            writeActions.remove(UID);
         }
 
 //        // process the request
@@ -121,6 +139,23 @@ public class BlueDataWriteFromOutside {
 //        // place it on the queue
 //        requests.put(macAddress, requestData);
 //        Log.i(TAG, "Request placed on queue: " + macAddress + " - " + receivedData);
+    }
+
+    /**
+     * A single command starting with > was received
+     * @param macAddress MAC address of the device which sent the message
+     * @param receivedData message received
+     * @param context context of the application
+     */
+    private void processSingleCommandReceived(String macAddress, String receivedData, Context context) {
+        // example of what we expect to receive
+        // >B:XY001
+        // this means: broadcast message with identification XY requests parcel 1
+        if(receivedData.startsWith(">B:")){
+            String parcelId = receivedData.substring(3);
+            // what do we do now?
+        }
+
     }
 
     /**
@@ -161,7 +196,7 @@ public class BlueDataWriteFromOutside {
         BroadcastMessage messageReceived = new BroadcastMessage(messageText, deviceId, false);
         messageReceived.setDeviceId(deviceId);
         // place the message on the list
-        BroadcastChat.messages.add(messageReceived);
+        BroadcastSendMessage.messages.add(messageReceived);
     }
 
 

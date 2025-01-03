@@ -356,4 +356,58 @@ public class BluePackage {
     public DataType getCommand() {
         return command;
     }
+
+
+    /**
+     * Gets the index of the latest parcel that is not null and closest to the end of the array.
+     *
+     * @return The index of the latest parcel (1-based), or -1 if no parcels are received.
+     */
+    private int getLatestParcel() {
+        if (dataParcels == null) {
+            return -1;
+        }
+
+        for (int i = dataParcels.length - 1; i >= 0; i--) {
+            if (dataParcels[i] != null) {
+                return i + 1; // Convert to 1-based index
+            }
+        }
+        return -1; // No parcel found
+    }
+
+
+    /**
+     * Looks at all the received parcels and checks if there are any gaps
+     * @return true when there is at least one gap existing
+     */
+    public boolean hasGaps() {
+        int latestParcel = getLatestParcel();
+        for (int i = 0; i < latestParcel; i++) {
+            if (dataParcels[i] == null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Finds the first gap (missing parcel) in the received data parcels.
+     *
+     * @return The ID of the first missing parcel in the format "AA###", or {@code null} if there are no gaps.
+     */
+    public String getFirstGapParcel() {
+        if (dataParcels == null) {
+            return null;
+        }
+
+        for (int i = 0; i < dataParcels.length; i++) {
+            if (dataParcels[i] == null) {
+                // Generate the parcel ID for the first gap
+                return String.format(Locale.US, "%s%03d", id, i ); // Convert to 1-based index
+            }
+        }
+        return null; // No gaps found
+    }
+
 }

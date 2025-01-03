@@ -91,9 +91,25 @@ public class BluePackageTest {
         assertTrue(receiver.allParcelsReceivedAndValid());
         String dataReceived = receiver.getData();
         assertEquals("HelloWorldThisIsATestThatGoesAroundAndShouldBreakToMultipleMessagesOK?", dataReceived);
-
-
     }
 
+
+    @Test
+    public void testGaps() {
+        String headerToReceive = "ab:003:JSDA:B";
+        BluePackage receiver = BluePackage.createReceiver(headerToReceive);
+
+        receiver.receiveParcel("ab000:DataPart1");
+        assertFalse(receiver.hasGaps());
+
+        receiver.receiveParcel("ab002:DataPart3");
+        assertTrue(receiver.hasGaps());
+
+        String gapIndex = receiver.getFirstGapParcel();
+        assertEquals(receiver.getId() + "001", gapIndex);
+
+        receiver.receiveParcel("ab001:DataPart2");
+        assertFalse(receiver.hasGaps());
+    }
 
 }

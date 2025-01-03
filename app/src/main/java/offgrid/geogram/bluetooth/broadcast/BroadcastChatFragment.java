@@ -20,11 +20,10 @@ import androidx.fragment.app.Fragment;
 import java.util.ArrayList;
 
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.core.old.old.GenerateDeviceId;
 
-public class BroadcastChatFragment extends Fragment implements BroadcastChat.MessageUpdateListener {
+public class BroadcastChatFragment extends Fragment implements BroadcastSendMessage.MessageUpdateListener {
 
     private final ArrayList<BroadcastMessage> displayedMessages = new ArrayList<>();
     private LinearLayout chatMessageContainer;
@@ -64,15 +63,14 @@ public class BroadcastChatFragment extends Fragment implements BroadcastChat.Mes
             // add this message to our list of sent messages
             String deviceId = GenerateDeviceId.generateInstanceId(this.getContext());
             BroadcastMessage messageToBroadcast = new BroadcastMessage(message, deviceId, true);
-            BroadcastChat.addMessage(messageToBroadcast);
+            BroadcastSendMessage.addMessage(messageToBroadcast);
 
 
             new Thread(() -> {
                 // Send the message via BroadcastChat
-                boolean success = BroadcastChat.broadcast(message, getContext());
+                boolean success = BroadcastSendMessage.broadcast(messageToBroadcast, getContext());
                 requireActivity().runOnUiThread(() -> {
                     if (success) {
-                        //addUserMessage(message);
                         messageInput.setText("");
 
                         // Scroll to the bottom of the chat
@@ -89,7 +87,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastChat.Mes
         startMessagePolling();
 
         // Register the fragment as a listener for updates
-        BroadcastChat.setMessageUpdateListener(this);
+        BroadcastSendMessage.setMessageUpdateListener(this);
 
         // update the message right now on the chat box
         updateMessages();
@@ -102,7 +100,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastChat.Mes
         super.onDestroyView();
         // Stop message polling and unregister listener to avoid memory leaks
         handler.removeCallbacksAndMessages(null);
-        BroadcastChat.removeMessageUpdateListener();
+        BroadcastSendMessage.removeMessageUpdateListener();
     }
 
     /**
@@ -122,7 +120,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastChat.Mes
      * Updates the chat message container with new messages.
      */
     private void updateMessages() {
-        ArrayList<BroadcastMessage> currentMessages = new ArrayList<>(BroadcastChat.messages);
+        ArrayList<BroadcastMessage> currentMessages = new ArrayList<>(BroadcastSendMessage.messages);
         for (BroadcastMessage message : currentMessages) {
             if (!displayedMessages.contains(message)) {
                 if (message.isWrittenByMe()) {

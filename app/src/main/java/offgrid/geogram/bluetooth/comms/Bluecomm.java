@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.core.Log;
@@ -28,8 +29,44 @@ public class Bluecomm {
     private static final UUID SERVICE_UUID = BluetoothCentral.CUSTOM_SERVICE_UUID;
     private static final UUID CHARACTERISTIC_UUID = BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
 
+    private final int
+            timeBetweenChecks = 1000,
+            timeBetweenMessages = 1000;
+
+
     private Bluecomm(Context context) {
         this.context = context.getApplicationContext();
+        if(cleanupThread == null){
+            startCleanupThread();
+        }
+    }
+
+    private final CopyOnWriteArrayList<BlueQueueItem> queue = new CopyOnWriteArrayList<>();
+    private Thread cleanupThread = null;
+
+
+    private void startCleanupThread() {
+        cleanupThread = new Thread(() -> {
+            try {
+                while(true) {
+                    Thread.sleep(timeBetweenChecks); // Pause for a bit
+                    if(queue.isEmpty()){
+                        continue;
+                    }
+                    while(!queue.isEmpty()){
+                        BlueQueueItem item = queue.get(0);
+                        writeData(item);
+                        Thread.sleep(timeBetweenMessages);
+                        queue.remove(0);
+                    }
+
+                }
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Thread interrupted: " + e.getMessage());
+            }
+
+        });
+        cleanupThread.start(); // Starts the thread
     }
 
     /**
@@ -139,8 +176,29 @@ public class Bluecomm {
      * @param data text to be sent, attention to keep it short
      */
     public synchronized void writeData(String macAddress, String data) {
+        BlueQueueItem item = new BlueQueueItem(macAddress, data);
+        queue.add(item);
+
+//        // send data with just logging and no further reaction
+//        writeData(macAddress, data, new DataCallbackTemplate() {
+//            @Override
+//            public void onDataSuccess(String data) {
+//                Log.i(TAG, "Data sent: " + data);
+//            }
+//            @Override
+//            public void onDataError(String errorMessage) {
+//                Log.e(TAG, "Error sending data: " + errorMessage);
+//            }
+//        });
+    }
+
+    /**
+     * Just send a write event to a device without waiting for the reply
+     * This is useful for cases like broadcasting messages to devices
+     */
+    public synchronized void writeData(BlueQueueItem item) {
         // send data with just logging and no further reaction
-        writeData(macAddress, data, new DataCallbackTemplate() {
+        writeData(item.getMacAddress(), item.getData(), new DataCallbackTemplate() {
             @Override
             public void onDataSuccess(String data) {
                 Log.i(TAG, "Data sent: " + data);

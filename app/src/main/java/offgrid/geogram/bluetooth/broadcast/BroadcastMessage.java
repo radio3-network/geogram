@@ -2,6 +2,7 @@ package offgrid.geogram.bluetooth.broadcast;
 
 import java.util.ArrayList;
 
+import offgrid.geogram.bluetooth.comms.BluePackage;
 import offgrid.geogram.things.BeaconReachable;
 
 /**
@@ -12,7 +13,8 @@ public class BroadcastMessage {
     private final long timestamp;
     private final boolean writtenByMe;
     private String deviceId = null;
-    private ArrayList<BeaconReachable> devicesThatReadMessage = new ArrayList<>();
+    private BluePackage packageSent;
+    private final ArrayList<BeaconReachable> devicesThatReadMessage = new ArrayList<>();
 
     public BroadcastMessage(String message, String deviceId, boolean writtenByMe) {
         this.message = message;
@@ -45,5 +47,10 @@ public class BroadcastMessage {
     public boolean isWrittenByMe() {
         return writtenByMe;
     }
-
+    public void setPackage(BluePackage packageSent) {
+        this.packageSent = packageSent;
+    }
+    public BluePackage getPackage() {
+        return packageSent;
+    }
 }

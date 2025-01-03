@@ -145,15 +145,15 @@ public class GattServer {
             return false;
         }
 
-        try {
-            gattServer.notifyCharacteristicChanged(device, characteristic, false);
-            Log.i(TAG, "Characteristic written successfully.");
-            return true;
-        } catch (SecurityException e) {
-            Log.i(TAG, "SecurityException while writing characteristic: " + e.getMessage());
-        } catch (Exception e) {
-            Log.i(TAG, "Unexpected error while writing characteristic: " + e.getMessage());
-        }
+//        try {
+//            gattServer.notifyCharacteristicChanged(device, characteristic, false);
+//            Log.i(TAG, "Characteristic written successfully.");
+//            return true;
+//        } catch (SecurityException e) {
+//            Log.i(TAG, "SecurityException while writing characteristic: " + e.getMessage());
+//        } catch (Exception e) {
+//            Log.i(TAG, "Unexpected error while writing characteristic: " + e.getMessage());
+//        }
         return false;
     }
 
