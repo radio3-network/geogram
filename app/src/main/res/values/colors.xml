@@ -20,4 +20,6 @@
     <color name="neon_purple">#9400D3</color>
     <color name="neon_green">#39FF14</color>
     <color name="dark_gray_background">#121212</color>
+    <color name="light_gray">#D3D3D3</color> <!-- Light gray -->
+
 </resources>

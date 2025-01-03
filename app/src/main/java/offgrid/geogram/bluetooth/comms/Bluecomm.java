@@ -31,7 +31,9 @@ public class Bluecomm {
 
     public static final int
             timeBetweenChecks = 1000,
-            timeBetweenMessages = 1000;
+            timeBetweenMessages = 1000,
+            maxSizeOfMessages = 14
+    ;
 
 
     private Bluecomm(Context context) {

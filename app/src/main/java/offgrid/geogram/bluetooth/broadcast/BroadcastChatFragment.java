@@ -1,5 +1,6 @@
 package offgrid.geogram.bluetooth.broadcast;
 
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -147,7 +148,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
                         }
                         // setup with the mac address that was used
                         this.profiles.put(message.getDeviceId(), profile);
-                        Log.i("BroadcastChatFragment", "Adding bio profile: " + profile.getNickname());
+                        Log.i("BroadcastChatFragment", "Adding bio profile: " + profile.getNick());
                         // valid bio, write it to our database
                         BioDatabase.saveOrMergeWithBeaconDiscovered(profile, this.getContext());
                         //return;
@@ -202,33 +203,83 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         TextView textBoxLower = receivedMessageView.findViewById(R.id.message_timestamp);
 
         BioProfile profile = profiles.get(message.getDeviceId());
-
         String nickname = "";
 
-        if(profile != null){
-            nickname = profile.getNickname();
+        if (profile != null) {
+            nickname = profile.getNick();
         }
 
         // Set the sender's name
-        if(nickname.isEmpty() && message.getDeviceId() != null){
+        if (nickname.isEmpty() && message.getDeviceId() != null) {
             textBoxLower.setText(message.getDeviceId());
-        }else{
+        } else {
             textBoxLower.setText(nickname);
         }
-        // now add the time stamp
+
+        // Add the timestamp
         long timeStamp = message.getTimestamp();
         String dateText = DateUtils.convertTimestampForChatMessage(timeStamp);
         textBoxUpper.setText(dateText);
-
 
         // Set the message content
         TextView messageTextView = receivedMessageView.findViewById(R.id.message_user_1);
         messageTextView.setText(message.getMessage());
 
+        // Apply balloon style based on preferred background color
+        String colorBackground = profile != null ? profile.getColor() : "light gray";
+        applyBalloonStyle(messageTextView, colorBackground);
+
         // Add the view to the container
         chatMessageContainer.addView(receivedMessageView);
         chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
     }
+
+
+    private void applyBalloonStyle(TextView messageTextView, String backgroundColor) {
+        int bgColor;
+        int textColor;
+
+        // Define readable text color based on the background color
+        switch (backgroundColor.toLowerCase()) {
+            case "black":
+                bgColor = getResources().getColor(R.color.black);
+                textColor = getResources().getColor(R.color.white);
+                break;
+            case "yellow":
+                bgColor = getResources().getColor(R.color.yellow);
+                textColor = getResources().getColor(R.color.black);
+                break;
+            case "blue":
+            case "green":
+            case "cyan":
+            case "red":
+            case "magenta":
+            case "pink":
+            case "brown":
+            case "dark gray":
+            case "light blue":
+            case "light green":
+            case "light cyan":
+            case "light red":
+            case "white":
+                bgColor = getResources().getColor(getResources().getIdentifier(backgroundColor.replace(" ", "_").toLowerCase(), "color", requireContext().getPackageName()));
+                textColor = backgroundColor.equalsIgnoreCase("white") ? getResources().getColor(R.color.black) : getResources().getColor(R.color.white);
+                break;
+            default:
+                // Fallback to a neutral background and readable text color
+                bgColor = getResources().getColor(R.color.light_gray); // Define a light gray fallback in colors.xml
+                textColor = getResources().getColor(R.color.black);
+                break;
+        }
+
+        // Apply the background and text colors to the message TextView
+        if (messageTextView.getBackground() instanceof GradientDrawable) {
+            GradientDrawable background = (GradientDrawable) messageTextView.getBackground();
+            background.setColor(bgColor);
+        }
+        messageTextView.setTextColor(textColor);
+    }
+
 
     @Override
     public void onMessageUpdate() {

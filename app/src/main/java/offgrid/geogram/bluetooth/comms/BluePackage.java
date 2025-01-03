@@ -47,7 +47,7 @@ public class BluePackage {
     private final DataType command;
 
     // The length of text per parcel
-    private static final int TEXT_LENGTH_PER_PARCEL = 10;
+    private static final int TEXT_LENGTH_PER_PARCEL = Bluecomm.maxSizeOfMessages;
 
     // Total number of parcels in the message
     private final int messageParcelsTotal;

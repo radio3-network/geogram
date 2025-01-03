@@ -17,13 +17,13 @@ import offgrid.geogram.core.Log;
 public class BioProfile {
 
     @Expose
-    private String deviceId; // Limit: 15 characters
+    private String id; // Limit: 15 characters
 
     @Expose
-    private String nickname; // Limit: 15 characters
+    private String nick; // Limit: 15 characters
 
     @Expose
-    private String preferredColor;
+    private String color;
 
     @Expose
     private String npub;
@@ -88,28 +88,28 @@ public class BioProfile {
     }
 
     // Getters and setters (if required)
-    public String getDeviceId() {
-        return deviceId;
+    public String getId() {
+        return id;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getNickname() {
-        return nickname;
+    public String getNick() {
+        return nick;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
+    public void setNick(String nick) {
+        this.nick = nick;
     }
 
-    public String getPreferredColor() {
-        return preferredColor;
+    public String getColor() {
+        return color;
     }
 
-    public void setPreferredColor(String preferredColor) {
-        this.preferredColor = preferredColor;
+    public void setColor(String color) {
+        this.color = color;
     }
 
     public String getNpub() {

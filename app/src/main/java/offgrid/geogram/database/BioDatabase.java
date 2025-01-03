@@ -79,7 +79,7 @@ public class BioDatabase {
      * @param appContext The application context.
      */
     public static void saveOrMergeWithBeaconDiscovered(BioProfile profile, Context appContext) {
-        String deviceId = profile.getDeviceId();
+        String deviceId = profile.getId();
         if (deviceId == null) {
             Log.e(TAG, "Device Id is null");
             return;

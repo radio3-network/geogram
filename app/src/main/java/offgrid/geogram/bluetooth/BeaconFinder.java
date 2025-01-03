@@ -199,10 +199,10 @@ public class BeaconFinder {
     private void sendProfileToEveryone() {
         SettingsUser settings = Central.getInstance().getSettings();
         BioProfile profile = new BioProfile();
-        profile.setNickname(settings.getNickname());
+        profile.setNick(settings.getNickname());
         String deviceId = GenerateDeviceId.generateInstanceId(this.context);
-        profile.setDeviceId(deviceId);
-        profile.setPreferredColor(settings.getPreferredColor());
+        profile.setId(deviceId);
+        profile.setColor(settings.getPreferredColor());
         //profile.setNpub(settings.getNpub());
 
         String message = "/bio:" + profile.toJson();
