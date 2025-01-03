@@ -3,6 +3,8 @@ package offgrid.geogram.core.old.old;
 import android.content.Context;
 import android.provider.Settings;
 
+import java.util.Locale;
+
 public class GenerateDeviceId {
 
     public static String generateInstanceId(Context context) {
@@ -19,7 +21,7 @@ public class GenerateDeviceId {
         }
 
         // Format as a 6-byte hexadecimal string
-        return String.format("%06x", hash & 0xFFFFFF);
+        return String.format("%06x", hash & 0xFFFFFF).toUpperCase(Locale.ROOT);
     }
 
 }

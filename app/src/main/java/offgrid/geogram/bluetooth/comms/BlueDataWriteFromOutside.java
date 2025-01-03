@@ -9,6 +9,8 @@ import java.util.Map;
 import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.database.BioDatabase;
+import offgrid.geogram.database.BioProfile;
 
 /**
  * This class stores the requests that are made from outside
@@ -159,6 +161,9 @@ public class BlueDataWriteFromOutside {
                     + id + " for parcel " + parcelId.substring(2));
         }
 
+        // single command is not yet supported
+        Log.i(TAG, "Single command received and ignored: " + receivedData);
+
     }
 
     /**
@@ -166,7 +171,7 @@ public class BlueDataWriteFromOutside {
      * @return the answer to the request
      */
     private void processReceivedRequest(
-            String deviceId,
+            String macAddress,
             BluePackage writeAction,
             Context context) {
 
@@ -177,7 +182,7 @@ public class BlueDataWriteFromOutside {
             case G -> {
             }
             case B -> {
-                writeBroadCastMessage(deviceId, writeAction, context);
+                writeBroadCastMessage(macAddress, writeAction, context);
             }
             default -> {
             }
@@ -190,14 +195,15 @@ public class BlueDataWriteFromOutside {
      * @return
      */
     private void writeBroadCastMessage(
-            String deviceId,
+            String macAddress,
             BluePackage writeAction,
             Context context) {
 
         String messageText = writeAction.getData();
+
         // this message was written by someone else
-        BroadcastMessage messageReceived = new BroadcastMessage(messageText, deviceId, false);
-        messageReceived.setDeviceId(deviceId);
+        BroadcastMessage messageReceived = new BroadcastMessage(messageText, macAddress, false);
+        messageReceived.setDeviceId(macAddress);
         // place the message on the list
         BroadcastSendMessage.messages.add(messageReceived);
     }

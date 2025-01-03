@@ -18,15 +18,22 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import offgrid.geogram.R;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.core.old.old.GenerateDeviceId;
+import offgrid.geogram.database.BioDatabase;
+import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.util.DateUtils;
 
 public class BroadcastChatFragment extends Fragment implements BroadcastSendMessage.MessageUpdateListener {
 
+    // messages that are displayed
     private final ArrayList<BroadcastMessage> displayedMessages = new ArrayList<>();
+    // profiles that we have chatted so far. The string is the MAC address being used
+    private final HashMap<String, BioProfile> profiles = new HashMap<>();
+
     private LinearLayout chatMessageContainer;
     private ScrollView chatScrollView;
     private final Handler handler = new Handler(Looper.getMainLooper());
@@ -128,7 +135,26 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
                     Log.i("BroadcastChatFragment", "Adding user message: " + message.getMessage());
                     addUserMessage(message);
                 } else {
-                    Log.i("BroadcastChatFragment", "Adding received message: " + message.getMessage());
+                    // save the bio profile to disk
+                    String tagBio = "/bio:";
+                    String messageText = message.getMessage();
+                    if(messageText.startsWith(tagBio)){
+                        String data = messageText.substring(tagBio.length());
+                        BioProfile profile = BioProfile.fromJson(data);
+                        if(profile == null){
+                            Log.e("BroadcastChatFragment", "Invalid bio profile received: " + data);
+                            return;
+                        }
+                        // setup with the mac address that was used
+                        this.profiles.put(message.getDeviceId(), profile);
+                        Log.i("BroadcastChatFragment", "Adding bio profile: " + profile.getNickname());
+                        // valid bio, write it to our database
+                        BioDatabase.saveOrMergeWithBeaconDiscovered(profile, this.getContext());
+                        //return;
+                    }
+
+                    Log.i("BroadcastChatFragment", "Adding received message: "
+                            + message.getMessage() + " from " + message.getDeviceId());
                     addReceivedMessage(message);
                     // Scroll to the bottom of the chat
                     chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
@@ -158,8 +184,6 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         textBoxUpper.setText(dateText);
         textBoxLower.setText("");
 
-
-
         chatMessageContainer.addView(userMessageView);
         chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
     }
@@ -177,11 +201,19 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         TextView textBoxUpper = receivedMessageView.findViewById(R.id.sender_name);
         TextView textBoxLower = receivedMessageView.findViewById(R.id.message_timestamp);
 
+        BioProfile profile = profiles.get(message.getDeviceId());
+
+        String nickname = "";
+
+        if(profile != null){
+            nickname = profile.getNickname();
+        }
+
         // Set the sender's name
-        if(message.getDeviceId() != null){
+        if(nickname.isEmpty() && message.getDeviceId() != null){
             textBoxLower.setText(message.getDeviceId());
         }else{
-            textBoxLower.setText("");
+            textBoxLower.setText(nickname);
         }
         // now add the time stamp
         long timeStamp = message.getTimestamp();

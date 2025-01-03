@@ -3,8 +3,6 @@ package offgrid.geogram.database;
 import android.content.Context;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
 

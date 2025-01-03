@@ -17,12 +17,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import offgrid.geogram.bluetooth.comms.BlueDataWriteAndReadToOutside;
-import offgrid.geogram.bluetooth.comms.BluePackage;
-import offgrid.geogram.bluetooth.comms.DataCallbackTemplate;
-import offgrid.geogram.bluetooth.comms.DataType;
+import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
+import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
+import offgrid.geogram.database.BioProfile;
+import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.core.old.old.GenerateDeviceId;
 import offgrid.geogram.database.BeaconDatabase;
+import offgrid.geogram.settings.SettingsUser;
 import offgrid.geogram.things.BeaconReachable;
 
 public class BeaconFinder {
@@ -167,6 +169,7 @@ public class BeaconFinder {
             beacon.setRssi(result.getRssi());
             beaconMap.put(deviceId, beacon);
             // send our profile info to this beacon
+            sendProfileToEveryone();
             //getProfileInfo(beacon);
 
             // also save it do disk
@@ -176,9 +179,7 @@ public class BeaconFinder {
                     + " at "
                     + result.getDevice().getAddress()
             );
-            
-            
-            
+
             // update the list
             BeaconListing.getInstance().updateList(this.context);
             Log.i(TAG, "Updating beacon list on UI");
@@ -188,7 +189,25 @@ public class BeaconFinder {
         beacon.setTimeLastFound(System.currentTimeMillis());
         beacon.setRssi(result.getRssi());
         beacon.setServiceData(serviceData);
+        beacon.setMacAddress(result.getDevice().getAddress());
         //Log.i(TAG, "Updated beacon: " + instanceId + " RSSI: " + result.getRssi());
+    }
+
+    /**
+     * Will broadcast the profile of this device to everyone within reach
+     */
+    private void sendProfileToEveryone() {
+        SettingsUser settings = Central.getInstance().getSettings();
+        BioProfile profile = new BioProfile();
+        profile.setNickname(settings.getNickname());
+        String deviceId = GenerateDeviceId.generateInstanceId(this.context);
+        profile.setDeviceId(deviceId);
+        profile.setPreferredColor(settings.getPreferredColor());
+        //profile.setNpub(settings.getNpub());
+
+        String message = "/bio:" + profile.toJson();
+        BroadcastMessage messageToBroadcast = new BroadcastMessage(message, deviceId, true);
+        BroadcastSendMessage.broadcastMessageToAllEddystoneDevices(messageToBroadcast, context);
     }
 
 //    /**
