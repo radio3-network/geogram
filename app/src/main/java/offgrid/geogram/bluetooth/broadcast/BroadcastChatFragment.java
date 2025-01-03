@@ -156,7 +156,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         long timeStamp = message.getTimestamp();
         String dateText = DateUtils.convertTimestampForChatMessage(timeStamp);
         textBoxUpper.setText(dateText);
-        textBoxLower.setText("delivered");
+        textBoxLower.setText("");
 
 
 

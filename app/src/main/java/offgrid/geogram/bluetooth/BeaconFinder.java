@@ -166,7 +166,7 @@ public class BeaconFinder {
             beacon.setMacAddress(result.getDevice().getAddress());
             beacon.setRssi(result.getRssi());
             beaconMap.put(deviceId, beacon);
-            // get the profile info
+            // send our profile info to this beacon
             //getProfileInfo(beacon);
 
             // also save it do disk
@@ -191,56 +191,56 @@ public class BeaconFinder {
         //Log.i(TAG, "Updated beacon: " + instanceId + " RSSI: " + result.getRssi());
     }
 
-    /**
-     * Get the name used for this connected device
-     * @param beacon to get the profile name from
-     */
-    private void getProfileInfo(BeaconReachable beacon) {
-        // setup a new request
-        BlueDataWriteAndReadToOutside request = new BlueDataWriteAndReadToOutside();
-        // MAC address of the Eddystone beacon you want to read data from
-        String macAddress = beacon.getMacAddress();
-        request.setMacAddress(macAddress);
-        // what we are requesting as data to the device
-        request.setRequest(DataType.G);
-        // Implement the callback
-        DataCallbackTemplate callback = new DataCallbackTemplate() {
-            BluePackage requestData = null;
-            @Override
-            public void onDataSuccess(String data){
-                if(requestData == null){
-                    try {
-                        requestData = BluePackage.createReceiver(data);
-                    }catch (Exception e){
-                        Log.e(TAG, "Invalid data: " + e.getMessage());
-                    }
-                }else{
-                    requestData.receiveParcel(data);
-                }
-
-                Log.i(TAG, "Data arrived for device Id: " + data);
-                // save the data on the beacon
-                beacon.setProfileName(data);
-                BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
-
-                // when the message is complete
-                if(requestData != null && requestData.allParcelsReceivedAndValid()){
-                    Log.i(TAG, "This is the profile name: " + requestData.getData());
-                }
-
-            }
-            @Override
-            public void onDataError(String errorMessage) {
-                Log.e(TAG, "Failed to get profile info: " + errorMessage);
-            }
-        };
-        // setup the callback beacon details to update them later
-        callback.setDeviceId(beacon.getDeviceId());
-        callback.setMacAddress(beacon.getMacAddress());
-        request.setCallback(callback);
-        // send the request
-        request.send(context);
-    }
+//    /**
+//     * Get the name used for this connected device
+//     * @param beacon to get the profile name from
+//     */
+//    private void getProfileInfo(BeaconReachable beacon) {
+//        // setup a new request
+//        BlueDataWriteAndReadToOutside request = new BlueDataWriteAndReadToOutside();
+//        // MAC address of the Eddystone beacon you want to read data from
+//        String macAddress = beacon.getMacAddress();
+//        request.setMacAddress(macAddress);
+//        // what we are requesting as data to the device
+//        request.setRequest(DataType.G);
+//        // Implement the callback
+//        DataCallbackTemplate callback = new DataCallbackTemplate() {
+//            BluePackage requestData = null;
+//            @Override
+//            public void onDataSuccess(String data){
+//                if(requestData == null){
+//                    try {
+//                        requestData = BluePackage.createReceiver(data);
+//                    }catch (Exception e){
+//                        Log.e(TAG, "Invalid data: " + e.getMessage());
+//                    }
+//                }else{
+//                    requestData.receiveParcel(data);
+//                }
+//
+//                Log.i(TAG, "Data arrived for device Id: " + data);
+//                // save the data on the beacon
+//                beacon.setProfileName(data);
+//                BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
+//
+//                // when the message is complete
+//                if(requestData != null && requestData.allParcelsReceivedAndValid()){
+//                    Log.i(TAG, "This is the profile name: " + requestData.getData());
+//                }
+//
+//            }
+//            @Override
+//            public void onDataError(String errorMessage) {
+//                Log.e(TAG, "Failed to get profile info: " + errorMessage);
+//            }
+//        };
+//        // setup the callback beacon details to update them later
+//        callback.setDeviceId(beacon.getDeviceId());
+//        callback.setMacAddress(beacon.getMacAddress());
+//        request.setCallback(callback);
+//        // send the request
+//        request.send(context);
+//    }
 
     /**
      * Cleans up beacons that haven't been seen for a while.

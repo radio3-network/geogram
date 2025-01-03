@@ -131,6 +131,10 @@ public class EddyBeaconAdvertise {
         }
     }
 
+    public boolean isAdvertising() {
+        return isAdvertising;
+    }
+
     /**
      * Stops the Eddystone beacon advertisement.
      */
