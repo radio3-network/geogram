@@ -11,7 +11,11 @@ import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.bluetooth.comms.BluePackage;
 import offgrid.geogram.bluetooth.comms.Bluecomm;
 import offgrid.geogram.bluetooth.comms.DataType;
+import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.core.old.old.GenerateDeviceId;
+import offgrid.geogram.database.BioProfile;
+import offgrid.geogram.settings.SettingsUser;
 import offgrid.geogram.things.BeaconReachable;
 
 /*
@@ -225,4 +229,22 @@ public class BroadcastSendMessage {
     public interface MessageUpdateListener {
         void onMessageUpdate();
     }
+
+    /**
+     * Will broadcast the profile of this device to everyone within reach
+     */
+    public static void sendProfileToEveryone(Context context) {
+        SettingsUser settings = Central.getInstance().getSettings();
+        BioProfile profile = new BioProfile();
+        profile.setNick(settings.getNickname());
+        String deviceId = GenerateDeviceId.generateInstanceId(context);
+        profile.setId(deviceId);
+        profile.setColor(settings.getPreferredColor());
+        //profile.setNpub(settings.getNpub());
+
+        String message = "/bio:" + profile.toJson();
+        BroadcastMessage messageToBroadcast = new BroadcastMessage(message, deviceId, true);
+        BroadcastSendMessage.broadcastMessageToAllEddystoneDevices(messageToBroadcast, context);
+    }
+
 }

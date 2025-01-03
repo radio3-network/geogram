@@ -1,6 +1,8 @@
 package offgrid.geogram.settings;
 
 
+import static offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage.sendProfileToEveryone;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -21,6 +23,7 @@ import androidx.fragment.app.Fragment;
 
 import offgrid.geogram.R;
 import offgrid.geogram.core.Central;
+import offgrid.geogram.core.Log;
 
 public class SettingsFragment extends Fragment {
 
@@ -252,5 +255,21 @@ public class SettingsFragment extends Fragment {
             // Handle other errors
             Toast.makeText(requireContext(), "Error saving settings: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+
+        // update all reachable devices about the change
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(500); // Pause for a bit
+                // send our profile info to all reachable devices
+                sendProfileToEveryone(this.requireContext());
+            } catch (InterruptedException e) {
+                Log.e("Settings", "Thread interrupted: " + e.getMessage());
+            }
+
+        });
+        thread.start();
+
+
+
     }
 }

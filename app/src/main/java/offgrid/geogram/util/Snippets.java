@@ -15,7 +15,7 @@ public class Snippets {
             }
 
         });
-        thread.start(); // Starts the thread
+        thread.start();
 
 
      */

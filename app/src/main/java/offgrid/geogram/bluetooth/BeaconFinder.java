@@ -1,6 +1,7 @@
 package offgrid.geogram.bluetooth;
 
 import static offgrid.geogram.bluetooth.BluetoothCentral.EDDYSTONE_SERVICE_UUID;
+import static offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage.sendProfileToEveryone;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -168,9 +169,8 @@ public class BeaconFinder {
             beacon.setMacAddress(result.getDevice().getAddress());
             beacon.setRssi(result.getRssi());
             beaconMap.put(deviceId, beacon);
-            // send our profile info to this beacon
-            sendProfileToEveryone();
-            //getProfileInfo(beacon);
+            // send our profile info to all reachable devices
+            sendProfileToEveryone(context);
 
             // also save it do disk
             BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
@@ -193,73 +193,6 @@ public class BeaconFinder {
         //Log.i(TAG, "Updated beacon: " + instanceId + " RSSI: " + result.getRssi());
     }
 
-    /**
-     * Will broadcast the profile of this device to everyone within reach
-     */
-    private void sendProfileToEveryone() {
-        SettingsUser settings = Central.getInstance().getSettings();
-        BioProfile profile = new BioProfile();
-        profile.setNick(settings.getNickname());
-        String deviceId = GenerateDeviceId.generateInstanceId(this.context);
-        profile.setId(deviceId);
-        profile.setColor(settings.getPreferredColor());
-        //profile.setNpub(settings.getNpub());
-
-        String message = "/bio:" + profile.toJson();
-        BroadcastMessage messageToBroadcast = new BroadcastMessage(message, deviceId, true);
-        BroadcastSendMessage.broadcastMessageToAllEddystoneDevices(messageToBroadcast, context);
-    }
-
-//    /**
-//     * Get the name used for this connected device
-//     * @param beacon to get the profile name from
-//     */
-//    private void getProfileInfo(BeaconReachable beacon) {
-//        // setup a new request
-//        BlueDataWriteAndReadToOutside request = new BlueDataWriteAndReadToOutside();
-//        // MAC address of the Eddystone beacon you want to read data from
-//        String macAddress = beacon.getMacAddress();
-//        request.setMacAddress(macAddress);
-//        // what we are requesting as data to the device
-//        request.setRequest(DataType.G);
-//        // Implement the callback
-//        DataCallbackTemplate callback = new DataCallbackTemplate() {
-//            BluePackage requestData = null;
-//            @Override
-//            public void onDataSuccess(String data){
-//                if(requestData == null){
-//                    try {
-//                        requestData = BluePackage.createReceiver(data);
-//                    }catch (Exception e){
-//                        Log.e(TAG, "Invalid data: " + e.getMessage());
-//                    }
-//                }else{
-//                    requestData.receiveParcel(data);
-//                }
-//
-//                Log.i(TAG, "Data arrived for device Id: " + data);
-//                // save the data on the beacon
-//                beacon.setProfileName(data);
-//                BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
-//
-//                // when the message is complete
-//                if(requestData != null && requestData.allParcelsReceivedAndValid()){
-//                    Log.i(TAG, "This is the profile name: " + requestData.getData());
-//                }
-//
-//            }
-//            @Override
-//            public void onDataError(String errorMessage) {
-//                Log.e(TAG, "Failed to get profile info: " + errorMessage);
-//            }
-//        };
-//        // setup the callback beacon details to update them later
-//        callback.setDeviceId(beacon.getDeviceId());
-//        callback.setMacAddress(beacon.getMacAddress());
-//        request.setCallback(callback);
-//        // send the request
-//        request.send(context);
-//    }
 
     /**
      * Cleans up beacons that haven't been seen for a while.

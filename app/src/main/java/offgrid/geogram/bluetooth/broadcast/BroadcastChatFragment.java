@@ -1,5 +1,7 @@
 package offgrid.geogram.bluetooth.broadcast;
 
+import static offgrid.geogram.bluetooth.broadcast.BroadcastMessage.tagBio;
+
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +28,7 @@ import offgrid.geogram.core.Log;
 import offgrid.geogram.core.old.old.GenerateDeviceId;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
+import offgrid.geogram.util.ASCII;
 import offgrid.geogram.util.DateUtils;
 
 public class BroadcastChatFragment extends Fragment implements BroadcastSendMessage.MessageUpdateListener {
@@ -222,8 +225,12 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         textBoxUpper.setText(dateText);
 
         // Set the message content
+        String text = message.getMessage();
+        if(text.startsWith(tagBio)){
+            text = ASCII.getRandomOneliner();
+        }
         TextView messageTextView = receivedMessageView.findViewById(R.id.message_user_1);
-        messageTextView.setText(message.getMessage());
+        messageTextView.setText(text);
 
         // Apply balloon style based on preferred background color
         String colorBackground = profile != null ? profile.getColor() : "light gray";
@@ -257,14 +264,18 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
             case "pink":
             case "brown":
             case "dark gray":
-            case "light blue":
-            case "light green":
-            case "light cyan":
             case "light red":
             case "white":
                 bgColor = getResources().getColor(getResources().getIdentifier(backgroundColor.replace(" ", "_").toLowerCase(), "color", requireContext().getPackageName()));
                 textColor = backgroundColor.equalsIgnoreCase("white") ? getResources().getColor(R.color.black) : getResources().getColor(R.color.white);
                 break;
+            case "light blue":
+            case "light green":
+            case "light cyan":
+                bgColor = getResources().getColor(getResources().getIdentifier(backgroundColor.replace(" ", "_").toLowerCase(), "color", requireContext().getPackageName()));
+                textColor = getResources().getColor(R.color.black);
+                break;
+
             default:
                 // Fallback to a neutral background and readable text color
                 bgColor = getResources().getColor(R.color.light_gray); // Define a light gray fallback in colors.xml
