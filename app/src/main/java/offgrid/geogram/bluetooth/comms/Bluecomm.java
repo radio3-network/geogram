@@ -29,11 +29,10 @@ public class Bluecomm {
     private static final UUID CHARACTERISTIC_UUID = BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
 
     public static final int
-            timeBetweenChecks = 2000,
-            timeBetweenMessages = 1200,
+            timeBetweenChecks = 1000,
+            timeBetweenMessages = 1000,
             maxSizeOfMessages = 14,
             packageTimeToBeActive = 3000
-
     ;
 
 
