@@ -1,6 +1,7 @@
 package offgrid.geogram.bluetooth.broadcast;
 
 import static offgrid.geogram.bluetooth.broadcast.BroadcastMessage.tagBio;
+import static offgrid.geogram.bluetooth.comms.BlueQueue.messagesReceivedAsBroadcast;
 
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import offgrid.geogram.R;
+import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.core.old.old.GenerateDeviceId;
 import offgrid.geogram.database.BioDatabase;
@@ -73,7 +75,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
                 return;
             }
             // add this message to our list of sent messages
-            String deviceId = GenerateDeviceId.generateInstanceId(this.getContext());
+            String deviceId = Central.getInstance().getSettings().getIdDevice();
             BroadcastMessage messageToBroadcast = new BroadcastMessage(message, deviceId, true);
             BroadcastSendMessage.addMessage(messageToBroadcast);
 
@@ -132,7 +134,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
      * Updates the chat message container with new messages.
      */
     private void updateMessages() {
-        ArrayList<BroadcastMessage> currentMessages = new ArrayList<>(BroadcastSendMessage.messages);
+        ArrayList<BroadcastMessage> currentMessages = new ArrayList<>(messagesReceivedAsBroadcast);
         for (BroadcastMessage message : currentMessages) {
             if (!displayedMessages.contains(message)) {
                 if (message.isWrittenByMe()) {

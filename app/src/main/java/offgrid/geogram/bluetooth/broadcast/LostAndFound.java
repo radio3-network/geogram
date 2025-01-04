@@ -11,7 +11,12 @@ import offgrid.geogram.core.Log;
  * them to be sent again
  */
 public class LostAndFound {
+
     private static final String TAG = "LostAndFound";
+    public static final String
+            gapBroadcast = ">B:", // means a one line statement
+            gapREPEAT = "REPEAT" // please send the whole package again
+                    ;
 
     /**
      * We received a parcel section that wasn't the initial one.
@@ -34,30 +39,36 @@ public class LostAndFound {
             Log.e(TAG, "Invalid header received, can't do much: " + receivedData);
             return;
         }
+        // get the package id
         String packageId = data[0].substring(0, 2);
-        String parcelNumber = data[0].substring(2);
-
         // ask for the whole package to be sent again
-        BroadcastSendMessage.sendParcelToDevice(macAddress, Bluecomm.gapREPEAT, context);
+        BroadcastSendMessage.sendParcelToDevice(macAddress, gapREPEAT
+                + ":" +packageId, context);
+        Log.i(TAG, "Lost package detected, requesting to be sent again: " + receivedData);
     }
 
     /**
      * Checks if there is a missing gap on the parcels being received.
      * Whenever one is detected as missing, will ask for it again.
-     * @param writeAction the package that is being received
+     * @param packageIncomplete the package that is being received
      * @param macAddress the sender of this package
      * @param context useful for transmitting data
      */
-    public static boolean hasMissingParcels(BluePackage writeAction, String macAddress, Context context) {
+    public static boolean hasMissingParcels(BluePackage packageIncomplete, String macAddress, Context context) {
         // no gaps detected? Nothing to be done here
-        if(writeAction.hasGaps() == false){
+        if(packageIncomplete.hasGaps() == false){
             return false;
         }
-        // get the first gap that is missing
-        String gapIndex = writeAction.getFirstGapParcel();
-        // send this request back to the other device
-        BroadcastSendMessage.sendParcelToDevice(macAddress, gapIndex, context);
-        // there are still gaps, don't let this continue
+
+        String packageId = packageIncomplete.getId();
+        BroadcastSendMessage.sendParcelToDevice(macAddress, gapREPEAT
+                + ":" +packageId, context);
+        Log.i(TAG, "Lost package detected, requesting to be sent again: " + packageId);
+//        // get the first gap that is missing
+//        String gapIndex = packageIncomplete.getFirstGapParcel();
+//        // send this request back to the other device
+//        BroadcastSendMessage.sendParcelToDevice(macAddress, gapIndex, context);
+//        // there are still gaps, don't let this continue
         return true;
     }
 }

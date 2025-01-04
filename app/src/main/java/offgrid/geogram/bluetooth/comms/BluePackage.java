@@ -39,10 +39,15 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Arrays;
 
+import offgrid.geogram.core.Central;
+
 public class BluePackage {
 
     // Random two bytes generated as ID
     private final String id;
+
+    // the device id for this machine
+    private String deviceId;
 
     private final DataType command;
 
@@ -62,7 +67,8 @@ public class BluePackage {
     private String[] dataParcels;
 
     // Timestamp when data transmission started
-    private final long transmissionStartTime;
+    private final long transmissionTimeStart;
+    private long transmissionTimeLastActive;
 
     private final String checksum;
 
@@ -75,7 +81,7 @@ public class BluePackage {
         return new BluePackage(command, data, true);
     }
 
-    public static BluePackage createSender(DataType command, String data) {
+    public static BluePackage createSender(DataType command, String data, String deviceId) {
         return new BluePackage(command, data, true);
     }
 
@@ -95,10 +101,12 @@ public class BluePackage {
                 throw new IllegalArgumentException("Data cannot be null");
             }
             this.id = generateRandomId();
+            this.deviceId = Central.getInstance().getSettings().getIdDevice();
             this.command = command;
             this.data = data;
             this.messageParcelCurrent = -1;
-            this.transmissionStartTime = System.currentTimeMillis();
+            this.transmissionTimeStart = System.currentTimeMillis();
+            this.ping();
             this.isTransferring = true;
             this.messageParcelsTotal = (int) Math.ceil((double) this.data.length() / TEXT_LENGTH_PER_PARCEL);
             this.checksum = calculateChecksum(data);
@@ -107,10 +115,10 @@ public class BluePackage {
             // we are receiving this package from someone outside
             String[] parts = data.split(":");
             // expected format:
-            // uid:parceltotal:datachecksum:commandId
+            // uid:parceltotal:datachecksum:commandId:deviceId
             // Example:
-            // AA:003:A4GD:B
-            if (parts.length != 4) {
+            // AA:003:A4GD:B:34343
+            if (parts.length != 5) {
                 // this header isn't valid, invalidate the whole package
                 validHeader = false;
                 id = null;
@@ -119,7 +127,7 @@ public class BluePackage {
                 this.data = null;
                 this.messageParcelCurrent = -1;
                 this.command = DataType.NONE;
-                this.transmissionStartTime = -1;
+                this.transmissionTimeStart = -1;
                 this.checksum = null;
                 return;
             }
@@ -131,8 +139,11 @@ public class BluePackage {
             this.messageParcelCurrent = -1;
             // get the command type
             this.command = DataType.valueOf(parts[3]);
+            // get the device id
+            this.deviceId = parts[4];
             // setup the transmission time
-            this.transmissionStartTime = System.currentTimeMillis();
+            this.transmissionTimeStart = System.currentTimeMillis();
+            this.ping();
             this.isTransferring = true;
         }
     }
@@ -161,6 +172,7 @@ public class BluePackage {
      * @throws IllegalArgumentException If the parcel format is invalid or the ID does not match.
      */
     public void receiveParcel(String parcel) {
+        this.ping();
         String[] parts = parcel.split(":", 2);
         if (parts.length != 2 || !parts[0].startsWith(id)) {
             throw new IllegalArgumentException("Invalid parcel format or ID mismatch");
@@ -194,11 +206,14 @@ public class BluePackage {
      * @return The next parcel as a string, or {@code null} if all parcels have been sent.
      */
     public String getNextParcel() {
+        this.ping();
         // first message is the header
         if (messageParcelCurrent == -1) {
             messageParcelCurrent++;
             // First parcel is the header with ID and total parcel count
-            return String.format(Locale.US, "%s:%03d:%s:%s", id, messageParcelsTotal, checksum, command);
+            return String.format(Locale.US, "%s:%03d:%s:%s:%s",
+                    id, messageParcelsTotal, checksum, command, deviceId);
+            // next parcels are normal
         } else if (messageParcelCurrent < messageParcelsTotal) {
             // Subsequent parcels contain just the id, parcel number and data
             String parcelId = String.format(Locale.US, "%s%03d", id, messageParcelCurrent);
@@ -213,6 +228,7 @@ public class BluePackage {
      * Permits to send again this package
      */
     public void resetParcelCounter(){
+        this.ping();
         this.messageParcelCurrent = -1;
     }
 
@@ -324,8 +340,8 @@ public class BluePackage {
      *
      * @return The timestamp as a long value.
      */
-    public long getTransmissionStartTime() {
-        return transmissionStartTime;
+    public long getTransmissionTimeStart() {
+        return transmissionTimeStart;
     }
 
     /**
@@ -429,4 +445,20 @@ public class BluePackage {
     }
 
 
+    private void ping(){
+        transmissionTimeLastActive = System.currentTimeMillis();
+    }
+
+    /**
+     * Checks if the data transmission is still active.
+     * @return
+     */
+    public boolean isStillActive() {
+        long timeInterval = System.currentTimeMillis() - transmissionTimeLastActive;
+        return timeInterval < Bluecomm.packageTimeToBeActive;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
 }

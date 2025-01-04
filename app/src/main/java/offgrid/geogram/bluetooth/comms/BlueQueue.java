@@ -5,18 +5,20 @@ import static offgrid.geogram.bluetooth.comms.Bluecomm.timeBetweenMessages;
 
 import android.content.Context;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.core.Log;
 
 /**
  * The queues for outgoing and incoming transmissions.
  * This class is implemented as a singleton to ensure only one instance of the queue exists.
  */
-public class BlueQueues {
+public class BlueQueue {
 
-    private static BlueQueues instance = null;
+    private static BlueQueue instance = null;
     private final Context context;
 
     // The queue for outgoing transmissions
@@ -25,20 +27,28 @@ public class BlueQueues {
     private Thread queueThreadToSend = null;
 
     // The queue for incoming transmissions
-    private final CopyOnWriteArrayList<BlueQueueItem> queueToReceive = new CopyOnWriteArrayList<>();
+    //private final CopyOnWriteArrayList<BlueQueueItem> queueToReceive = new CopyOnWriteArrayList<>();
     // queue to store individual one-line messages to be received
-    private Thread queueThreadToReceive = null;
+    //private Thread queueThreadToReceive = null;
 
-    // Queue for data packages being build from what we receive of other devices
+    // Queue for data packages being built with what we receive from other devices
     // <UID, BluePackage>
-    public final HashMap<String, BluePackage> writeActions = new HashMap<>();
+    public final HashMap<String, BluePackage> packagesBeingReceived = new HashMap<>();
+
+    // Queue for data packages that we are sending to other devices
+    // <UID, BluePackage>
+    public final HashMap<String, BluePackage> packagesBeingSent = new HashMap<>();
+
+    // These are the messages visible from the UI
+    // This gets updated even when the UI is not selected
+    public static ArrayList<BroadcastMessage> messagesReceivedAsBroadcast = new ArrayList<>();
 
 
 
     private static final String TAG = "BlueQueues";
 
     // Private constructor to prevent external instantiation
-    private BlueQueues(Context context) {
+    private BlueQueue(Context context) {
         this.context = context.getApplicationContext();
     }
 
@@ -47,9 +57,9 @@ public class BlueQueues {
      *
      * @return The singleton instance of BlueQueues.
      */
-    public static BlueQueues getInstance(Context context) {
+    public static BlueQueue getInstance(Context context) {
         if (instance == null) {
-            instance = new BlueQueues(context);
+            instance = new BlueQueue(context);
         }
         return instance;
     }
@@ -58,9 +68,23 @@ public class BlueQueues {
         if(queueThreadToSend == null){
             startThreadToSendMessagesInQueue();
         }
-        if(queueThreadToReceive == null){
-            startThreadToReceiveMessagesInQueue();
+//        if(queueThreadToReceive == null){
+//            startThreadToReceiveMessagesInQueue();
+//        }
+    }
+
+    /**
+     * Adds a package to be sent to other devices for future memory
+     * in cases where it is needed to send again
+     * @param packageToSend the data to be dispatched
+     */
+    public void addPackageToSending(BluePackage packageToSend){
+        String uid = packageToSend.getId();
+        if(packagesBeingReceived.containsKey(uid)){
+            return;
         }
+        Log.i(TAG, "Adding package to archive: " + uid);
+        packagesBeingSent.put(uid, packageToSend);
     }
 
     /**
@@ -80,39 +104,6 @@ public class BlueQueues {
         queueToSend.add(item);
     }
 
-
-    /**
-     * The thread that keeps sending messages that were placed
-     * on the queue
-     */
-    private void startThreadToReceiveMessagesInQueue() {
-        queueThreadToReceive = new Thread(() -> {
-            Log.i(TAG, "Starting thread to receive messages in queue");
-            try {
-                while(true) {
-                    Thread.sleep(timeBetweenChecks); // Pause for a bit
-                    // nothing to send
-                    if(queueToReceive.isEmpty()){
-                        continue;
-                    }
-                    // there is something to send
-                    while(queueToReceive.isEmpty() == false){
-                        BlueQueueItem item = queueToReceive.get(0);
-                        //Bluecomm.getInstance(context).writeData(item);
-                        queueToReceive.remove(0);
-                        Thread.sleep(timeBetweenMessages);
-                    }
-
-                }
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Thread interrupted: " + e.getMessage());
-            }
-
-        });
-        queueThreadToReceive.start(); // Starts the thread
-    }
-
-
     /**
      * The thread that keeps sending messages that were placed
      * on the queue
@@ -127,6 +118,12 @@ public class BlueQueues {
                     if(queueToSend.isEmpty()){
                         continue;
                     }
+
+                    // don't send messages while we are receiving data
+                    if(stillReceivingMessages()){
+                        continue;
+                    }
+
                     // there is something to send
                     while(queueToSend.isEmpty() == false){
                         Mutex.getInstance().waitUntilUnlocked();
@@ -145,6 +142,20 @@ public class BlueQueues {
 
         });
         queueThreadToSend.start(); // Starts the thread
+    }
+
+    /**
+     * Checks if there are received messages that are
+     * still with activity
+     * @return true when we are receiving data
+     */
+    private boolean stillReceivingMessages() {
+        for(BluePackage pkg : packagesBeingReceived.values()){
+            if(pkg.isStillActive()){
+                return true;
+            }
+        }
+        return false;
     }
 
 }

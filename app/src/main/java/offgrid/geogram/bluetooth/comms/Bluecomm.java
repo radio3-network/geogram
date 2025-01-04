@@ -30,20 +30,17 @@ public class Bluecomm {
 
     public static final int
             timeBetweenChecks = 2000,
-            timeBetweenMessages = 1000,
-            maxSizeOfMessages = 14
-    ;
+            timeBetweenMessages = 1200,
+            maxSizeOfMessages = 14,
+            packageTimeToBeActive = 3000
 
-    public static final String
-            gapBroadcast = ">B:", // means a one line statement
-            gapREPEAT = "REPEAT" // please send the whole package again
     ;
 
 
     private Bluecomm(Context context) {
         this.context = context.getApplicationContext();
         // start the queues when not started already
-        BlueQueues.getInstance(context).start();
+        BlueQueue.getInstance(context).start();
     }
 
     /**
@@ -155,7 +152,7 @@ public class Bluecomm {
      */
     public synchronized void writeData(String macAddress, String data) {
         BlueQueueItem item = new BlueQueueItem(macAddress, data);
-        BlueQueues.getInstance(context).addQueueToSend(item);
+        BlueQueue.getInstance(context).addQueueToSend(item);
     }
 
     /**
@@ -184,6 +181,10 @@ public class Bluecomm {
      * @param callback   Callback to handle success or failure of the write operation.
      */
     public synchronized void writeData(String macAddress, String data, DataCallbackTemplate callback) {
+        if(data == null){
+            Log.e(TAG, "Null data received for write operation in " + macAddress);
+            return;
+        }
         // wait a bit until unlocked
         Mutex.getInstance().waitUntilUnlocked();
 

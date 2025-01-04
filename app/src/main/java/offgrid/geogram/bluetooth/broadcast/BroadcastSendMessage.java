@@ -1,6 +1,7 @@
 package offgrid.geogram.bluetooth.broadcast;
 
-import static offgrid.geogram.bluetooth.comms.Bluecomm.gapBroadcast;
+import static offgrid.geogram.bluetooth.broadcast.LostAndFound.gapBroadcast;
+import static offgrid.geogram.bluetooth.comms.BlueQueue.messagesReceivedAsBroadcast;
 
 import android.content.Context;
 
@@ -11,6 +12,7 @@ import java.util.Collection;
 import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.bluetooth.comms.BluePackage;
+import offgrid.geogram.bluetooth.comms.BlueQueue;
 import offgrid.geogram.bluetooth.comms.Bluecomm;
 import offgrid.geogram.bluetooth.comms.DataType;
 import offgrid.geogram.core.Central;
@@ -85,15 +87,11 @@ import offgrid.geogram.things.BeaconReachable;
 public class BroadcastSendMessage {
     private static final String TAG_ID = "BroadcastSendMessage";
 
-    // These are the messages visible from the UI
-    // This gets updated even when the UI is not selected
-    public static ArrayList<BroadcastMessage> messages = new ArrayList<>();
-
     // Listener for message updates
     private static WeakReference<MessageUpdateListener> messageUpdateListener;
 
     public static void addMessage(BroadcastMessage message) {
-        messages.add(message);
+        messagesReceivedAsBroadcast.add(message);
         notifyMessageUpdate();
     }
 
@@ -135,12 +133,15 @@ public class BroadcastSendMessage {
                     return;
                 }
                 // create the package to send
-                BluePackage packageToSend = BluePackage.createSender(DataType.B, messageToBroadcast.getMessage());
+                String deviceId = Central.getInstance().getSettings().getIdDevice();
+                BluePackage packageToSend = BluePackage.createSender(
+                        DataType.B, messageToBroadcast.getMessage(), deviceId
+                );
                 messageToBroadcast.setPackage(packageToSend);
                 // iterate over the devices
                 for (BeaconReachable device : devices) {
                     // send the message
-                    sendPackageToDevice(device, packageToSend, context);
+                    sendPackageToDevice(device.getMacAddress(), packageToSend, context);
                 }
                 Thread.sleep(500); // Pause for a bit
             } catch (InterruptedException e) {
@@ -171,24 +172,26 @@ public class BroadcastSendMessage {
     /**
      * Sends a message to a specific Eddystone device.
      * When the message is large, it will break into multiple portions
-     * @param device The Eddystone device to send the message to
+     * @param macAddress The Eddystone device to send the message to
      * @param packageToSend The message to be sent
      * @param context The application context
      */
-    private static void sendPackageToDevice(BeaconReachable device,
+    public static void sendPackageToDevice(String macAddress,
                                             BluePackage packageToSend,
                                             Context context) {
         try {
+            // add this package on the archive of dispatched messages
+            BlueQueue.getInstance(context).addPackageToSending(packageToSend);
             // reset the counter for this package
             packageToSend.resetParcelCounter();
             // send all parcels of the package to the other device
             for(int i = 0; i <= packageToSend.getMessageParcelsTotal(); i++){
                 String text = packageToSend.getNextParcel();
-                Log.i(TAG_ID, "Sending message to " + device.getMacAddress() + " with data: " + text);
-                Bluecomm.getInstance(context).writeData(device.getMacAddress(), text);
+                Log.i(TAG_ID, "Sending message to " + macAddress + " with data: " + text);
+                Bluecomm.getInstance(context).writeData(macAddress, text);
                 Thread.sleep(500);
             }
-            Log.i(TAG_ID, "Message sent to Eddystone device: " + device.getMacAddress());
+            Log.i(TAG_ID, "Message sent to Eddystone device: " + macAddress);
             //Thread.sleep(500);
 
         } catch (InterruptedException e) {
@@ -239,7 +242,7 @@ public class BroadcastSendMessage {
         SettingsUser settings = Central.getInstance().getSettings();
         BioProfile profile = new BioProfile();
         profile.setNick(settings.getNickname());
-        String deviceId = GenerateDeviceId.generateInstanceId(context);
+        String deviceId = settings.getIdDevice();
         profile.setId(deviceId);
         profile.setColor(settings.getPreferredColor());
         //profile.setNpub(settings.getNpub());

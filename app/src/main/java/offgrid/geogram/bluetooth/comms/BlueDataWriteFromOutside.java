@@ -1,12 +1,12 @@
 package offgrid.geogram.bluetooth.comms;
 
-import static offgrid.geogram.bluetooth.comms.Bluecomm.gapBroadcast;
+import static offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage.sendPackageToDevice;
+import static offgrid.geogram.bluetooth.broadcast.LostAndFound.gapBroadcast;
+import static offgrid.geogram.bluetooth.comms.BlueQueue.messagesReceivedAsBroadcast;
 
 import android.content.Context;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
@@ -72,6 +72,11 @@ public class BlueDataWriteFromOutside {
             return;
         }
 
+        // examples of messages:
+        // HX:005:TCHA:B:2a1a78 -> data header
+        // HX000:/bio:{"color": -> data parcel
+        // >B:REPEAT:HZ         -> single command
+
         // is this a single command?
         if(receivedData.startsWith(">")){
             processSingleCommandReceived(macAddress, receivedData, context);
@@ -80,16 +85,19 @@ public class BlueDataWriteFromOutside {
 
         String[] data = receivedData.split(":");
         String UID = data[0].substring(0, 2);
-        HashMap<String, BluePackage> writeActions = BlueQueues.getInstance(context).writeActions;
+        HashMap<String, BluePackage> packagesBeingReceived =
+                BlueQueue.getInstance(context).packagesBeingReceived;
         // with a valid device, is there already a write request?
-        BluePackage writeAction = null;
-        if(writeActions.containsKey(UID)){
-            writeAction = writeActions.get(UID);
+        BluePackage packageBeingReceived;
+        // does it already exist?
+        if(packagesBeingReceived.containsKey(UID)){
+            packageBeingReceived = packagesBeingReceived.get(UID);
         }else{
-            writeAction = BluePackage.createReceiver(receivedData);
+            // not yet, then let's create a new one
+            packageBeingReceived = BluePackage.createReceiver(receivedData);
             // first message should be a header, is it valid?
-            if(writeAction.isValidHeader()){
-                writeActions.put(UID, writeAction);
+            if(packageBeingReceived.isValidHeader()){
+                packagesBeingReceived.put(UID, packageBeingReceived);
                 // no need to continue, first message is the header
                 return;
             }else{
@@ -98,31 +106,34 @@ public class BlueDataWriteFromOutside {
                 return;
             }
         }
-        // at this point our write action should NOT be null
-        if(writeAction == null){
-            Log.e(TAG, "Null write action received");
+        // at this point our package should NOT be null
+        if(packageBeingReceived == null){
+            Log.e(TAG, "Null package received");
             return;
         }
 
         // avoid replay actions, this parcel is complete
-        if(writeAction.allParcelsReceivedAndValid()){
+        if(packageBeingReceived.allParcelsReceivedAndValid()){
             return;
         }
 
         // next messages should be an increment
-        writeAction.receiveParcel(receivedData);
+        packageBeingReceived.receiveParcel(receivedData);
 
         // when we detect a missing parcel, try to get it first
-        if(LostAndFound.hasMissingParcels(writeAction, macAddress, context)){
+        // it will retry to ask for the package again
+        if(LostAndFound.hasMissingParcels(packageBeingReceived, macAddress, context)){
             return;
         }
 
         // when the message is complete, process the command inside
-        if(writeAction.allParcelsReceivedAndValid()){
-            processReceivedRequest(macAddress, writeAction, context);
-            Log.i(TAG, "Request processed from " + macAddress);
+        if(packageBeingReceived.allParcelsReceivedAndValid()){
+            processReceivedRequest(macAddress, packageBeingReceived, context);
+            Log.i(TAG, "Full data received from " + macAddress
+                    + " -> " + packageBeingReceived.getData());
             // remove this message from the queue
-            writeActions.remove(UID);
+            // don't remove yet to avoid replay actions
+            //packagesBeingReceived.remove(UID);
         }
 
     }
@@ -137,17 +148,32 @@ public class BlueDataWriteFromOutside {
         // example of what we expect to receive
         // >B:XY001
         // this means: broadcast message with identification XY requests parcel 1
+        // >B:REPEAT:TZ
+        // this means to repeat the TZ package again
         if(receivedData.startsWith(gapBroadcast)){
-            String parcelId = receivedData.substring(3);
-            // what do we do now?
-            String id = parcelId.substring(0, 2);
-            String parcelNumber = parcelId.substring(2);
-            Log.i(TAG, "Gap data: received request with id: "
-                    + id + " for parcel " + parcelNumber);
+            String[] data = receivedData.split(":");
+            String action = data[1]; // e.g. XY001 or REPEAT
+            // is this a repeat request?
+            if(action.equals(LostAndFound.gapREPEAT)){
+                String packageId = data[2];
+                BluePackage packageToResend =
+                        BlueQueue.getInstance(context).packagesBeingSent.get(packageId);
+                // there is a package that we can send again
+                if(packageToResend != null){
+                    Log.i(TAG, "Gap data: repeating package: " + packageId);
+                    sendPackageToDevice(macAddress, packageToResend, context);
+                    return;
+                }
+            }
+            // otherwise assume that "action" is something like XY001
+            String id = action.substring(0, 2);
+            String parcelNumber = data[1].substring(2);
+            Log.i(TAG, "Gap data: sending again id: "
+                    + id + " and parcel " + parcelNumber);
             // send back the parcel to the other device
-            HashMap<String, BluePackage> writeActions = BlueQueues.getInstance(context).writeActions;
-            BluePackage writeAction = writeActions.get(id);
-            if(writeAction == null){
+            HashMap<String, BluePackage> packagesSentBefore = BlueQueue.getInstance(context).packagesBeingSent;
+            BluePackage packageToSendAgain = packagesSentBefore.get(id);
+            if(packageToSendAgain == null){
                 Log.e(TAG, "GapData: No write action found for id: " + id);
                 return;
             }
@@ -158,7 +184,7 @@ public class BlueDataWriteFromOutside {
                 Log.e(TAG, "GapData: Invalid parcel number received: " + parcelNumber);
                 return;
             }
-            String textToSendAgain = writeAction.getSpecificParcel(value);
+            String textToSendAgain = packageToSendAgain.getSpecificParcel(value);
             Log.i(TAG, "GapData: Sending parcel: " + textToSendAgain);
             Bluecomm.getInstance(context).writeData(macAddress, textToSendAgain);
         }
@@ -174,17 +200,14 @@ public class BlueDataWriteFromOutside {
      */
     private void processReceivedRequest(
             String macAddress,
-            BluePackage writeAction,
+            BluePackage packageReceived,
             Context context) {
-
-
         //Log.i(TAG, "Received command: " + received);
-
-        switch (writeAction.getCommand()) {
+        switch (packageReceived.getCommand()) {
             case G -> {
             }
             case B -> {
-                writeBroadCastMessage(macAddress, writeAction, context);
+                writeBroadCastMessage(macAddress, packageReceived, context);
             }
             default -> {
             }
@@ -194,65 +217,20 @@ public class BlueDataWriteFromOutside {
     /**
      * Handle the broadcast message when being received from the outside
      * @param context
-     * @return
      */
     private void writeBroadCastMessage(
             String macAddress,
-            BluePackage writeAction,
+            BluePackage packageReceived,
             Context context) {
 
-        String messageText = writeAction.getData();
+        String messageText = packageReceived.getData();
+        String deviceId = packageReceived.getDeviceId();
 
         // this message was written by someone else
-        BroadcastMessage messageReceived = new BroadcastMessage(messageText, macAddress, false);
-        messageReceived.setDeviceId(macAddress);
+        BroadcastMessage messageReceived = new BroadcastMessage(messageText, deviceId, false);
         // place the message on the list
-        BroadcastSendMessage.messages.add(messageReceived);
+        messagesReceivedAsBroadcast.add(messageReceived);
     }
 
 
-
-//    /**
-//     * Provides the request data for the given MAC address.
-//     * @param address MAC address of the bluetooth device
-//     * @return the associated request data or null when not found
-//     */
-//    public BluePackage getRequest(String address) {
-//        return requests.get(address);
-//    }
-
-//    /**
-//     * Starts a background thread to clean up outdated requests
-//     * that are older than 5 minutes (300,000 milliseconds).
-//     */
-//    private void startCleanupThread() {
-//        new Thread(() -> {
-//            while (true) {
-//                try {
-//                    Thread.sleep(60000); // Check every minute
-//                    //cleanupOldRequests();
-//                } catch (InterruptedException e) {
-//                    Log.e(TAG, "Cleanup thread interrupted: " + e.getMessage());
-//                    break;
-//                }
-//            }
-//        }).start();
-//    }
-
-//    /**
-//     * Removes requests that are older than 5 minutes.
-//     */
-//    private synchronized void cleanupOldRequests() {
-//        long currentTime = System.currentTimeMillis();
-//        Iterator<Map.Entry<String, BluePackage>> iterator = requests.entrySet().iterator();
-//
-//        while (iterator.hasNext()) {
-//            Map.Entry<String, BluePackage> entry = iterator.next();
-//            BluePackage requestData = entry.getValue();
-//            if (currentTime - requestData.getTransmissionStartTime() > 300000) { // 5 minutes
-//                Log.i(TAG, "Removing outdated request for address: " + entry.getKey());
-//                iterator.remove();
-//            }
-//        }
-//    }
 }
