@@ -73,16 +73,16 @@ public class SettingsFragment extends Fragment {
 
     private void initializeUI(View view) {
         // Privacy Options
-        Switch listenOnlySwitch = view.findViewById(R.id.switch_listen_only);
-        listenOnlySwitch.setChecked(settings.isInvisibleMode());
-        listenOnlySwitch.setChecked(false);
-        listenOnlySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> settings.setInvisibleMode(isChecked));
+//        Switch listenOnlySwitch = view.findViewById(R.id.switch_listen_only);
+//        listenOnlySwitch.setChecked(settings.isInvisibleMode());
+//        listenOnlySwitch.setChecked(false);
+//        listenOnlySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> settings.setInvisibleMode(isChecked));
 
         // User Preferences
         EditText nickname = view.findViewById(R.id.edit_preferred_nickname);
-        EditText intro = view.findViewById(R.id.edit_intro);
         nickname.setText(settings.getNickname());
-        intro.setText(settings.getIntro());
+//        EditText intro = view.findViewById(R.id.edit_intro);
+//        intro.setText(settings.getIntro());
 
         Spinner preferredColorSpinner = view.findViewById(R.id.spinner_preferred_color);
         String[] colorOptions = getResources().getStringArray(R.array.color_options);
@@ -100,25 +100,26 @@ public class SettingsFragment extends Fragment {
         nsec.setText(settings.getNsec());
 
         // Beacon Preferences
-        Spinner beaconTypeSpinner = view.findViewById(R.id.spinner_beacon_type);
-        EditText beaconNickname = view.findViewById(R.id.edit_beacon_nickname);
-        EditText groupId = view.findViewById(R.id.edit_group_id);
-        EditText deviceId = view.findViewById(R.id.edit_device_id);
-        beaconNickname.setText(settings.getBeaconNickname());
-        groupId.setText(settings.getIdGroup());
-        deviceId.setText(settings.getIdDevice());
+        //Spinner beaconTypeSpinner = view.findViewById(R.id.spinner_beacon_type);
+        //EditText beaconNickname = view.findViewById(R.id.edit_beacon_nickname);
+        //EditText groupId = view.findViewById(R.id.edit_group_id);
+        //EditText deviceId = view.findViewById(R.id.edit_device_id);
+        //beaconNickname.setText(settings.getBeaconNickname());
+//        groupId.setText(settings.getIdGroup());
+//        deviceId.setText(settings.getIdDevice());
 
-        String[] beaconTypes = getResources().getStringArray(R.array.beacon_types);
-        for (int i = 0; i < beaconTypes.length; i++) {
-            if (beaconTypes[i].equals(settings.getBeaconType())) {
-                beaconTypeSpinner.setSelection(i);
-                break;
-            }
-        }
+//        String[] beaconTypes = getResources().getStringArray(R.array.beacon_types);
+//        for (int i = 0; i < beaconTypes.length; i++) {
+//            if (beaconTypes[i].equals(settings.getBeaconType())) {
+//                beaconTypeSpinner.setSelection(i);
+//                break;
+//            }
+//        }
 
         // Save Button
         View saveButton = view.findViewById(R.id.btn_save_settings);
-        saveButton.setOnClickListener(v -> saveSettings(nickname, intro, npub, nsec, preferredColorSpinner, beaconTypeSpinner, groupId, deviceId));
+        saveButton.setOnClickListener(v -> saveSettings(nickname, npub, nsec, preferredColorSpinner));
+//        saveButton.setOnClickListener(v -> saveSettings(nickname, intro, npub, nsec, preferredColorSpinner, beaconTypeSpinner, groupId, deviceId));
 
         // Reset Button
         Button resetButton = view.findViewById(R.id.btn_reset_settings);
@@ -129,7 +130,6 @@ public class SettingsFragment extends Fragment {
             // Reload settings and update the UI
             settings = SettingsLoader.loadSettings(requireContext());
             reloadSettings(view);
-
             //Toast.makeText(requireContext(), "Settings reset to defaults.", Toast.LENGTH_SHORT).show();
         });
 
@@ -172,14 +172,14 @@ public class SettingsFragment extends Fragment {
 
     private void reloadSettings(View view) {
         // Privacy Options
-        Switch listenOnlySwitch = view.findViewById(R.id.switch_listen_only);
-        listenOnlySwitch.setChecked(settings.isInvisibleMode());
+        //Switch listenOnlySwitch = view.findViewById(R.id.switch_listen_only);
+        //listenOnlySwitch.setChecked(settings.isInvisibleMode());
 
         // User Preferences
         EditText nickname = view.findViewById(R.id.edit_preferred_nickname);
-        EditText intro = view.findViewById(R.id.edit_intro);
+        //EditText intro = view.findViewById(R.id.edit_intro);
         nickname.setText(settings.getNickname());
-        intro.setText(settings.getIntro());
+        //intro.setText(settings.getIntro());
 
         Spinner preferredColorSpinner = view.findViewById(R.id.spinner_preferred_color);
         String[] colorOptions = getResources().getStringArray(R.array.color_options);
@@ -197,21 +197,21 @@ public class SettingsFragment extends Fragment {
         nsec.setText(settings.getNsec());
 
         // Beacon Preferences
-        Spinner beaconTypeSpinner = view.findViewById(R.id.spinner_beacon_type);
-        EditText beaconNickname = view.findViewById(R.id.edit_beacon_nickname);
-        EditText groupId = view.findViewById(R.id.edit_group_id);
-        EditText deviceId = view.findViewById(R.id.edit_device_id);
-        beaconNickname.setText(settings.getBeaconNickname());
-        groupId.setText(settings.getIdGroup());
-        deviceId.setText(settings.getIdDevice());
-
-        String[] beaconTypes = getResources().getStringArray(R.array.beacon_types);
-        for (int i = 0; i < beaconTypes.length; i++) {
-            if (beaconTypes[i].equals(settings.getBeaconType())) {
-                beaconTypeSpinner.setSelection(i);
-                break;
-            }
-        }
+//        Spinner beaconTypeSpinner = view.findViewById(R.id.spinner_beacon_type);
+//        EditText beaconNickname = view.findViewById(R.id.edit_beacon_nickname);
+//        EditText groupId = view.findViewById(R.id.edit_group_id);
+//        EditText deviceId = view.findViewById(R.id.edit_device_id);
+//        beaconNickname.setText(settings.getBeaconNickname());
+//        groupId.setText(settings.getIdGroup());
+//        deviceId.setText(settings.getIdDevice());
+//
+//        String[] beaconTypes = getResources().getStringArray(R.array.beacon_types);
+//        for (int i = 0; i < beaconTypes.length; i++) {
+//            if (beaconTypes[i].equals(settings.getBeaconType())) {
+//                beaconTypeSpinner.setSelection(i);
+//                break;
+//            }
+//        }
     }
 
     private void saveSettings(SettingsUser settings){
@@ -229,20 +229,24 @@ public class SettingsFragment extends Fragment {
 
 
 
-    private void saveSettings(EditText nickname, EditText intro, EditText npub, EditText nsec,
-                              Spinner preferredColorSpinner, Spinner beaconTypeSpinner, EditText groupId, EditText deviceId) {
+    private void saveSettings(EditText nickname,
+                              //EditText intro,
+                              EditText npub, EditText nsec,
+                              Spinner preferredColorSpinner
+                              //Spinner beaconTypeSpinner, EditText groupId, EditText deviceId
+    ) {
 
         try {
             // Update settings object with validation
             settings.setNickname(nickname.getText().toString());
-            settings.setIntro(intro.getText().toString());
+            //settings.setIntro(intro.getText().toString());
             settings.setNpub(npub.getText().toString());
             settings.setNsec(nsec.getText().toString());
             settings.setPreferredColor(preferredColorSpinner.getSelectedItem().toString());
-            settings.setBeaconType(beaconTypeSpinner.getSelectedItem().toString());
-            settings.setBeaconNickname(((EditText) requireView().findViewById(R.id.edit_beacon_nickname)).getText().toString());
-            settings.setIdGroup(groupId.getText().toString());
-            settings.setIdDevice(deviceId.getText().toString());
+            //settings.setBeaconType(beaconTypeSpinner.getSelectedItem().toString());
+            //settings.setBeaconNickname(((EditText) requireView().findViewById(R.id.edit_beacon_nickname)).getText().toString());
+            //settings.setIdGroup(groupId.getText().toString());
+            //settings.setIdDevice(deviceId.getText().toString());
 
             // Save settings using SettingsLoader
             SettingsLoader.saveSettings(requireContext(), settings);
