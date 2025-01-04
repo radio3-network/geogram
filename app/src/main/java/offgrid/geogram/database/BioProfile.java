@@ -28,8 +28,8 @@ public class BioProfile {
     @Expose
     private String npub;
 
-    @Expose
-    private String macAddress;
+    //@Expose
+    //private String macAddress;
 
     private String extra;
 
@@ -89,11 +89,11 @@ public class BioProfile {
     }
 
     // Getters and setters (if required)
-    public String getId() {
+    public String getDeviceId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setDeviceId(String id) {
         this.id = id;
     }
 
@@ -121,13 +121,13 @@ public class BioProfile {
         this.npub = npub;
     }
 
-    public String getMacAddress() {
-        return macAddress;
-    }
-
-    public void setMacAddress(String macAddress) {
-        this.macAddress = macAddress;
-    }
+//    public String getMacAddress() {
+//        return macAddress;
+//    }
+//
+//    public void setMacAddress(String macAddress) {
+//        this.macAddress = macAddress;
+//    }
 
     public void merge(BioProfile bioProfileFromFile) {
 //        if (bioProfileFromFile == null) {
@@ -143,7 +143,7 @@ public class BioProfile {
 
     /**
      * Extra is just used internally
-     * @return
+     * @return a special value
      */
     public String getExtra() {
         return extra;

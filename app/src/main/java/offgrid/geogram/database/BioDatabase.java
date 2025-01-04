@@ -14,11 +14,12 @@ import offgrid.geogram.core.Log;
 public class BioDatabase {
 
     public static final String TAG = "BioDatabase";
-    public static final String FOLDER_NAME = "bios";
+    public static final String FOLDER_NAME = "profiles";
     public static final String FILE_NAME = "bio.json";
 
-    // the most up to date list of beacons saved on our disk
-    public static HashMap<String, BioProfile> bios = new HashMap<>();
+    // profiles that we have chatted so far. The string is the device Id being used
+    public static HashMap<String, BioProfile> profiles = new HashMap<>();
+
 
     /**
      * Gets the base folder for storage.
@@ -26,7 +27,7 @@ public class BioDatabase {
      * @param context The application context.
      * @return The folder for storing beacon data.
      */
-    public static File getFolder(Context context) {
+    private static File getFolder(Context context) {
         File folder = new File(context.getFilesDir(), FOLDER_NAME);
         if (!folder.exists()) {
             if (!folder.mkdirs()) {
@@ -78,45 +79,25 @@ public class BioDatabase {
      * @param profile     The profile to save or merge.
      * @param appContext The application context.
      */
-    public static void saveOrMergeWithBeaconDiscovered(BioProfile profile, Context appContext) {
-        String deviceId = profile.getId();
+    public static void saveToDisk(BioProfile profile, Context appContext) {
+        String deviceId = profile.getDeviceId();
         if (deviceId == null) {
             Log.e(TAG, "Device Id is null");
             return;
         }
-
         File folderDevice = getFolderDeviceId(deviceId, appContext);
         if (folderDevice == null) {
             return;
         }
-
         File file = new File(folderDevice, FILE_NAME);
-        BioProfile bioProfileFromFile = null;
-        if (file.exists()) {
-            bioProfileFromFile = BioProfile.fromJson(file);
-            if (bioProfileFromFile == null) {
-                Log.e(TAG,
-                        "Failed to parse beacon data from file: "
-                        + file.getAbsolutePath());
-            }
+
+        try {
+            profile.saveToFile(file, appContext);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to save data to file: " + file.getAbsolutePath() + " " + e.getMessage());
         }
 
-        if (bioProfileFromFile == null) {
-            try {
-                profile.saveToFile(file, appContext);
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to save data to file: " + file.getAbsolutePath() + " " + e.getMessage());
-            }
-        } else {
-            profile.merge(bioProfileFromFile);
-            try {
-                profile.saveToFile(file, appContext);
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to save merged data to file: " + file.getAbsolutePath() + " " + e.getMessage());
-            }
-        }
         Log.i(TAG, "Saved data to file: " + file.getAbsolutePath());
-        return;
     }
 
     /**

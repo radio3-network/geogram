@@ -27,7 +27,6 @@ import java.util.HashMap;
 import offgrid.geogram.R;
 import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.core.old.old.GenerateDeviceId;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.util.ASCII;
@@ -37,8 +36,6 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
 
     // messages that are displayed
     private final ArrayList<BroadcastMessage> displayedMessages = new ArrayList<>();
-    // profiles that we have chatted so far. The string is the MAC address being used
-    private final HashMap<String, BioProfile> profiles = new HashMap<>();
 
     private LinearLayout chatMessageContainer;
     private ScrollView chatScrollView;
@@ -152,10 +149,10 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
                             return;
                         }
                         // setup with the mac address that was used
-                        this.profiles.put(message.getDeviceId(), profile);
-                        Log.i("BroadcastChatFragment", "Adding bio profile: " + profile.getNick());
+                        BioDatabase.profiles.put(message.getDeviceId(), profile);
                         // valid bio, write it to our database
-                        BioDatabase.saveOrMergeWithBeaconDiscovered(profile, this.getContext());
+                        BioDatabase.saveToDisk(profile, this.getContext());
+                        Log.i("BroadcastChatFragment", "Adding bio profile: " + profile.getNick());
                         //return;
                     }
 
@@ -207,7 +204,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         TextView textBoxUpper = receivedMessageView.findViewById(R.id.sender_name);
         TextView textBoxLower = receivedMessageView.findViewById(R.id.message_timestamp);
 
-        BioProfile profile = profiles.get(message.getDeviceId());
+        BioProfile profile = BioDatabase.profiles.get(message.getDeviceId());
         String nickname = "";
 
         if (profile != null) {
@@ -230,6 +227,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         String text = message.getMessage();
         if(text.startsWith(tagBio) && profile != null){
             if(profile.getExtra() == null){
+                // add a nice one line ASCII emoticon
                 profile.setExtra(ASCII.getRandomOneliner());
             }
             text = profile.getExtra();

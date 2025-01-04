@@ -6,7 +6,6 @@ import static offgrid.geogram.bluetooth.comms.BlueQueue.messagesReceivedAsBroadc
 import android.content.Context;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import offgrid.geogram.bluetooth.BeaconFinder;
@@ -17,7 +16,6 @@ import offgrid.geogram.bluetooth.comms.Bluecomm;
 import offgrid.geogram.bluetooth.comms.DataType;
 import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.core.old.old.GenerateDeviceId;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.settings.SettingsUser;
 import offgrid.geogram.things.BeaconReachable;
@@ -243,7 +241,7 @@ public class BroadcastSendMessage {
         BioProfile profile = new BioProfile();
         profile.setNick(settings.getNickname());
         String deviceId = settings.getIdDevice();
-        profile.setId(deviceId);
+        profile.setDeviceId(deviceId);
         profile.setColor(settings.getPreferredColor());
         //profile.setNpub(settings.getNpub());
 
