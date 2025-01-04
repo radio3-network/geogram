@@ -11,8 +11,7 @@ import java.util.Map;
 import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.database.BioDatabase;
-import offgrid.geogram.database.BioProfile;
+import offgrid.geogram.bluetooth.broadcast.LostAndFound;
 
 /**
  * This class stores the requests that are made from outside
@@ -23,12 +22,8 @@ import offgrid.geogram.database.BioProfile;
 public class BlueDataWriteFromOutside {
 
     // the requests currently active
-    private final HashMap<String, BluePackage> requests = new HashMap<>();
-
-    // the write actions from outside devices
-    // <UID, BluePackage>
-    private final HashMap<String, BluePackage> writeActions = new HashMap<>();
-
+    // this is only used for read operations and will soon be phased out
+    //private final HashMap<String, BluePackage> requests = new HashMap<>();
 
     // Static instance of the singleton
     private static BlueDataWriteFromOutside instance;
@@ -36,7 +31,7 @@ public class BlueDataWriteFromOutside {
 
     // Private constructor to prevent instantiation from outside
     private BlueDataWriteFromOutside() {
-        startCleanupThread(); // Start cleanup thread upon initialization
+        //startCleanupThread(); // Start cleanup thread upon initialization
     }
 
     /**
@@ -85,7 +80,7 @@ public class BlueDataWriteFromOutside {
 
         String[] data = receivedData.split(":");
         String UID = data[0].substring(0, 2);
-
+        HashMap<String, BluePackage> writeActions = BlueQueues.getInstance(context).writeActions;
         // with a valid device, is there already a write request?
         BluePackage writeAction = null;
         if(writeActions.containsKey(UID)){
@@ -99,6 +94,7 @@ public class BlueDataWriteFromOutside {
                 return;
             }else{
                 Log.e(TAG, "Invalid header received for write operation: " + receivedData);
+                LostAndFound.decodeLostPackage(receivedData, macAddress, context);
                 return;
             }
         }
@@ -116,12 +112,8 @@ public class BlueDataWriteFromOutside {
         // next messages should be an increment
         writeAction.receiveParcel(receivedData);
 
-        if(writeAction.hasGaps()){
-            // get the first gap that is missing
-            String gapIndex = writeAction.getFirstGapParcel();
-            // send this request back to the other device
-            BroadcastSendMessage.sendParcelToDevice(macAddress, gapIndex, context);
-            // all done
+        // when we detect a missing parcel, try to get it first
+        if(LostAndFound.hasMissingParcels(writeAction, macAddress, context)){
             return;
         }
 
@@ -133,16 +125,6 @@ public class BlueDataWriteFromOutside {
             writeActions.remove(UID);
         }
 
-//        // process the request
-//        String answer = processReceivedRequest(macAddress, receivedData, context);
-//        Log.i(TAG, "Request processed from " + macAddress + ". Answer: " + answer);
-//        // prepare an answer to be shipped
-//        BluePackage requestData = BluePackage.createSender(answer);
-//        // remove previous requests for this address (if any)
-//        requests.remove(macAddress);
-//        // place it on the queue
-//        requests.put(macAddress, requestData);
-//        Log.i(TAG, "Request placed on queue: " + macAddress + " - " + receivedData);
     }
 
     /**
@@ -163,6 +145,7 @@ public class BlueDataWriteFromOutside {
             Log.i(TAG, "Gap data: received request with id: "
                     + id + " for parcel " + parcelNumber);
             // send back the parcel to the other device
+            HashMap<String, BluePackage> writeActions = BlueQueues.getInstance(context).writeActions;
             BluePackage writeAction = writeActions.get(id);
             if(writeAction == null){
                 Log.e(TAG, "GapData: No write action found for id: " + id);
@@ -229,47 +212,47 @@ public class BlueDataWriteFromOutside {
 
 
 
-    /**
-     * Provides the request data for the given MAC address.
-     * @param address MAC address of the bluetooth device
-     * @return the associated request data or null when not found
-     */
-    public BluePackage getRequest(String address) {
-        return requests.get(address);
-    }
+//    /**
+//     * Provides the request data for the given MAC address.
+//     * @param address MAC address of the bluetooth device
+//     * @return the associated request data or null when not found
+//     */
+//    public BluePackage getRequest(String address) {
+//        return requests.get(address);
+//    }
 
-    /**
-     * Starts a background thread to clean up outdated requests
-     * that are older than 5 minutes (300,000 milliseconds).
-     */
-    private void startCleanupThread() {
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(60000); // Check every minute
-                    cleanupOldRequests();
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "Cleanup thread interrupted: " + e.getMessage());
-                    break;
-                }
-            }
-        }).start();
-    }
+//    /**
+//     * Starts a background thread to clean up outdated requests
+//     * that are older than 5 minutes (300,000 milliseconds).
+//     */
+//    private void startCleanupThread() {
+//        new Thread(() -> {
+//            while (true) {
+//                try {
+//                    Thread.sleep(60000); // Check every minute
+//                    //cleanupOldRequests();
+//                } catch (InterruptedException e) {
+//                    Log.e(TAG, "Cleanup thread interrupted: " + e.getMessage());
+//                    break;
+//                }
+//            }
+//        }).start();
+//    }
 
-    /**
-     * Removes requests that are older than 5 minutes.
-     */
-    private synchronized void cleanupOldRequests() {
-        long currentTime = System.currentTimeMillis();
-        Iterator<Map.Entry<String, BluePackage>> iterator = requests.entrySet().iterator();
-
-        while (iterator.hasNext()) {
-            Map.Entry<String, BluePackage> entry = iterator.next();
-            BluePackage requestData = entry.getValue();
-            if (currentTime - requestData.getTransmissionStartTime() > 300000) { // 5 minutes
-                Log.i(TAG, "Removing outdated request for address: " + entry.getKey());
-                iterator.remove();
-            }
-        }
-    }
+//    /**
+//     * Removes requests that are older than 5 minutes.
+//     */
+//    private synchronized void cleanupOldRequests() {
+//        long currentTime = System.currentTimeMillis();
+//        Iterator<Map.Entry<String, BluePackage>> iterator = requests.entrySet().iterator();
+//
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, BluePackage> entry = iterator.next();
+//            BluePackage requestData = entry.getValue();
+//            if (currentTime - requestData.getTransmissionStartTime() > 300000) { // 5 minutes
+//                Log.i(TAG, "Removing outdated request for address: " + entry.getKey());
+//                iterator.remove();
+//            }
+//        }
+//    }
 }

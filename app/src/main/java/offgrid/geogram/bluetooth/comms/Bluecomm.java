@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.core.Log;
@@ -31,23 +30,20 @@ public class Bluecomm {
 
     public static final int
             timeBetweenChecks = 2000,
-            timeBetweenMessages = 700,
+            timeBetweenMessages = 1000,
             maxSizeOfMessages = 14
     ;
 
     public static final String
-            gapBroadcast = ">B:";
-
-    // queue to store individual one-line messages to be sent
-    private final CopyOnWriteArrayList<BlueQueueItem> queue = new CopyOnWriteArrayList<>();
-    private Thread queueThread = null;
+            gapBroadcast = ">B:", // means a one line statement
+            gapREPEAT = "REPEAT" // please send the whole package again
+    ;
 
 
     private Bluecomm(Context context) {
         this.context = context.getApplicationContext();
-        if(queueThread == null){
-            startThreadToSendMessagesInQueue();
-        }
+        // start the queues when not started already
+        BlueQueues.getInstance(context).start();
     }
 
     /**
@@ -60,30 +56,6 @@ public class Bluecomm {
         return instance;
     }
 
-
-    private void startThreadToSendMessagesInQueue() {
-        queueThread = new Thread(() -> {
-            try {
-                while(true) {
-                    Thread.sleep(timeBetweenChecks); // Pause for a bit
-                    if(queue.isEmpty()){
-                        continue;
-                    }
-                    while(!queue.isEmpty()){
-                        BlueQueueItem item = queue.get(0);
-                        writeData(item);
-                        Thread.sleep(timeBetweenMessages);
-                        queue.remove(0);
-                    }
-
-                }
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Thread interrupted: " + e.getMessage());
-            }
-
-        });
-        queueThread.start(); // Starts the thread
-    }
 
     /**
      * Reads data from the custom characteristic on a specified device.
@@ -183,7 +155,7 @@ public class Bluecomm {
      */
     public synchronized void writeData(String macAddress, String data) {
         BlueQueueItem item = new BlueQueueItem(macAddress, data);
-        queue.add(item);
+        BlueQueues.getInstance(context).addQueueToSend(item);
     }
 
     /**

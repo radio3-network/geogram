@@ -303,19 +303,19 @@ public class GattServer {
             if (!CUSTOM_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
                 return;
             }
-            try {
-                BlueDataWriteFromOutside blueCentral = BlueDataWriteFromOutside.getInstance();
-                BluePackage request = blueCentral.getRequest(device.getAddress());
-                if (request == null) {
-                    Log.e(TAG, "Request not found for device: " + device.getAddress());
-                    return;
-                }
-                String message = request.getNextParcel();
-                Log.i(TAG, "Read request from " + device.getAddress() + ". Replying with: " + message);
-                gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, message.getBytes());
-            } catch (SecurityException e) {
-                Log.e(TAG, "SecurityException while sending read response: " + e.getMessage());
-            }
+//            try {
+//                BlueDataWriteFromOutside blueCentral = BlueDataWriteFromOutside.getInstance();
+//                BluePackage request = blueCentral.getRequest(device.getAddress());
+//                if (request == null) {
+//                    Log.e(TAG, "Request not found for device: " + device.getAddress());
+//                    return;
+//                }
+//                String message = request.getNextParcel();
+//                Log.i(TAG, "Read request from " + device.getAddress() + ". Replying with: " + message);
+//                gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, message.getBytes());
+//            } catch (SecurityException e) {
+//                Log.e(TAG, "SecurityException while sending read response: " + e.getMessage());
+//            }
 
         }
 

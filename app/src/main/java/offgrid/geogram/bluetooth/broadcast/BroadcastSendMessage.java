@@ -155,14 +155,14 @@ public class BroadcastSendMessage {
     /**
      * This is used for asking the other device to send a parcel that is missing
      * @param macAddress MAC address of the device
-     * @param gapIndex index of the missing parcel
+     * @param gapData data or index of the missing parcel
      * @param context application context
      */
     public static void sendParcelToDevice(String macAddress,
-                                          String gapIndex,
+                                          String gapData,
                                           Context context) {
         // create a single broadcast command
-        String text = gapBroadcast + gapIndex;
+        String text = gapBroadcast + gapData;
         // send it over the wire
         Log.i(TAG_ID, "GapData: Sending gap data request to " + macAddress + " with: " + text);
         Bluecomm.getInstance(context).writeData(macAddress, text);
