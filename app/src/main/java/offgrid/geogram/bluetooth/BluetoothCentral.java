@@ -81,7 +81,10 @@ public class BluetoothCentral {
      * Starts the GATT server and beacon if Bluetooth is enabled.
      */
     public void start() {
-        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        gattServer = GattServer.getInstance(context);
+
+        if (bluetoothAdapter == null || bluetoothAdapter.isEnabled() == false) {
             Log.i(TAG, "Bluetooth is disabled. Services will not start.");
             return;
         }
@@ -94,12 +97,12 @@ public class BluetoothCentral {
         // always start the gatt server
         //gattServer = GattServer.getInstance(context);
 
-        if (beacon != null && !beacon.isAdvertising()) {
+        if (beacon != null && beacon.isAdvertising() == false) {
             beacon.startBeacon();
             Log.i(TAG, "Beacon started.");
         }
 
-        if (!isScanning){
+        if (isScanning == false){
             startScanning();
         }
     }
@@ -116,7 +119,8 @@ public class BluetoothCentral {
         }
 
         if (gattServer != null) {
-            Log.i(TAG, "GATT server will continue to run.");
+            Log.i(TAG, "GATT server will be nullified");
+            gattServer = null;
         }
     }
 
@@ -152,13 +156,6 @@ public class BluetoothCentral {
         beaconFinder.stopScanning();
         isScanning = false;
         Log.i(TAG, "Beacon scanning stopped from BluetoothCentral.");
-    }
-
-    /**
-     * Returns whether scanning is currently active.
-     */
-    public boolean isScanningActive() {
-        return isScanning;
     }
 
     /**

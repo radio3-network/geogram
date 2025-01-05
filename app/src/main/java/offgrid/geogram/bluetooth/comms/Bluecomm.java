@@ -9,6 +9,8 @@ import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 
 import java.util.UUID;
 
@@ -225,6 +227,7 @@ public class Bluecomm {
                     }
                 }
 
+
                 @Override
                 public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                     super.onServicesDiscovered(gatt, status);
@@ -245,23 +248,58 @@ public class Bluecomm {
                             return;
                         }
 
-                        characteristic.setValue(data);
-                        boolean success = gatt.writeCharacteristic(characteristic);
-                        if (success) {
-                            Log.i(TAG, "Write operation initiated successfully.");
-                            callback.onDataSuccess("Write operation initiated.");
-                        } else {
-                            Log.i(TAG, "Failed to initiate write operation.");
-                            callback.onDataError("Failed to initiate write operation.");
+                        // Check if the characteristic supports write
+                        int properties = characteristic.getProperties();
+                        if ((properties & BluetoothGattCharacteristic.PROPERTY_WRITE) == 0 &&
+                                (properties & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) {
+                            Log.e(TAG, "Characteristic does not support write operations.");
+                            callback.onDataError("Characteristic does not support write operations.");
                             gatt.disconnect();
+                            return;
                         }
 
+                        // Set the write type to default
+                        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+
+                        // Introduce a delay to ensure smooth operation
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            try {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    int result = gatt.writeCharacteristic(characteristic, data.getBytes(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                                    if (result != BluetoothGatt.GATT_SUCCESS) {
+                                        Log.e(TAG, "GATT write failed with status: " + result);
+                                        callback.onDataError("GATT write failed with status: " + result);
+                                    } else {
+                                        Log.i(TAG, "Write operation initiated successfully.");
+                                        callback.onDataSuccess("Write operation initiated.");
+                                    }
+                                } else {
+                                    // For older APIs, use the legacy method
+                                    boolean success = gatt.writeCharacteristic(characteristic);
+                                    if (!success) {
+                                        Log.i(TAG, "Failed to initiate write operation.");
+                                        callback.onDataError("Failed to initiate write operation.");
+                                        gatt.disconnect();
+                                    } else {
+                                        Log.i(TAG, "Write operation initiated successfully.");
+                                        callback.onDataSuccess("Write operation initiated.");
+                                    }
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Exception during write operation: " + e.getMessage());
+                                callback.onDataError("Exception during write operation: " + e.getMessage());
+                            }
+                        }, 200); // Delay of 200ms to avoid back-to-back operations
                     } else {
                         Log.i(TAG, "Failed to discover services. Status: " + status);
                         callback.onDataError("Failed to discover services.");
                         gatt.disconnect();
                     }
                 }
+
+
+
+
             });
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());

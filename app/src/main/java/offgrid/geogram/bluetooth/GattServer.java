@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.UUID;
 
 import offgrid.geogram.bluetooth.comms.BlueDataWriteFromOutside;
-import offgrid.geogram.bluetooth.comms.BluePackage;
 import offgrid.geogram.core.Log;
 
 public class GattServer {

@@ -28,9 +28,6 @@ public class BioProfile {
     @Expose
     private String npub;
 
-    //@Expose
-    //private String macAddress;
-
     private String extra;
 
     /**
