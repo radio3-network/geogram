@@ -63,18 +63,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // load all the beacons we have seen before
-        loadBeaconsOnDatabase();
+        //loadBeaconsOnDatabase();
 
         initializeApp();
     }
 
-    /**
-     * Load all the beacons we have seen before from the database.
-     */
-    private void loadBeaconsOnDatabase() {
-        BeaconDatabase.updateBeacons(this.getApplicationContext());
-        BeaconListing.getInstance().updateList(this.getApplicationContext());
-    }
+//    /**
+//     * Load all the beacons we have seen before from the database.
+//     */
+//    private void loadBeaconsOnDatabase() {
+//        BeaconDatabase.updateBeacons(this.getApplicationContext());
+//        BeaconListing.getInstance().updateList(this.getApplicationContext());
+//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

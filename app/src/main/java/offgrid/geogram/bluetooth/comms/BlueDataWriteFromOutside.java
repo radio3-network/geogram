@@ -1,7 +1,9 @@
 package offgrid.geogram.bluetooth.comms;
 
 import static offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage.sendPackageToDevice;
-import static offgrid.geogram.bluetooth.broadcast.LostAndFound.gapBroadcast;
+import static offgrid.geogram.bluetooth.comms.BlueCommands.oneLineCommandGapBroadcast;
+import static offgrid.geogram.bluetooth.comms.BlueCommands.gapREPEAT;
+import static offgrid.geogram.bluetooth.comms.BlueCommands.oneLineCommandPing;
 import static offgrid.geogram.bluetooth.comms.BlueQueue.messagesReceivedAsBroadcast;
 
 import android.content.Context;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.bluetooth.broadcast.LostAndFound;
+import offgrid.geogram.database.BioDatabase;
 
 /**
  * This class stores the requests that are made from outside
@@ -149,11 +152,11 @@ public class BlueDataWriteFromOutside {
         // this means: broadcast message with identification XY requests parcel 1
         // >B:REPEAT:TZ
         // this means to repeat the TZ package again
-        if(receivedData.startsWith(gapBroadcast)){
+        if(receivedData.startsWith(oneLineCommandGapBroadcast)){
             String[] data = receivedData.split(":");
             String action = data[1]; // e.g. XY001 or REPEAT
             // is this a repeat request?
-            if(action.equals(LostAndFound.gapREPEAT)){
+            if(action.equals(gapREPEAT)){
                 String packageId = data[2];
                 BluePackage packageToResend =
                         BlueQueue.getInstance(context).packagesBeingSent.get(packageId);
@@ -186,6 +189,14 @@ public class BlueDataWriteFromOutside {
             String textToSendAgain = packageToSendAgain.getSpecificParcel(value);
             Log.i(TAG, "GapData: Sending parcel: " + textToSendAgain);
             Bluecomm.getInstance(context).writeData(macAddress, textToSendAgain);
+        }
+
+        // received a message like >PING:713321
+        // this is an update to the MAC address of that device Id
+        if(receivedData.startsWith(oneLineCommandPing)){
+            String data = receivedData.substring(oneLineCommandPing.length());
+            BioDatabase.ping(data, macAddress, context);
+            return;
         }
 
         // single command is not yet supported

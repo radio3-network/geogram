@@ -5,7 +5,9 @@ import android.content.Context;
 import java.io.File;
 import java.util.HashMap;
 
+import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.things.BeaconReachable;
 
 /**
  * Handles all data related to bio profiles that were sent
@@ -107,12 +109,18 @@ public class BioDatabase {
      * @param appContext The application context.
      * @return The beacon object if found, or null if not.
      */
-    public static BioProfile getBio(String deviceId, Context appContext) {
+    public static BioProfile get(String deviceId, Context appContext) {
         if (deviceId == null) {
             Log.e(TAG, "Device Id is null");
             return null;
         }
 
+        // if the device is in memory, add it from there
+        if(profiles.containsKey(deviceId)){
+            return profiles.get(deviceId);
+        }
+
+        // seems we really have to read it from disk
         File folderDevice = getFolderDeviceId(deviceId, appContext);
         if (folderDevice == null || !folderDevice.exists()) {
             Log.e(TAG, "Folder does not exist for " + deviceId);
@@ -125,7 +133,14 @@ public class BioDatabase {
             return null;
         }
         Log.i(TAG, "Providing bio profile: " + deviceId);
-        return BioProfile.fromJson(file);
+        BioProfile profile = BioProfile.fromJson(file);
+        if (profile == null) {
+            Log.e(TAG, "Failed to load profile from file: " + file.getAbsolutePath());
+            return null;
+        }
+        // save it in memory for future runs
+        profiles.put(deviceId, profile);
+        return profile;
     }
 
     public static void save(String deviceId, BioProfile profile, Context context) {
@@ -134,6 +149,38 @@ public class BioDatabase {
     }
 
     public static BioProfile get(String deviceId) {
-        return profiles.get(deviceId);
+        if (deviceId == null) {
+            Log.e(TAG, "Device Id is null");
+            return null;
+        }
+        return profiles.getOrDefault(deviceId, null);
+    }
+
+    /**
+     * Received a bluetooth ping for a specific deviceId
+     *
+     * @param data      presumed to be the deviceID
+     * @param context   used for looking inside the archive on the disk
+     */
+    public static void ping(String data, String macAddress, Context context) {
+        Log.i(TAG, "Ping received from " + macAddress + " with data: " + data);
+        // data on this case is just the device ID. In the future will have more fields
+        BioProfile profile = get(data, context);
+        if(profile == null){
+            Log.e(TAG, "Pinged profile not found for " + data);
+            return;
+        }
+        BeaconReachable beacon = BeaconFinder.getInstance(context)
+                .getBeaconMap().get(profile.getDeviceId());
+        if(beacon == null){
+            Log.e(TAG, "Pinged beacon not found for " + data);
+            return;
+        }
+        // update the beacon
+        beacon.setMacAddress(macAddress);
+        beacon.setTimeLastFound(System.currentTimeMillis());
+        BeaconFinder.getInstance(context).update(beacon);
+        Log.i(TAG, "Ping updated beacon: " + beacon.getDeviceId() + " from " + beacon.getMacAddress());
+
     }
 }

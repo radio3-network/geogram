@@ -10,23 +10,15 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Build;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
-import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
 import offgrid.geogram.bluetooth.comms.Mutex;
-import offgrid.geogram.database.BioProfile;
-import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.core.old.old.GenerateDeviceId;
 import offgrid.geogram.database.BeaconDatabase;
-import offgrid.geogram.settings.SettingsUser;
 import offgrid.geogram.things.BeaconReachable;
 
 public class BeaconFinder {
@@ -40,6 +32,7 @@ public class BeaconFinder {
     private final BluetoothAdapter bluetoothAdapter;
     private final HashMap<String, BeaconReachable> beaconMap = new HashMap<>();
     private boolean isScanning = false;
+    private long timeLastUpdated = System.currentTimeMillis();
 
     private BeaconFinder(Context context) {
         this.context = context.getApplicationContext();
@@ -151,6 +144,14 @@ public class BeaconFinder {
             return;
         }
 
+        // reduce stress on the CPU
+        long timePassed = System.currentTimeMillis() - timeLastUpdated;
+        if(timePassed > 2000){
+            timeLastUpdated = System.currentTimeMillis();
+        }else{
+            return;
+        }
+
         // wait for write operations to be over
         Mutex.getInstance().waitUntilUnlocked();
         Mutex.getInstance().lock();
@@ -161,6 +162,13 @@ public class BeaconFinder {
         }
 
         String deviceId = extractInstanceId(serviceData);
+
+        // for the moment we provide a full large number instead of shorter
+        if(deviceId.length() == 12){
+            deviceId = deviceId.substring(0, deviceId.length() - 6);
+        }
+        //Log.i(TAG, "Found Eddystone beacon: " + deviceId);
+
         String namespaceId = extractNamespaceId(serviceData);
 
         // is this beacon already on our hashmap?
@@ -174,18 +182,19 @@ public class BeaconFinder {
             beacon.setMacAddress(result.getDevice().getAddress());
             beacon.setRssi(result.getRssi());
             beaconMap.put(deviceId, beacon);
-            // send our profile info to all reachable devices
+            // send our own profile info to all reachable devices
+            // this way they can know about us.
             sendProfileToEveryone(context);
 
             // also save it do disk
-            BeaconDatabase.saveOrMergeWithBeaconDiscovered(beacon, context);
+            //BeaconDatabase.saveBeaconToDisk(beacon, context);
             Log.i(TAG, "New Eddystone beacon found: "
                     + deviceId
                     + " at "
                     + result.getDevice().getAddress()
             );
 
-            // update the list
+            // update the list visible on the main screen
             BeaconListing.getInstance().updateList(this.context);
             Log.i(TAG, "Updating beacon list on UI");
         }
@@ -247,7 +256,11 @@ public class BeaconFinder {
         return hexString.toString();
     }
 
-
-
-
+    /**
+     * Updates a beacon.
+     * @param beacon
+     */
+    public void update(BeaconReachable beacon) {
+        beaconMap.put(beacon.getDeviceId(), beacon);
+    }
 }

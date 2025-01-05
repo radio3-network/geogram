@@ -35,8 +35,28 @@
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:paddingStart="8dp"/>
+            android:paddingStart="8dp" />
 
+        <!-- Clear Log Button -->
+        <ImageButton
+            android:id="@+id/btn_clear_log"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="Clear Log"
+            android:src="@drawable/ic_clear"
+            app:tint="@color/white"
+            android:background="@android:color/transparent"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Copy to Clipboard Button -->
+        <ImageButton
+            android:id="@+id/btn_copy_log"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:contentDescription="Copy to Clipboard"
+            android:src="@drawable/ic_copy"
+            app:tint="@color/white"
+            android:background="@android:color/transparent" />
     </LinearLayout>
 
     <!-- Log Window -->
@@ -51,36 +71,5 @@
         android:inputType="none"
         android:textIsSelectable="true"
         android:textSize="10sp" />
-
-    <!-- Bottom Buttons -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end|center_vertical"
-        android:paddingTop="8dp">
-
-        <!-- Clear Log Button -->
-        <ImageButton
-            android:id="@+id/btn_clear_log"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="Clear Log"
-            android:src="@drawable/ic_clear"
-            app:tint="@color/white"
-            android:background="@android:color/transparent"
-            android:layout_marginEnd="16dp" />
-
-        <!-- Copy to Clipboard Button -->
-        <ImageButton
-            android:id="@+id/btn_copy_log"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="Copy to Clipboard"
-            android:src="@drawable/ic_copy"
-            app:tint="@color/white"
-            android:background="@android:color/transparent" />
-
-    </LinearLayout>
 
 </LinearLayout>

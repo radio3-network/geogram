@@ -1,6 +1,6 @@
 package offgrid.geogram.bluetooth.broadcast;
 
-import static offgrid.geogram.bluetooth.broadcast.LostAndFound.gapBroadcast;
+import static offgrid.geogram.bluetooth.comms.BlueCommands.oneLineCommandGapBroadcast;
 import static offgrid.geogram.bluetooth.comms.BlueQueue.messagesReceivedAsBroadcast;
 
 import android.content.Context;
@@ -118,10 +118,30 @@ public class BroadcastSendMessage {
         return true;
     }
 
-    /**
-     * Broadcasts a message to all Eddystone devices in reach.
-     * @param messageToBroadcast The message to be sent, it needs to be within 20 characters
-     */
+
+    public static void broadcastMessageToAllEddystoneDevicesShort(String text, Context context) {
+        Thread thread = new Thread(() -> {
+            try {
+                Collection<BeaconReachable> devices = BeaconFinder.getInstance(context).getBeaconMap().values();
+                for (BeaconReachable device : devices) {
+                    // send the message
+                    String macAddress = device.getMacAddress();
+                    Log.i(TAG_ID, "Sending short message to " + macAddress + " with: " + text);
+                    Bluecomm.getInstance(context).writeData(macAddress, text);
+                }
+            } catch (Exception e) {
+                Log.e(TAG_ID, "Exception happened: " + e.getMessage());
+            }
+
+        });
+        thread.start(); // Starts the thread
+    }
+
+
+        /**
+         * Broadcasts a message to all Eddystone devices in reach.
+         * @param messageToBroadcast The message to be sent, it needs to be within 20 characters
+         */
     public static void broadcastMessageToAllEddystoneDevices(BroadcastMessage messageToBroadcast, Context context) {
         Thread thread = new Thread(() -> {
             try {
@@ -161,7 +181,7 @@ public class BroadcastSendMessage {
                                           String gapData,
                                           Context context) {
         // create a single broadcast command
-        String text = gapBroadcast + gapData;
+        String text = oneLineCommandGapBroadcast + gapData;
         // send it over the wire
         Log.i(TAG_ID, "GapData: Sending gap data request to " + macAddress + " with: " + text);
         Bluecomm.getInstance(context).writeData(macAddress, text);

@@ -211,8 +211,8 @@ public class Bluecomm {
 
         try {
             // wait a bit until unlocked
-            Mutex.getInstance().waitUntilUnlocked();
-            Mutex.getInstance().lock();
+            //Mutex.getInstance().waitUntilUnlocked();
+            //Mutex.getInstance().lock();
 
             bluetoothGatt = device.connectGatt(context, false, new BluetoothGattCallback() {
                 @Override
@@ -290,7 +290,7 @@ public class Bluecomm {
                                 Log.e(TAG, "Exception during write operation: " + e.getMessage());
                                 callback.onDataError("Exception during write operation: " + e.getMessage());
                             }
-                        }, 200); // Delay of 200ms to avoid back-to-back operations
+                        }, 300); // Delay of 200ms to avoid back-to-back operations
                     } else {
                         Log.i(TAG, "Failed to discover services. Status: " + status);
                         callback.onDataError("Failed to discover services.");
@@ -305,9 +305,9 @@ public class Bluecomm {
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());
             callback.onDataError("Security exception occurred.");
-            Mutex.getInstance().unlock();
+            //Mutex.getInstance().unlock();
         }
-        Mutex.getInstance().unlock();
+        //Mutex.getInstance().unlock();
     }
 
     /**

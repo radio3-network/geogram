@@ -13,7 +13,7 @@ public class Mutex {
     private Timer timer = null;
 
     // Timeout value in milliseconds (default is 1 minute)
-    private static final int TIMEOUT_MS = 60000;
+    private static final int TIMEOUT_MS = 20_000;
 
     // Singleton instance
     private static final Mutex INSTANCE = new Mutex();
@@ -108,6 +108,7 @@ public class Mutex {
      * Makes the current thread wait until the lock is unlocked.
      */
     public void waitUntilUnlocked() {
+        //return;
         synchronized (lock) {
             while (isLocked) {
                 try {

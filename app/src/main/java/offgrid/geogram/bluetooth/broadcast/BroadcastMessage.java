@@ -16,7 +16,7 @@ public class BroadcastMessage {
     private BluePackage packageSent;
     private final ArrayList<BeaconReachable> devicesThatReadMessage = new ArrayList<>();
 
-    public final static String tagBio = "/bio:";
+
 
     public BroadcastMessage(String message, String deviceId, boolean writtenByMe) {
         this.message = message;

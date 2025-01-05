@@ -9,6 +9,7 @@ import android.os.ParcelUuid;
 import java.util.List;
 import java.util.UUID;
 
+import offgrid.geogram.bluetooth.comms.BluePing;
 import offgrid.geogram.bluetooth.old.BluetoothStateReceiver;
 import offgrid.geogram.core.Log;
 
@@ -102,6 +103,12 @@ public class BluetoothCentral {
             Log.i(TAG, "Beacon started.");
         }
 
+        // Start the ping service
+        BluePing.getInstance(context).start();
+
+
+
+        // synchronize messages
         if (isScanning == false){
             startScanning();
         }
@@ -122,6 +129,9 @@ public class BluetoothCentral {
             Log.i(TAG, "GATT server will be nullified");
             gattServer = null;
         }
+
+        // Start the ping service
+        BluePing.getInstance(context).stop();
     }
 
     /**

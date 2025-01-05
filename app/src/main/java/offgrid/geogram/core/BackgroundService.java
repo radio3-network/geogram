@@ -255,7 +255,7 @@ public class BackgroundService extends Service {
         }
 
         // update the beacons found on disk
-        BeaconDatabase.updateBeacons(this.getApplicationContext());
+        //BeaconDatabase.updateBeacons(this.getApplicationContext());
 
         // update the beacons list on the UI
         BeaconListing.getInstance().updateList(this.getApplicationContext());

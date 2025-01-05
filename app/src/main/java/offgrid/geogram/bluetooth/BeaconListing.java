@@ -8,7 +8,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 
@@ -74,7 +73,7 @@ public class BeaconListing {
         // Sort beacons by last seen time, most recent first
         beaconsList.sort(Comparator.comparingLong(BeaconReachable::getTimeLastFound).reversed());
 
-        ArrayList<String> displayList = new ArrayList<>();
+        ArrayList<BioProfile> displayList = new ArrayList<>();
         for (BeaconReachable beacon : beaconsList) {
             // data displayed on main screen
             String distance = "" + calculateDistance(beacon.getRssi());
@@ -84,43 +83,23 @@ public class BeaconListing {
                 distance = "not reachable since " + getHumanReadableTime(beacon.getTimeLastFound());
             }
 
-            String profileName = beacon.getProfileName();
-            if(profileName == null){
-                profileName = beacon.getDeviceId().substring(0, 6);
+
+            // get the device id
+            String deviceId = beacon.getDeviceId();
+            if(deviceId.endsWith("000000")){
+                deviceId = deviceId.substring(0, 6);
             }
-
-            String deviceInfo = beacon.getMacAddress();
-
-            String text = profileName
-                    + " (#"
-                    + deviceInfo
-                    + ")"
-                    + "\n"
-                    + distance;
-
-
-            // try to get data based on deviceId
-            if (beacon.getDeviceId() != null) {
-                String deviceId = beacon.getDeviceId();
-                if(deviceId.endsWith("000000")){
-                    deviceId = deviceId.substring(0, 6);
-                }
-                BioProfile bioData = BioDatabase.getBio(deviceId, context);
-                if(bioData != null){
-                    profileName = bioData.getNick();
-                    deviceInfo = deviceId;
-                    text = profileName
-                            + " ("
-                            + distance
-                            + ")";
-                }
+            BioProfile bioData = BioDatabase.get(deviceId, context);
+            if(bioData == null){
+                Log.e(TAG, "No bio data found for " + deviceId);
+                continue;
             }
-
-
-            displayList.add(text);
+            bioData.setDistance(distance);
+            displayList.add(bioData);
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+        // instead of strings, we place a whole object there
+        ArrayAdapter<BioProfile> adapter = new ArrayAdapter<>(
                 beaconWindow.getContext(),
                 android.R.layout.simple_list_item_1,
                 displayList
@@ -129,26 +108,13 @@ public class BeaconListing {
 
         // Add click listener to items
         beaconWindow.setOnItemClickListener((parent, view, position, id) -> {
-            String selectedBeaconDetails = displayList.get(position);
-            String deviceId = selectedBeaconDetails.substring(0, 6);
-            BeaconReachable beacon = null;
+            // get the object
+            BioProfile profile = displayList.get(position);
 
-            Collection<BeaconReachable> beacons = BeaconFinder.getInstance(context).getBeaconMap().values();
-            for (BeaconReachable b : beacons) {
-                if (b.getDeviceId().startsWith(deviceId)) {
-                    beacon = b;
-                    break;
-                }
-            }
-            // cannot be null
-            if (beacon == null) {
-                Log.e(TAG, "Beacon not found: " + deviceId);
-                return;
-            }
-
+            // make the screen appear
             MainActivity.activity.getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.main, BeaconDetailsFragment.newInstance(beacon))
+                    .replace(R.id.main, BeaconDetailsFragment.newInstance(profile))
                     .addToBackStack(null)
                     .commit();
         });

@@ -262,25 +262,36 @@
                 android:textStyle="bold"
                 android:paddingTop="16dp" />
 
+            <!-- Reset Settings Button -->
             <Button
                 android:id="@+id/btn_reset_settings"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Reset Settings"
                 android:backgroundTint="@color/material_dynamic_neutral40"
                 android:textColor="@color/white"
-                android:padding="8dp"
-                android:layout_marginTop="8dp" />
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="start" />
 
+            <!-- Shutdown App Button -->
             <Button
                 android:id="@+id/btn_shutdown_app"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Shutdown App"
                 android:backgroundTint="@color/material_dynamic_neutral40"
                 android:textColor="@color/white"
-                android:padding="8dp"
-                android:layout_marginTop="8dp" />
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="start" />
+
         </LinearLayout>
     </ScrollView>
 

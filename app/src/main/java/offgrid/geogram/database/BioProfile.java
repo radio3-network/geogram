@@ -2,6 +2,8 @@ package offgrid.geogram.database;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -29,6 +31,8 @@ public class BioProfile {
     private String npub;
 
     private String extra;
+    // only used during runtimg
+    private String distance = null;
 
     /**
      * Converts this BioProfile object to a compact JSON string.
@@ -148,5 +152,22 @@ public class BioProfile {
 
     public void setExtra(String extra) {
         this.extra = extra;
+    }
+
+    public String getDistance() {
+        return distance;
+    }
+
+    public void setDistance(String distance) {
+        this.distance = distance;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        if(distance == null){
+            return nick;
+        }
+        return nick + " (" + distance + ")"; // This will be displayed in the list
     }
 }

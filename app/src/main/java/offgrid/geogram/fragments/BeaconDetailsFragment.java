@@ -21,6 +21,7 @@ import offgrid.geogram.bluetooth.BluetoothUtils;
 import offgrid.geogram.bluetooth.comms.BlueDataWriteAndReadToOutside;
 import offgrid.geogram.bluetooth.comms.DataCallbackTemplate;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.util.DateUtils;
@@ -33,10 +34,10 @@ public class BeaconDetailsFragment extends Fragment {
     private static final String
             ARG_BEACON_DETAILS = "beacon_details";
 
-    public static BeaconDetailsFragment newInstance(BeaconReachable beaconDiscovered)  {
+    public static BeaconDetailsFragment newInstance(BioProfile profile)  {
         BeaconDetailsFragment fragment = new BeaconDetailsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_BEACON_DETAILS, beaconDiscovered.getDeviceId());
+        args.putString(ARG_BEACON_DETAILS, profile.getDeviceId());
         fragment.setArguments(args);
         return fragment;
     }
@@ -84,34 +85,34 @@ public class BeaconDetailsFragment extends Fragment {
         }
 
         // this discovered beacon is already in our database?
-        BeaconReachable beaconExisting = BeaconDatabase.getBeacon(beaconDiscovered.getDeviceId(), this.getContext());
-        if(beaconExisting != null){
-            beaconDiscovered.merge(beaconExisting);
-        }
-
-        // setup the title for this window
-        String macAddress = beaconDiscovered.getMacAddress();
-        String timeFirstFound = DateUtils.formatTimestamp(
-                beaconDiscovered.getTimeFirstFound()
-        );
-        String timeLastFound = DateUtils.getHumanReadableTime(beaconDiscovered.getTimeLastFound());
-        String rssi = String.valueOf(beaconDiscovered.getRssi());
-        String distance = BluetoothUtils.calculateDistance(beaconDiscovered.getRssi());
-
-        String text = "Device Id: " + deviceId
-                + "\n"
-                + "Address: " + macAddress
-                + "\n"
-                + "Distance: " + distance + " (RSSI = " + rssi + ")"
-                + "\n"
-                + "First seen: " + timeFirstFound
-                + "\n"
-                + "Last seen: " + timeLastFound;
-
-        beaconDescription.setText("FlyingBarrel89" +
-                "\n" +
-                "On a mission to improve humankind");
-        beaconDescriptionAdditional.setText(text);
+//        BeaconReachable beaconExisting = BeaconDatabase.getBeacon(beaconDiscovered.getDeviceId(), this.getContext());
+//        if(beaconExisting != null){
+//            beaconDiscovered.merge(beaconExisting);
+//        }
+//
+//        // setup the title for this window
+//        String macAddress = beaconDiscovered.getMacAddress();
+//        String timeFirstFound = DateUtils.formatTimestamp(
+//                beaconDiscovered.getTimeFirstFound()
+//        );
+//        String timeLastFound = DateUtils.getHumanReadableTime(beaconDiscovered.getTimeLastFound());
+//        String rssi = String.valueOf(beaconDiscovered.getRssi());
+//        String distance = BluetoothUtils.calculateDistance(beaconDiscovered.getRssi());
+//
+//        String text = "Device Id: " + deviceId
+//                + "\n"
+//                + "Address: " + macAddress
+//                + "\n"
+//                + "Distance: " + distance + " (RSSI = " + rssi + ")"
+//                + "\n"
+//                + "First seen: " + timeFirstFound
+//                + "\n"
+//                + "Last seen: " + timeLastFound;
+//
+//        beaconDescription.setText("FlyingBarrel89" +
+//                "\n" +
+//                "On a mission to improve humankind");
+//        beaconDescriptionAdditional.setText(text);
 
         // Find the chat section
         View chatSection = view.findViewById(R.id.chat_section);

@@ -1,6 +1,6 @@
 package offgrid.geogram.bluetooth.broadcast;
 
-import static offgrid.geogram.bluetooth.broadcast.BroadcastMessage.tagBio;
+import static offgrid.geogram.bluetooth.comms.BlueCommands.tagBio;
 import static offgrid.geogram.bluetooth.comms.BlueQueue.messagesReceivedAsBroadcast;
 
 import android.graphics.drawable.GradientDrawable;
@@ -204,7 +204,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         TextView textBoxUpper = receivedMessageView.findViewById(R.id.sender_name);
         TextView textBoxLower = receivedMessageView.findViewById(R.id.message_timestamp);
 
-        BioProfile profile = BioDatabase.get(message.getDeviceId());
+        BioProfile profile = BioDatabase.get(message.getDeviceId(), this.getContext());
         String nickname = "";
 
         if (profile != null) {

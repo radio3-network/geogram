@@ -1,9 +1,10 @@
 package offgrid.geogram.bluetooth.broadcast;
 
+import static offgrid.geogram.bluetooth.comms.BlueCommands.gapREPEAT;
+
 import android.content.Context;
 
 import offgrid.geogram.bluetooth.comms.BluePackage;
-import offgrid.geogram.bluetooth.comms.Bluecomm;
 import offgrid.geogram.core.Log;
 
 /**
@@ -13,10 +14,6 @@ import offgrid.geogram.core.Log;
 public class LostAndFound {
 
     private static final String TAG = "LostAndFound";
-    public static final String
-            gapBroadcast = ">B:", // means a one line statement
-            gapREPEAT = "REPEAT" // please send the whole package again
-                    ;
 
     /**
      * We received a parcel section that wasn't the initial one.
