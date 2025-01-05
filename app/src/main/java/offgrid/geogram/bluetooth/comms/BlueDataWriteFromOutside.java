@@ -8,7 +8,6 @@ import android.content.Context;
 
 import java.util.HashMap;
 
-import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.bluetooth.broadcast.LostAndFound;

@@ -18,7 +18,7 @@ public class BioDatabase {
     public static final String FILE_NAME = "bio.json";
 
     // profiles that we have chatted so far. The string is the device Id being used
-    public static HashMap<String, BioProfile> profiles = new HashMap<>();
+    private static final HashMap<String, BioProfile> profiles = new HashMap<>();
 
 
     /**
@@ -115,6 +115,7 @@ public class BioDatabase {
 
         File folderDevice = getFolderDeviceId(deviceId, appContext);
         if (folderDevice == null || !folderDevice.exists()) {
+            Log.e(TAG, "Folder does not exist for " + deviceId);
             return null;
         }
 
@@ -123,7 +124,16 @@ public class BioDatabase {
             Log.e(TAG, "File does not exist: " + file.getAbsolutePath());
             return null;
         }
+        Log.i(TAG, "Providing bio profile: " + deviceId);
         return BioProfile.fromJson(file);
     }
 
+    public static void save(String deviceId, BioProfile profile, Context context) {
+        profiles.put(deviceId, profile);
+        saveToDisk(profile, context);
+    }
+
+    public static BioProfile get(String deviceId) {
+        return profiles.get(deviceId);
+    }
 }

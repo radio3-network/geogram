@@ -149,7 +149,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
                             return;
                         }
                         // setup with the mac address that was used
-                        BioDatabase.profiles.put(message.getDeviceId(), profile);
+                        BioDatabase.save(message.getDeviceId(), profile, this.getContext());
                         // valid bio, write it to our database
                         BioDatabase.saveToDisk(profile, this.getContext());
                         Log.i("BroadcastChatFragment", "Adding bio profile: " + profile.getNick());
@@ -204,7 +204,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         TextView textBoxUpper = receivedMessageView.findViewById(R.id.sender_name);
         TextView textBoxLower = receivedMessageView.findViewById(R.id.message_timestamp);
 
-        BioProfile profile = BioDatabase.profiles.get(message.getDeviceId());
+        BioProfile profile = BioDatabase.get(message.getDeviceId());
         String nickname = "";
 
         if (profile != null) {

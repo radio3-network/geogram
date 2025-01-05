@@ -26,8 +26,6 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
-import java.util.ArrayList;
-
 import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.bluetooth.broadcast.BroadcastChatFragment;
 import offgrid.geogram.core.Art;
@@ -40,7 +38,6 @@ import offgrid.geogram.settings.SettingsFragment;
 import offgrid.geogram.settings.SettingsLoader;
 import offgrid.geogram.settings.SettingsUser;
 import offgrid.geogram.database.BeaconDatabase;
-import offgrid.geogram.things.BeaconReachable;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -10,7 +10,7 @@ public class BluetoothUtils {
     public static String calculateDistance(int rssi) {
         double txPower = -59; // Default Tx Power for BLE beacons
         if (rssi == 0) {
-            return "Unknown";
+            return "unknown";
         }
 
         double ratio = rssi * 1.0 / txPower;
@@ -22,7 +22,7 @@ public class BluetoothUtils {
         }
 
         if (distance < 0.5) {
-            return "Next to you";
+            return "next to you";
         } else {
             return String.format("%.2f meters", distance);
         }

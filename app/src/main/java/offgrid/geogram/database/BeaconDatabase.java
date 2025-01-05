@@ -149,9 +149,6 @@ public class BeaconDatabase {
     }
 
 
-
-
-
     /**
      * Gets the list of beacons that have been discovered.
      * This list places on top the most recently found beacons.
@@ -182,17 +179,22 @@ public class BeaconDatabase {
         }
 
         for (File section : Objects.requireNonNull(baseFolder.listFiles())) {
-            if (section != null && section.isDirectory() && section.listFiles() != null) {
-                for (File deviceFolder : Objects.requireNonNull(section.listFiles())) {
-                    if (deviceFolder.isDirectory()) {
-                        File beaconFile = new File(deviceFolder, FILE_NAME);
-                        if (beaconFile.exists()) {
-                            BeaconReachable beacon = BeaconReachable.fromJson(beaconFile);
-                            if (beacon != null) {
-                                beacons.put(beacon.getDeviceId(), beacon);
-                            }
-                        }
-                    }
+            if (section == null
+                    || section.isDirectory() == false
+                    || section.listFiles() == null) {
+                continue;
+            }
+            for (File deviceFolder : Objects.requireNonNull(section.listFiles())) {
+                if (deviceFolder.isDirectory() == false) {
+                    continue;
+                }
+                File beaconFile = new File(deviceFolder, FILE_NAME);
+                if (beaconFile.exists() == false) {
+                    continue;
+                }
+                BeaconReachable beacon = BeaconReachable.fromJson(beaconFile);
+                if (beacon != null) {
+                    beacons.put(beacon.getDeviceId(), beacon);
                 }
             }
         }

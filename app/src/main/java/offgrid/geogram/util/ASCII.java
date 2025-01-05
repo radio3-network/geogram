@@ -6,7 +6,7 @@ public class ASCII {
 
     public static final String[] oneliners = new String[]{
             "|-o-|",
-            "C|_|",
+            //"C|_|",
             "(^_^)",
             ">>------>",
             "{-_-}",

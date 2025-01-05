@@ -15,6 +15,8 @@ import java.util.HashMap;
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 import offgrid.geogram.database.BeaconDatabase;
+import offgrid.geogram.database.BioDatabase;
+import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.fragments.BeaconDetailsFragment;
@@ -74,11 +76,12 @@ public class BeaconListing {
 
         ArrayList<String> displayList = new ArrayList<>();
         for (BeaconReachable beacon : beaconsList) {
-            String distance = "Distance: " + calculateDistance(beacon.getRssi());
+            // data displayed on main screen
+            String distance = "" + calculateDistance(beacon.getRssi());
             long lastSeen = System.currentTimeMillis() - beacon.getTimeLastFound();
 
             if (lastSeen > 3 * 60_000) {
-                distance = "Not reachable since " + getHumanReadableTime(beacon.getTimeLastFound());
+                distance = "not reachable since " + getHumanReadableTime(beacon.getTimeLastFound());
             }
 
             String profileName = beacon.getProfileName();
@@ -86,13 +89,33 @@ public class BeaconListing {
                 profileName = beacon.getDeviceId().substring(0, 6);
             }
 
+            String deviceInfo = beacon.getMacAddress();
 
             String text = profileName
-                    + " ("
-                    + beacon.getMacAddress()
+                    + " (#"
+                    + deviceInfo
                     + ")"
                     + "\n"
                     + distance;
+
+
+            // try to get data based on deviceId
+            if (beacon.getDeviceId() != null) {
+                String deviceId = beacon.getDeviceId();
+                if(deviceId.endsWith("000000")){
+                    deviceId = deviceId.substring(0, 6);
+                }
+                BioProfile bioData = BioDatabase.getBio(deviceId, context);
+                if(bioData != null){
+                    profileName = bioData.getNick();
+                    deviceInfo = deviceId;
+                    text = profileName
+                            + " ("
+                            + distance
+                            + ")";
+                }
+            }
+
 
             displayList.add(text);
         }

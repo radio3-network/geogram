@@ -265,7 +265,7 @@ public class Bluecomm {
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
                             try {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    int result = gatt.writeCharacteristic(characteristic, data.getBytes(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
+                                    int result = gatt.writeCharacteristic(characteristic, data.getBytes(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
                                     if (result != BluetoothGatt.GATT_SUCCESS) {
                                         Log.e(TAG, "GATT write failed with status: " + result);
                                         callback.onDataError("GATT write failed with status: " + result);
@@ -275,6 +275,7 @@ public class Bluecomm {
                                     }
                                 } else {
                                     // For older APIs, use the legacy method
+                                    characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
                                     boolean success = gatt.writeCharacteristic(characteristic);
                                     if (!success) {
                                         Log.i(TAG, "Failed to initiate write operation.");
