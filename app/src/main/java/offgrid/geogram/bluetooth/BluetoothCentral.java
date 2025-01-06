@@ -142,7 +142,7 @@ public class BluetoothCentral {
         }
 
         if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
-            BeaconFinder beaconFinder = BeaconFinder.getInstance(context);
+            DeviceFinder beaconFinder = DeviceFinder.getInstance(context);
             beaconFinder.startScanning();
             Log.i(TAG, "Beacon scanning started from BluetoothCentral.");
             isScanning = true;
@@ -160,7 +160,7 @@ public class BluetoothCentral {
             return;
         }
 
-        BeaconFinder beaconFinder = BeaconFinder.getInstance(context);
+        DeviceFinder beaconFinder = DeviceFinder.getInstance(context);
         beaconFinder.stopScanning();
         isScanning = false;
         Log.i(TAG, "Beacon scanning stopped from BluetoothCentral.");

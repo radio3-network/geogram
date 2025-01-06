@@ -5,15 +5,10 @@ import android.content.Context;
 import java.io.File;
 import java.util.HashMap;
 
-import offgrid.geogram.bluetooth.BeaconFinder;
+import offgrid.geogram.bluetooth.DeviceFinder;
 import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
-import offgrid.geogram.bluetooth.comms.BlueCommands;
-import offgrid.geogram.bluetooth.comms.BluePackage;
-import offgrid.geogram.bluetooth.comms.DataType;
-import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.settings.SettingsUser;
-import offgrid.geogram.things.BeaconReachable;
+import offgrid.geogram.things.DeviceReachable;
 
 /**
  * Handles all data related to bio profiles that were sent
@@ -192,8 +187,8 @@ public class BioDatabase {
             Log.e(TAG, "Pinged profile not found for " + data);
             return;
         }
-        BeaconReachable beacon = BeaconFinder.getInstance(context)
-                .getBeaconMap().get(profile.getDeviceId());
+        DeviceReachable beacon = DeviceFinder.getInstance(context)
+                .getDeviceMap().get(profile.getDeviceId());
         if(beacon == null){
             Log.e(TAG, "Pinged beacon not found for " + data);
             return;
@@ -201,7 +196,7 @@ public class BioDatabase {
         // update the beacon
         beacon.setMacAddress(macAddress);
         beacon.setTimeLastFound(System.currentTimeMillis());
-        BeaconFinder.getInstance(context).update(beacon);
+        DeviceFinder.getInstance(context).update(beacon);
         Log.i(TAG, "Ping updated beacon: " + beacon.getDeviceId() + " from " + beacon.getMacAddress());
 
     }

@@ -3,7 +3,6 @@ package offgrid.geogram;
 import static offgrid.geogram.core.Messages.log;
 
 import android.bluetooth.BluetoothAdapter;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
-import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.bluetooth.broadcast.BroadcastChatFragment;
 import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
@@ -35,9 +33,6 @@ import offgrid.geogram.core.PermissionsHelper;
 import offgrid.geogram.fragments.AboutFragment;
 import offgrid.geogram.fragments.DebugFragment;
 import offgrid.geogram.settings.SettingsFragment;
-import offgrid.geogram.settings.SettingsLoader;
-import offgrid.geogram.settings.SettingsUser;
-import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.util.BatteryOptimizationHelper;
 
 public class MainActivity extends AppCompatActivity {

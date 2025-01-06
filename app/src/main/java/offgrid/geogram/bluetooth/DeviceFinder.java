@@ -18,23 +18,22 @@ import java.util.Map;
 
 import offgrid.geogram.bluetooth.comms.Mutex;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.database.BeaconDatabase;
-import offgrid.geogram.things.BeaconReachable;
+import offgrid.geogram.things.DeviceReachable;
 
-public class BeaconFinder {
+public class DeviceFinder {
 
-    private static final String TAG = "BeaconFinder";
+    private static final String TAG = "DeviceFinder";
     private static final long BEACON_TIMEOUT_MS = 30000; // 30 seconds
 
-    private static BeaconFinder instance;
+    private static DeviceFinder instance;
 
     private final Context context;
     private final BluetoothAdapter bluetoothAdapter;
-    private final HashMap<String, BeaconReachable> beaconMap = new HashMap<>();
+    private final HashMap<String, DeviceReachable> beaconMap = new HashMap<>();
     private boolean isScanning = false;
     private long timeLastUpdated = System.currentTimeMillis();
 
-    private BeaconFinder(Context context) {
+    private DeviceFinder(Context context) {
         this.context = context.getApplicationContext();
         BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager != null ? bluetoothManager.getAdapter() : null;
@@ -43,9 +42,9 @@ public class BeaconFinder {
     /**
      * Singleton access to the BeaconFinder instance.
      */
-    public static synchronized BeaconFinder getInstance(Context context) {
+    public static synchronized DeviceFinder getInstance(Context context) {
         if (instance == null) {
-            instance = new BeaconFinder(context);
+            instance = new DeviceFinder(context);
         }
         return instance;
     }
@@ -113,7 +112,7 @@ public class BeaconFinder {
     /**
      * Gets the up-to-date HashMap of discovered beacons.
      */
-    public HashMap<String, BeaconReachable> getBeaconMap() {
+    public HashMap<String, DeviceReachable> getDeviceMap() {
         return beaconMap;
     }
 
@@ -172,11 +171,11 @@ public class BeaconFinder {
         String namespaceId = extractNamespaceId(serviceData);
 
         // is this beacon already on our hashmap?
-        BeaconReachable beacon = beaconMap.get(deviceId);
+        DeviceReachable beacon = beaconMap.get(deviceId);
 
         // seems like a new one
         if (beacon == null) {
-            beacon = new BeaconReachable();
+            beacon = new DeviceReachable();
             beacon.setInstanceId(deviceId);
             beacon.setNamespaceId(namespaceId);
             beacon.setMacAddress(result.getDevice().getAddress());
@@ -195,7 +194,7 @@ public class BeaconFinder {
             );
 
             // update the list visible on the main screen
-            BeaconListing.getInstance().updateList(this.context);
+            DeviceListing.getInstance().updateList(this.context);
             Log.i(TAG, "Updating beacon list on UI");
         }
 
@@ -213,11 +212,11 @@ public class BeaconFinder {
      */
     public void cleanupDisconnectedDevices() {
         long currentTime = System.currentTimeMillis();
-        Iterator<Map.Entry<String, BeaconReachable>> iterator = beaconMap.entrySet().iterator();
+        Iterator<Map.Entry<String, DeviceReachable>> iterator = beaconMap.entrySet().iterator();
 
         while (iterator.hasNext()) {
-            Map.Entry<String, BeaconReachable> entry = iterator.next();
-            BeaconReachable beacon = entry.getValue();
+            Map.Entry<String, DeviceReachable> entry = iterator.next();
+            DeviceReachable beacon = entry.getValue();
             if (currentTime - beacon.getTimeLastFound() > BEACON_TIMEOUT_MS) {
                 Log.i(TAG, "Removing disconnected beacon: " + entry.getKey());
                 iterator.remove();
@@ -260,7 +259,7 @@ public class BeaconFinder {
      * Updates a beacon.
      * @param beacon
      */
-    public void update(BeaconReachable beacon) {
+    public void update(DeviceReachable beacon) {
         beaconMap.put(beacon.getDeviceId(), beacon);
     }
 }

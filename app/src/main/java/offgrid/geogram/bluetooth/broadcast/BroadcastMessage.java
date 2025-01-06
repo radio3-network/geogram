@@ -3,7 +3,7 @@ package offgrid.geogram.bluetooth.broadcast;
 import java.util.ArrayList;
 
 import offgrid.geogram.bluetooth.comms.BluePackage;
-import offgrid.geogram.things.BeaconReachable;
+import offgrid.geogram.things.DeviceReachable;
 
 /**
  * Stores a message that was broadcast to all devices within reach
@@ -14,7 +14,7 @@ public class BroadcastMessage {
     private final boolean writtenByMe;
     private String deviceId = null;
     private BluePackage packageSent;
-    private final ArrayList<BeaconReachable> devicesThatReadMessage = new ArrayList<>();
+    private final ArrayList<DeviceReachable> devicesThatReadMessage = new ArrayList<>();
 
 
 
@@ -25,11 +25,11 @@ public class BroadcastMessage {
         this.writtenByMe = writtenByMe;
     }
 
-    private void addDeviceThatReadMessage(BeaconReachable device) {
+    private void addDeviceThatReadMessage(DeviceReachable device) {
         devicesThatReadMessage.add(device);
     }
 
-    public ArrayList<BeaconReachable> getDevicesThatReadMessage() {
+    public ArrayList<DeviceReachable> getDevicesThatReadMessage() {
         return devicesThatReadMessage;
     }
 

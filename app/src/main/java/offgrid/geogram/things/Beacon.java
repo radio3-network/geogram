@@ -7,7 +7,7 @@ package offgrid.geogram.things;
 public class Beacon {
 
     // one beacon can only have one reachable device
-    BeaconReachable beaconReachable = null;
+    DeviceReachable beaconReachable = null;
 
 
 

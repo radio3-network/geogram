@@ -8,7 +8,7 @@ import android.content.Context;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 
-import offgrid.geogram.bluetooth.BeaconFinder;
+import offgrid.geogram.bluetooth.DeviceFinder;
 import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.bluetooth.comms.BlueCommands;
 import offgrid.geogram.bluetooth.comms.BluePackage;
@@ -19,7 +19,7 @@ import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.settings.SettingsUser;
-import offgrid.geogram.things.BeaconReachable;
+import offgrid.geogram.things.DeviceReachable;
 
 /*
 
@@ -123,8 +123,8 @@ public class BroadcastSendMessage {
     public static void broadcastMessageToAllEddystoneDevicesShort(String text, Context context) {
         Thread thread = new Thread(() -> {
             try {
-                Collection<BeaconReachable> devices = BeaconFinder.getInstance(context).getBeaconMap().values();
-                for (BeaconReachable device : devices) {
+                Collection<DeviceReachable> devices = DeviceFinder.getInstance(context).getDeviceMap().values();
+                for (DeviceReachable device : devices) {
                     // send the message
                     String macAddress = device.getMacAddress();
                     Log.i(TAG_ID, "Sending short message to " + macAddress + " with: " + text);
@@ -146,7 +146,7 @@ public class BroadcastSendMessage {
     public static void broadcastMessageToAllEddystoneDevices(BroadcastMessage messageToBroadcast, Context context) {
         Thread thread = new Thread(() -> {
             try {
-                Collection<BeaconReachable> devices = BeaconFinder.getInstance(context).getBeaconMap().values();
+                Collection<DeviceReachable> devices = DeviceFinder.getInstance(context).getDeviceMap().values();
                 if (devices.isEmpty()) {
                     Log.i(TAG_ID, "No Eddystone devices to broadcast the message.");
                     return;
@@ -158,7 +158,7 @@ public class BroadcastSendMessage {
                 );
                 messageToBroadcast.setPackage(packageToSend);
                 // iterate over the devices
-                for (BeaconReachable device : devices) {
+                for (DeviceReachable device : devices) {
                     // send the message
                     sendPackageToDevice(device.getMacAddress(), packageToSend, context);
                 }

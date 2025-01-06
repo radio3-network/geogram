@@ -16,12 +16,12 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.BeaconFinder;
+import offgrid.geogram.bluetooth.DeviceFinder;
 import offgrid.geogram.bluetooth.comms.BlueDataWriteAndReadToOutside;
 import offgrid.geogram.bluetooth.comms.DataCallbackTemplate;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioProfile;
-import offgrid.geogram.things.BeaconReachable;
+import offgrid.geogram.things.DeviceReachable;
 import offgrid.geogram.bluetooth.comms.DataType;
 
 public class DeviceDetailsFragment extends Fragment {
@@ -56,8 +56,8 @@ public class DeviceDetailsFragment extends Fragment {
         }
 
         // Set beaconDiscovered details text
-        TextView beaconDescription = view.findViewById(R.id.tv_beacon_description);
-        TextView beaconDescriptionAdditional = view.findViewById(R.id.tv_beacon_additional_info);
+        TextView deviceDescription = view.findViewById(R.id.tv_device_description);
+        TextView deviceDescriptionAdditional = view.findViewById(R.id.tv_device_additional_info);
 
 
         // we need to have valid arguments
@@ -74,10 +74,10 @@ public class DeviceDetailsFragment extends Fragment {
         }
 
         // get the beacon from the list
-        BeaconReachable beaconDiscovered =
-                BeaconFinder.getInstance(this.getContext()).getBeaconMap().get(deviceId);
-        if(beaconDiscovered == null){
-            Log.e(TAG, "Beacon not found: " + deviceId);
+        DeviceReachable deviceDiscovered =
+                DeviceFinder.getInstance(this.getContext()).getDeviceMap().get(deviceId);
+        if(deviceDiscovered == null){
+            Log.e(TAG, "Device not found: " + deviceId);
             return view;
         }
 
@@ -106,21 +106,21 @@ public class DeviceDetailsFragment extends Fragment {
 //                + "\n"
 //                + "Last seen: " + timeLastFound;
 //
-//        beaconDescription.setText("FlyingBarrel89" +
+//        deviceDescription.setText("FlyingBarrel89" +
 //                "\n" +
 //                "On a mission to improve humankind");
-//        beaconDescriptionAdditional.setText(text);
+//        deviceDescriptionAdditional.setText(text);
 
         // Find the chat section
         View chatSection = view.findViewById(R.id.chat_section);
 
         // Set a click listener
-        chatSection.setOnClickListener(v -> launchMessage(beaconDiscovered));
+        chatSection.setOnClickListener(v -> launchMessage(deviceDiscovered));
 
         return view;
     }
 
-    private void launchMessage(BeaconReachable beaconDiscovered) {
+    private void launchMessage(DeviceReachable beaconDiscovered) {
 
         // Implement the callback
         DataCallbackTemplate callback = new DataCallbackTemplate() {

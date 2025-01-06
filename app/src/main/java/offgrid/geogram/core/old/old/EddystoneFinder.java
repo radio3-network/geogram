@@ -13,7 +13,6 @@ import android.os.ParcelUuid;
 import java.util.ArrayList;
 import java.util.List;
 
-import offgrid.geogram.bluetooth.BeaconListing;
 import offgrid.geogram.core.Log;
 
 public class EddystoneFinder {

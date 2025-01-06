@@ -12,7 +12,7 @@ public class User {
     private ArrayList<NPUB> npubs = new ArrayList<>();
 
     // the devices that are associated to this user
-    private ArrayList<BeaconReachable> devices = new ArrayList<>();
+    private ArrayList<DeviceReachable> devices = new ArrayList<>();
 
 
 }
