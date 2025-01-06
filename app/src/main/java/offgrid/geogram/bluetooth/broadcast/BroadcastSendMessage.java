@@ -10,6 +10,7 @@ import java.util.Collection;
 
 import offgrid.geogram.bluetooth.BeaconFinder;
 import offgrid.geogram.bluetooth.BluetoothCentral;
+import offgrid.geogram.bluetooth.comms.BlueCommands;
 import offgrid.geogram.bluetooth.comms.BluePackage;
 import offgrid.geogram.bluetooth.comms.BlueQueue;
 import offgrid.geogram.bluetooth.comms.Bluecomm;
@@ -265,7 +266,7 @@ public class BroadcastSendMessage {
         profile.setColor(settings.getPreferredColor());
         //profile.setNpub(settings.getNpub());
 
-        String message = "/bio:" + profile.toJson();
+        String message = BlueCommands.tagBio + profile.toJson();
         BroadcastMessage messageToBroadcast = new BroadcastMessage(message, deviceId, true);
         BroadcastSendMessage.broadcastMessageToAllEddystoneDevices(messageToBroadcast, context);
     }

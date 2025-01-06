@@ -158,4 +158,23 @@ public class BlueQueue {
         return false;
     }
 
+    /**
+     * Checks if a specific message is already on the queue to be dispatched
+     * to another device and avoid repetition of messages.
+     * @param message to be compared
+     * @return true when it is a duplicate message
+     */
+    public boolean isAlreadyOnQueueToSend(String message, String macAdress) {
+        for(BlueQueueItem item : queueToSend){
+            // needs to match the mac address
+            if(item.getMacAddress().equals(macAdress) == false){
+                continue;
+            }
+            // is the data same?
+            if(item.getData().equals(message)){
+                return true;
+            }
+        }
+        return false;
+    }
 }

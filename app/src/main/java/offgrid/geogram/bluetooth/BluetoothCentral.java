@@ -67,7 +67,7 @@ public class BluetoothCentral {
      * Registers the BluetoothStateReceiver.
      */
     private void registerBluetoothStateReceiver() {
-        if (!isReceiverRegistered) {
+        if (isReceiverRegistered == false) {
             IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
             BluetoothStateReceiver receiver = BluetoothStateReceiver.getInstance();
             context.registerReceiver(receiver, filter);
@@ -105,8 +105,6 @@ public class BluetoothCentral {
 
         // Start the ping service
         BluePing.getInstance(context).start();
-
-
 
         // synchronize messages
         if (isScanning == false){
@@ -166,21 +164,6 @@ public class BluetoothCentral {
         beaconFinder.stopScanning();
         isScanning = false;
         Log.i(TAG, "Beacon scanning stopped from BluetoothCentral.");
-    }
-
-    /**
-     * Updates the beacon's namespace and instance ID dynamically.
-     */
-    public void updateBeaconData(String namespace, String instanceId) {
-        if (beacon == null) {
-            Log.i(TAG, "Beacon is not initialized.");
-            return;
-        }
-
-        beacon.setNamespace(namespace);
-        beacon.setInstanceId(instanceId);
-        beacon.restartBeacon();
-        Log.i(TAG, "Beacon data updated: Namespace=" + namespace + ", InstanceId=" + instanceId);
     }
 
     /**

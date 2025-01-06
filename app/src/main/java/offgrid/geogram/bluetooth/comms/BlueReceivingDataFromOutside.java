@@ -1,6 +1,7 @@
 package offgrid.geogram.bluetooth.comms;
 
 import static offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage.sendPackageToDevice;
+import static offgrid.geogram.bluetooth.comms.BlueCommands.oneLineCommandBio;
 import static offgrid.geogram.bluetooth.comms.BlueCommands.oneLineCommandGapBroadcast;
 import static offgrid.geogram.bluetooth.comms.BlueCommands.gapREPEAT;
 import static offgrid.geogram.bluetooth.comms.BlueCommands.oneLineCommandPing;
@@ -14,6 +15,7 @@ import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.bluetooth.broadcast.LostAndFound;
 import offgrid.geogram.database.BioDatabase;
+import offgrid.geogram.database.BioProfile;
 
 /**
  * This class stores the requests that are made from outside
@@ -21,18 +23,18 @@ import offgrid.geogram.database.BioDatabase;
  * in small little packages, this is where we keep track of
  * them.
  */
-public class BlueDataWriteFromOutside {
+public class BlueReceivingDataFromOutside {
 
     // the requests currently active
     // this is only used for read operations and will soon be phased out
     //private final HashMap<String, BluePackage> requests = new HashMap<>();
 
     // Static instance of the singleton
-    private static BlueDataWriteFromOutside instance;
-    private static final String TAG = "BlueDataWriteFromOutside";
+    private static BlueReceivingDataFromOutside instance;
+    private static final String TAG = "BlueReceiveDataFromOutside";
 
     // Private constructor to prevent instantiation from outside
-    private BlueDataWriteFromOutside() {
+    private BlueReceivingDataFromOutside() {
         //startCleanupThread(); // Start cleanup thread upon initialization
     }
 
@@ -41,9 +43,9 @@ public class BlueDataWriteFromOutside {
      *
      * @return The singleton instance of BlueCentral.
      */
-    public static synchronized BlueDataWriteFromOutside getInstance() {
+    public static synchronized BlueReceivingDataFromOutside getInstance() {
         if (instance == null) {
-            instance = new BlueDataWriteFromOutside();
+            instance = new BlueReceivingDataFromOutside();
         }
         return instance;
     }
@@ -199,6 +201,15 @@ public class BlueDataWriteFromOutside {
             return;
         }
 
+        // received a message like >PING:713321
+        // this is an update to the MAC address of that device Id
+        if(receivedData.startsWith(oneLineCommandBio)){
+            //String data = receivedData.substring(oneLineCommandPing.length());
+            BioDatabase.sendBio(macAddress, context);
+            return;
+        }
+
+
         // single command is not yet supported
         Log.i(TAG, "Single command received and ignored: " + receivedData);
 
@@ -235,6 +246,18 @@ public class BlueDataWriteFromOutside {
 
         String messageText = packageReceived.getData();
         String deviceId = packageReceived.getDeviceId();
+
+        // handle the case of bio messages
+        // e.g.: /bio:{"color":"Pink","id":"2A1A78","nick":"Eva"} from 2A1A78
+        String data = packageReceived.getData();
+        if(data.startsWith(BlueCommands.tagBio)){
+            // save this to disk
+            BioDatabase.save(deviceId, BioProfile.fromJson(
+                    data.substring(BlueCommands.tagBio.length())
+            ), context);
+            Log.i(TAG, "Bio data received and saved: " + data);
+            //return;
+        }
 
         // this message was written by someone else
         BroadcastMessage messageReceived = new BroadcastMessage(messageText, deviceId, false);

@@ -28,6 +28,10 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 
+    <!-- Don't permit to be placed sleeping -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+
     <!-- Required for Wi-Fi Direct Cluster Mode -->
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

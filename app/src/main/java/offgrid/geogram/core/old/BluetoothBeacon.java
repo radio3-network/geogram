@@ -158,6 +158,7 @@ public class BluetoothBeacon {
             AdvertiseSettings settings = new AdvertiseSettings.Builder()
                     .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                     .setConnectable(false)
+                    .setTimeout(0)
                     .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                     .build();
 

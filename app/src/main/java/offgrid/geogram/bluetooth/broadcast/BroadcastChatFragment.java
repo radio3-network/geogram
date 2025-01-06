@@ -139,7 +139,6 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
                     addUserMessage(message);
                 } else {
                     // save the bio profile to disk
-                    String tagBio = "/bio:";
                     String messageText = message.getMessage();
                     if(messageText.startsWith(tagBio)){
                         String data = messageText.substring(tagBio.length());
@@ -148,10 +147,8 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
                             Log.e("BroadcastChatFragment", "Invalid bio profile received: " + data);
                             return;
                         }
-                        // setup with the mac address that was used
-                        BioDatabase.save(message.getDeviceId(), profile, this.getContext());
                         // valid bio, write it to our database
-                        BioDatabase.saveToDisk(profile, this.getContext());
+                        BioDatabase.save(message.getDeviceId(), profile, this.getContext());
                         Log.i("BroadcastChatFragment", "Adding bio profile: " + profile.getNick());
                         //return;
                     }
@@ -229,6 +226,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
             if(profile.getExtra() == null){
                 // add a nice one line ASCII emoticon
                 profile.setExtra(ASCII.getRandomOneliner());
+                BioDatabase.save(profile.getDeviceId(), profile, this.getContext());
             }
             text = profile.getExtra();
         }

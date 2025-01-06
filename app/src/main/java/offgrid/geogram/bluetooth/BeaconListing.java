@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
+import offgrid.geogram.bluetooth.broadcast.LostAndFound;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
@@ -26,7 +27,7 @@ import offgrid.geogram.fragments.BeaconDetailsFragment;
  */
 public class BeaconListing {
 
-    private static final String TAG = "BeaconList";
+    private static final String TAG = "BeaconListing";
 
     private static BeaconListing instance; // Singleton instance
 
@@ -92,6 +93,7 @@ public class BeaconListing {
             BioProfile bioData = BioDatabase.get(deviceId, context);
             if(bioData == null){
                 Log.e(TAG, "No bio data found for " + deviceId);
+                LostAndFound.askForBio(beacon.getMacAddress(), context);
                 continue;
             }
             bioData.setDistance(distance);

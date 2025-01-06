@@ -6,7 +6,13 @@ import java.io.File;
 import java.util.HashMap;
 
 import offgrid.geogram.bluetooth.BeaconFinder;
+import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
+import offgrid.geogram.bluetooth.comms.BlueCommands;
+import offgrid.geogram.bluetooth.comms.BluePackage;
+import offgrid.geogram.bluetooth.comms.DataType;
+import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.settings.SettingsUser;
 import offgrid.geogram.things.BeaconReachable;
 
 /**
@@ -93,6 +99,15 @@ public class BioDatabase {
         }
         File file = new File(folderDevice, FILE_NAME);
 
+        // merge relevant settings
+        BioProfile existingProfile = get(deviceId, appContext);
+        if (existingProfile != null) {
+            if(profile.getExtra() == null && existingProfile.getExtra() != null){
+                profile.setExtra(existingProfile.getExtra());
+            }
+        }
+
+
         try {
             profile.saveToFile(file, appContext);
         } catch (Exception e) {
@@ -144,6 +159,13 @@ public class BioDatabase {
     }
 
     public static void save(String deviceId, BioProfile profile, Context context) {
+        if(profile == null){
+            Log.e(TAG, "Profile is null");
+            return;
+        }
+        if (deviceId == null) {
+            Log.e(TAG, "Device Id is null");
+        }
         profiles.put(deviceId, profile);
         saveToDisk(profile, context);
     }
@@ -182,5 +204,24 @@ public class BioDatabase {
         BeaconFinder.getInstance(context).update(beacon);
         Log.i(TAG, "Ping updated beacon: " + beacon.getDeviceId() + " from " + beacon.getMacAddress());
 
+    }
+
+    /**
+     * Send a bio profile to a device
+     * @param macAddress MAC address of the device
+     * @param context context to be used by the method
+     */
+    public static void sendBio(String macAddress, Context context) {
+//        SettingsUser settings = Central.getInstance().getSettings();
+//        BioProfile profile = new BioProfile();
+//        profile.setNick(settings.getNickname());
+//        String deviceId = settings.getIdDevice();
+//        profile.setDeviceId(deviceId);
+//        profile.setColor(settings.getPreferredColor());
+//        //profile.setNpub(settings.getNpub());
+//        String message = BlueCommands.tagBio + profile.toJson();
+//        BluePackage packageToSend = BluePackage.createSender(DataType.B, message, deviceId);
+//        BroadcastSendMessage.sendPackageToDevice(macAddress, packageToSend, context);
+        BroadcastSendMessage.sendProfileToEveryone(context);
     }
 }

@@ -25,7 +25,8 @@ public class PermissionsHelper {
             Manifest.permission.BLUETOOTH_ADVERTISE,
             Manifest.permission.BLUETOOTH_CONNECT,
             Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.INTERNET
+            Manifest.permission.INTERNET,
+            Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
     };
 
     private static final int PERMISSION_REQUEST_CODE = 100;

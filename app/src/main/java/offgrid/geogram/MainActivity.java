@@ -38,6 +38,7 @@ import offgrid.geogram.settings.SettingsFragment;
 import offgrid.geogram.settings.SettingsLoader;
 import offgrid.geogram.settings.SettingsUser;
 import offgrid.geogram.database.BeaconDatabase;
+import offgrid.geogram.util.BatteryOptimizationHelper;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Permissions are not granted yet. Waiting for user response.");
             return; // Defer initialization until permissions are granted
         }
+
 
         // load all the beacons we have seen before
         //loadBeaconsOnDatabase();
@@ -112,6 +114,9 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // allow the permissions to run in the background
+        BatteryOptimizationHelper.requestIgnoreBatteryOptimizations(this);
 
         // Setup navigation drawer
         setupNavigationDrawer();

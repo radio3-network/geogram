@@ -4,7 +4,10 @@ import static offgrid.geogram.bluetooth.comms.BlueCommands.gapREPEAT;
 
 import android.content.Context;
 
+import offgrid.geogram.bluetooth.comms.BlueCommands;
 import offgrid.geogram.bluetooth.comms.BluePackage;
+import offgrid.geogram.bluetooth.comms.BlueQueue;
+import offgrid.geogram.bluetooth.comms.Bluecomm;
 import offgrid.geogram.core.Log;
 
 /**
@@ -38,9 +41,15 @@ public class LostAndFound {
         }
         // get the package id
         String packageId = data[0].substring(0, 2);
+        String message = gapREPEAT + ":" +packageId;
+
+        // avoid sending duplicates
+        if(BlueQueue.getInstance(context).isAlreadyOnQueueToSend(message, macAddress)){
+            return;
+        }
+
         // ask for the whole package to be sent again
-        BroadcastSendMessage.sendParcelToDevice(macAddress, gapREPEAT
-                + ":" +packageId, context);
+        BroadcastSendMessage.sendParcelToDevice(macAddress, message, context);
         Log.i(TAG, "Lost package detected, requesting to be sent again: " + receivedData);
     }
 
@@ -58,6 +67,14 @@ public class LostAndFound {
         }
 
         String packageId = packageIncomplete.getId();
+        String message = gapREPEAT + ":" +packageId;
+
+        // avoid sending duplicates
+        if(BlueQueue.getInstance(context).isAlreadyOnQueueToSend(message, macAddress)){
+            return true;
+        }
+
+        // do a full repeat of the message
         BroadcastSendMessage.sendParcelToDevice(macAddress, gapREPEAT
                 + ":" +packageId, context);
         Log.i(TAG, "Lost package detected, requesting to be sent again: " + packageId);
@@ -67,5 +84,18 @@ public class LostAndFound {
 //        BroadcastSendMessage.sendParcelToDevice(macAddress, gapIndex, context);
 //        // there are still gaps, don't let this continue
         return true;
+    }
+
+    /**
+     * Communication was a bit lost, there is a device
+     * pinging our device and we have no idea who that
+     * device is, so ask for new info
+     * @param macAddress address of the target device
+     * @param context useful for permissions
+     */
+    public static void askForBio(String macAddress, Context context) {
+        String message = BlueCommands.oneLineCommandBio;
+        Log.i(TAG, "Asking for lost bio to " + macAddress);
+        Bluecomm.getInstance(context).writeData(macAddress, message);
     }
 }

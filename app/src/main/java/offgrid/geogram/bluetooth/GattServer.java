@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import offgrid.geogram.bluetooth.comms.BlueDataWriteFromOutside;
+import offgrid.geogram.bluetooth.comms.BlueReceivingDataFromOutside;
 import offgrid.geogram.core.Log;
 
 public class GattServer {
@@ -130,31 +130,6 @@ public class GattServer {
         return null;
     }
 
-    /**
-     * Writes data to a characteristic for a specific device.
-     */
-    public boolean writeCharacteristic(BluetoothDevice device, BluetoothGattCharacteristic characteristic) {
-        if (!checkPermissions()) {
-            Log.i(TAG, "Missing required permissions to write characteristic.");
-            return false;
-        }
-
-        if (gattServer == null) {
-            Log.i(TAG, "GATT server is not initialized.");
-            return false;
-        }
-
-//        try {
-//            gattServer.notifyCharacteristicChanged(device, characteristic, false);
-//            Log.i(TAG, "Characteristic written successfully.");
-//            return true;
-//        } catch (SecurityException e) {
-//            Log.i(TAG, "SecurityException while writing characteristic: " + e.getMessage());
-//        } catch (Exception e) {
-//            Log.i(TAG, "Unexpected error while writing characteristic: " + e.getMessage());
-//        }
-        return false;
-    }
 
     /**
      * Reads data from a characteristic for a specific device.
@@ -346,7 +321,7 @@ public class GattServer {
                 try {
 
                     // Handle the request and prepare a response if needed
-                    BlueDataWriteFromOutside dataWriteFromOutside = BlueDataWriteFromOutside.getInstance();
+                    BlueReceivingDataFromOutside dataWriteFromOutside = BlueReceivingDataFromOutside.getInstance();
                     dataWriteFromOutside.receivingDataFromDevice(device.getAddress(), received, context);
 
                     // Handle the request and prepare a response if needed
