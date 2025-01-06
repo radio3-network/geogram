@@ -118,8 +118,10 @@ public class SettingsFragment extends Fragment {
 
         // Save Button
         View saveButton = view.findViewById(R.id.btn_save_settings);
-        saveButton.setOnClickListener(v -> saveSettings(nickname, npub, nsec, preferredColorSpinner));
-//        saveButton.setOnClickListener(v -> saveSettings(nickname, intro, npub, nsec, preferredColorSpinner, beaconTypeSpinner, groupId, deviceId));
+        saveButton.setOnClickListener(v -> {
+                saveSettings(nickname, npub, nsec, preferredColorSpinner);
+                requireActivity().onBackPressed(); // Navigate back to the previous fragment
+        });
 
         // Reset Button
         Button resetButton = view.findViewById(R.id.btn_reset_settings);
@@ -264,12 +266,16 @@ public class SettingsFragment extends Fragment {
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(500); // Pause for a bit
-                // send our profile info to all reachable devices
-                sendProfileToEveryone(this.requireContext());
+
+                // Ensure the fragment is still attached before using its context
+                if (isAdded() && getContext() != null) {
+                    sendProfileToEveryone(requireContext());
+                } else {
+                    Log.e("Settings", "Fragment not attached to context, skipping sendProfileToEveryone.");
+                }
             } catch (InterruptedException e) {
                 Log.e("Settings", "Thread interrupted: " + e.getMessage());
             }
-
         });
         thread.start();
 

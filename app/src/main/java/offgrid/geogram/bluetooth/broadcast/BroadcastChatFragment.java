@@ -21,14 +21,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+
+import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
+import offgrid.geogram.fragments.DeviceDetailsFragment;
 import offgrid.geogram.util.ASCII;
 import offgrid.geogram.util.DateUtils;
 
@@ -133,7 +136,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
     private void updateMessages() {
         ArrayList<BroadcastMessage> currentMessages = new ArrayList<>(messagesReceivedAsBroadcast);
         for (BroadcastMessage message : currentMessages) {
-            if (!displayedMessages.contains(message)) {
+            if (displayedMessages.contains(message) == false) {
                 if (message.isWrittenByMe()) {
                     Log.i("BroadcastChatFragment", "Adding user message: " + message.getMessage());
                     addUserMessage(message);
@@ -237,9 +240,52 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         String colorBackground = profile != null ? profile.getColor() : "light gray";
         applyBalloonStyle(messageTextView, colorBackground);
 
+        // Add click listener to navigate to the user profile
+        receivedMessageView.setOnClickListener(v -> {
+            if (profile != null) {
+                navigateToDeviceDetails(profile);
+            } else {
+                Toast.makeText(getContext(), "Profile not found", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         // Add the view to the container
         chatMessageContainer.addView(receivedMessageView);
         chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh messages when returning to the fragment
+        //displayedMessages.clear();
+        // also need to hide the floating button
+        // Hide the floating action button
+        FloatingActionButton btnAdd = requireActivity().findViewById(R.id.btn_add);
+        if (btnAdd != null) {
+            btnAdd.hide();
+        }
+        updateMessages();
+        Log.i("BroadcastChatFragment", "onResume");
+    }
+
+
+    private void navigateToDeviceDetails(BioProfile profile) {
+        DeviceDetailsFragment fragment = DeviceDetailsFragment.newInstance(profile);
+
+        // make the screen appear
+        MainActivity.activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main, DeviceDetailsFragment.newInstance(profile))
+                .addToBackStack(null)
+                .commit();
+
+        // Begin the fragment transaction
+//        requireActivity().getSupportFragmentManager()
+//                .beginTransaction()
+//                .replace(R.id.fragment_container, fragment) // Replace with your container ID
+//                .addToBackStack(null) // Add to back stack for proper back navigation
+//                .commit();
     }
 
 

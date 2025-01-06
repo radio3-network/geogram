@@ -207,20 +207,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void saveSettings(SettingsUser settings){
-        Context context = this.getApplicationContext();
-        try{
-            SettingsLoader.saveSettings(context, settings);
-            Toast.makeText(context, "Settings saved successfully", Toast.LENGTH_SHORT).show();
-        } catch (IllegalArgumentException e) {
-            // Handle invalid values
-            Toast.makeText(context, "Invalid: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        } catch (Exception e) {
-            // Handle other errors
-            Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
     /**
      * Check the status of Bluetooth and notify the user if necessary.
      */

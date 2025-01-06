@@ -17,25 +17,22 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BeaconFinder;
-import offgrid.geogram.bluetooth.BluetoothUtils;
 import offgrid.geogram.bluetooth.comms.BlueDataWriteAndReadToOutside;
 import offgrid.geogram.bluetooth.comms.DataCallbackTemplate;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.things.BeaconReachable;
-import offgrid.geogram.database.BeaconDatabase;
-import offgrid.geogram.util.DateUtils;
 import offgrid.geogram.bluetooth.comms.DataType;
 
-public class BeaconDetailsFragment extends Fragment {
+public class DeviceDetailsFragment extends Fragment {
 
-    private static final String TAG = "BeaconDetailsFragment";
+    private static final String TAG = "DeviceDetailsFragment";
 
     private static final String
             ARG_BEACON_DETAILS = "beacon_details";
 
-    public static BeaconDetailsFragment newInstance(BioProfile profile)  {
-        BeaconDetailsFragment fragment = new BeaconDetailsFragment();
+    public static DeviceDetailsFragment newInstance(BioProfile profile)  {
+        DeviceDetailsFragment fragment = new DeviceDetailsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_BEACON_DETAILS, profile.getDeviceId());
         fragment.setArguments(args);
@@ -45,7 +42,7 @@ public class BeaconDetailsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_beacon_details, container, false);
+        View view = inflater.inflate(R.layout.fragment_device_details, container, false);
 
 
         // Handle back button

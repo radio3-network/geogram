@@ -19,7 +19,7 @@ import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.things.BeaconReachable;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.fragments.BeaconDetailsFragment;
+import offgrid.geogram.fragments.DeviceDetailsFragment;
 
 /**
  * Manages the list of beacons that were found
@@ -116,7 +116,7 @@ public class BeaconListing {
             // make the screen appear
             MainActivity.activity.getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.main, BeaconDetailsFragment.newInstance(profile))
+                    .replace(R.id.main, DeviceDetailsFragment.newInstance(profile))
                     .addToBackStack(null)
                     .commit();
         });
