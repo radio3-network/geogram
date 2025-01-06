@@ -257,14 +257,13 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh messages when returning to the fragment
-        //displayedMessages.clear();
-        // also need to hide the floating button
+
         // Hide the floating action button
         FloatingActionButton btnAdd = requireActivity().findViewById(R.id.btn_add);
         if (btnAdd != null) {
             btnAdd.hide();
         }
+        // update the messages, ignoring the already written ones
         updateMessages();
         Log.i("BroadcastChatFragment", "onResume");
     }

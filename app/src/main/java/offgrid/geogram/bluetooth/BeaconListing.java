@@ -77,7 +77,7 @@ public class BeaconListing {
         ArrayList<BioProfile> displayList = new ArrayList<>();
         for (BeaconReachable beacon : beaconsList) {
             // data displayed on main screen
-            String distance = "" + calculateDistance(beacon.getRssi());
+            String distance = calculateDistance(beacon.getRssi());
             long lastSeen = System.currentTimeMillis() - beacon.getTimeLastFound();
 
             if (lastSeen > 3 * 60_000) {
