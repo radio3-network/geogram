@@ -1,7 +1,6 @@
-package offgrid.geogram.bluetooth.broadcast;
+package offgrid.geogram.bluetooth.other.broadcast;
 
-import static offgrid.geogram.bluetooth.comms.BlueCommands.tagBio;
-import static offgrid.geogram.bluetooth.comms.BlueQueue.messagesReceivedAsBroadcast;
+import static offgrid.geogram.bluetooth.other.comms.BlueCommands.tagBio;
 
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -27,6 +26,7 @@ import java.util.ArrayList;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
+import offgrid.geogram.bluetooth.BlueQueueReceiving;
 import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioDatabase;
@@ -35,7 +35,7 @@ import offgrid.geogram.fragments.DeviceDetailsFragment;
 import offgrid.geogram.util.ASCII;
 import offgrid.geogram.util.DateUtils;
 
-public class BroadcastChatFragment extends Fragment implements BroadcastSendMessage.MessageUpdateListener {
+public class BroadcastChatFragment extends Fragment implements BroadcastSender.MessageUpdateListener {
 
     // messages that are displayed
     private final ArrayList<BroadcastMessage> displayedMessages = new ArrayList<>();
@@ -43,7 +43,8 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
     private LinearLayout chatMessageContainer;
     private ScrollView chatScrollView;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private static final int REFRESH_INTERVAL_MS = 10000;
+    Runnable runningPoll = null;
+    private static final int REFRESH_INTERVAL_MS = 2000;
 
     public BroadcastChatFragment() {
         // Required empty public constructor
@@ -77,12 +78,13 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
             // add this message to our list of sent messages
             String deviceId = Central.getInstance().getSettings().getIdDevice();
             BroadcastMessage messageToBroadcast = new BroadcastMessage(message, deviceId, true);
-            BroadcastSendMessage.addMessage(messageToBroadcast);
+            // add it to the list of messages
+            BlueQueueReceiving.getInstance(getContext()).addBroadcastMessage(messageToBroadcast);
 
 
             new Thread(() -> {
                 // Send the message via BroadcastChat
-                boolean success = BroadcastSendMessage.broadcast(messageToBroadcast, getContext());
+                boolean success = BroadcastSender.broadcast(messageToBroadcast, getContext());
                 requireActivity().runOnUiThread(() -> {
                     if (success) {
                         messageInput.setText("");
@@ -101,7 +103,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         startMessagePolling();
 
         // Register the fragment as a listener for updates
-        BroadcastSendMessage.setMessageUpdateListener(this);
+        BroadcastSender.setMessageUpdateListener(this);
 
         // update the message right now on the chat box
         updateMessages();
@@ -114,27 +116,33 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
         super.onDestroyView();
         // Stop message polling and unregister listener to avoid memory leaks
         handler.removeCallbacksAndMessages(null);
-        BroadcastSendMessage.removeMessageUpdateListener();
+        BroadcastSender.removeMessageUpdateListener();
     }
 
     /**
      * Starts polling the BroadcastChat.messages list every 10 seconds.
      */
     private void startMessagePolling() {
-        handler.postDelayed(new Runnable() {
+        // only allow one instance to run
+        if(runningPoll != null){
+            return;
+        }
+        runningPoll = new Runnable() {
             @Override
             public void run() {
                 updateMessages();
                 handler.postDelayed(this, REFRESH_INTERVAL_MS);
             }
-        }, REFRESH_INTERVAL_MS);
+        };
+        handler.postDelayed(runningPoll, REFRESH_INTERVAL_MS);
     }
 
     /**
      * Updates the chat message container with new messages.
      */
     private void updateMessages() {
-        ArrayList<BroadcastMessage> currentMessages = new ArrayList<>(messagesReceivedAsBroadcast);
+        ArrayList<BroadcastMessage> messages = BlueQueueReceiving.getInstance(getContext()).getMessagesReceivedAsBroadcast();
+        ArrayList<BroadcastMessage> currentMessages = new ArrayList<>(messages);
         for (BroadcastMessage message : currentMessages) {
             if (displayedMessages.contains(message) == false) {
                 if (message.isWrittenByMe()) {
@@ -160,11 +168,12 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
                             + message.getMessage() + " from " + message.getDeviceId());
                     addReceivedMessage(message);
                     // Scroll to the bottom of the chat
-                    chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
+                    //chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
                 }
                 displayedMessages.add(message);
             }
         }
+        chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
     }
 
     /**
@@ -196,7 +205,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSendMess
      *
      * @param message The message to display.
      */
-    public void addReceivedMessage(BroadcastMessage message) {
+    private void addReceivedMessage(BroadcastMessage message) {
         View receivedMessageView = LayoutInflater.from(getContext())
                 .inflate(R.layout.item_received_message, chatMessageContainer, false);
 

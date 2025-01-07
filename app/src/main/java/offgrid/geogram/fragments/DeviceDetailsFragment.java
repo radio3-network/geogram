@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,13 +17,14 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.DeviceFinder;
-import offgrid.geogram.bluetooth.comms.BlueDataWriteAndReadToOutside;
-import offgrid.geogram.bluetooth.comms.DataCallbackTemplate;
+import offgrid.geogram.bluetooth.other.DeviceFinder;
+import offgrid.geogram.bluetooth.other.comms.BlueDataWriteAndReadToOutside;
+import offgrid.geogram.bluetooth.other.comms.DataCallbackTemplate;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.things.DeviceReachable;
-import offgrid.geogram.bluetooth.comms.DataType;
+import offgrid.geogram.bluetooth.other.comms.DataType;
 
 public class DeviceDetailsFragment extends Fragment {
 
@@ -81,6 +83,24 @@ public class DeviceDetailsFragment extends Fragment {
             return view;
         }
 
+        BioProfile profile = BioDatabase.get(deviceId, this.getContext());
+        if(profile == null){
+            Log.i(TAG, "No bio data found for " + deviceId);
+            return view;
+        }
+
+        deviceDescription.setText(profile.getNick());
+        deviceDescriptionAdditional.setText("Waiting to receive more data about this device..");
+
+
+        disableIcon(view, R.id.section_chat);
+        disableIcon(view, R.id.section_messages);
+        disableIcon(view, R.id.section_collections);
+        disableIcon(view, R.id.section_stats);
+        disableIcon(view, R.id.section_settings);
+
+
+
         // this discovered beacon is already in our database?
 //        BeaconReachable beaconExisting = BeaconDatabase.getBeacon(beaconDiscovered.getDeviceId(), this.getContext());
 //        if(beaconExisting != null){
@@ -112,12 +132,18 @@ public class DeviceDetailsFragment extends Fragment {
 //        deviceDescriptionAdditional.setText(text);
 
         // Find the chat section
-        View chatSection = view.findViewById(R.id.chat_section);
+        View chatSection = view.findViewById(R.id.section_chat);
 
         // Set a click listener
         chatSection.setOnClickListener(v -> launchMessage(deviceDiscovered));
 
         return view;
+    }
+
+    private void disableIcon(View view, int value) {
+        LinearLayout icons = view.findViewById(value);
+        icons.setAlpha(0.2f); // Set transparency to 50%
+        icons.setClickable(false); // Disable click events
     }
 
     private void launchMessage(DeviceReachable beaconDiscovered) {

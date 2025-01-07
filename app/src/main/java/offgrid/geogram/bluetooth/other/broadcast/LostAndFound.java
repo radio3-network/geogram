@@ -1,13 +1,13 @@
-package offgrid.geogram.bluetooth.broadcast;
+package offgrid.geogram.bluetooth.other.broadcast;
 
-import static offgrid.geogram.bluetooth.comms.BlueCommands.gapREPEAT;
+import static offgrid.geogram.bluetooth.other.comms.BlueCommands.gapREPEAT;
 
 import android.content.Context;
 
-import offgrid.geogram.bluetooth.comms.BlueCommands;
-import offgrid.geogram.bluetooth.comms.BluePackage;
-import offgrid.geogram.bluetooth.comms.BlueQueue;
-import offgrid.geogram.bluetooth.comms.Bluecomm;
+import offgrid.geogram.bluetooth.BlueQueueSending;
+import offgrid.geogram.bluetooth.other.comms.BlueCommands;
+import offgrid.geogram.bluetooth.other.comms.BluePackage;
+import offgrid.geogram.bluetooth.Bluecomm;
 import offgrid.geogram.core.Log;
 
 /**
@@ -44,12 +44,12 @@ public class LostAndFound {
         String message = gapREPEAT + ":" +packageId;
 
         // avoid sending duplicates
-        if(BlueQueue.getInstance(context).isAlreadyOnQueueToSend(message, macAddress)){
+        if(BlueQueueSending.getInstance(context).isAlreadyOnQueueToSend(message, macAddress)){
             return;
         }
 
         // ask for the whole package to be sent again
-        BroadcastSendMessage.sendParcelToDevice(macAddress, message, context);
+        BroadcastSender.sendParcelToDevice(macAddress, message, context);
         Log.i(TAG, "Lost package detected, requesting to be sent again: " + receivedData);
     }
 
@@ -70,12 +70,12 @@ public class LostAndFound {
         String message = gapREPEAT + ":" +packageId;
 
         // avoid sending duplicates
-        if(BlueQueue.getInstance(context).isAlreadyOnQueueToSend(message, macAddress)){
+        if(BlueQueueSending.getInstance(context).isAlreadyOnQueueToSend(message, macAddress)){
             return true;
         }
 
         // do a full repeat of the message
-        BroadcastSendMessage.sendParcelToDevice(macAddress, gapREPEAT
+        BroadcastSender.sendParcelToDevice(macAddress, gapREPEAT
                 + ":" +packageId, context);
         Log.i(TAG, "Lost package detected, requesting to be sent again: " + packageId);
 //        // get the first gap that is missing

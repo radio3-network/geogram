@@ -1,7 +1,7 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.other;
 
-import static offgrid.geogram.bluetooth.BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
-import static offgrid.geogram.bluetooth.BluetoothCentral.CUSTOM_SERVICE_UUID;
+import static offgrid.geogram.bluetooth.other.BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
+import static offgrid.geogram.bluetooth.other.BluetoothCentral.CUSTOM_SERVICE_UUID;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -14,25 +14,29 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import offgrid.geogram.bluetooth.comms.BlueReceivingDataFromOutside;
+import offgrid.geogram.bluetooth.BlueReceiver;
 import offgrid.geogram.core.Log;
 
 public class GattServer {
 
-    private static final String TAG = "AppBluetoothGattServer";
+    private static final String TAG = "GattServer";
     private static GattServer instance;
 
     private final Context context;
     private BluetoothGattServer gattServer = null;
+    private final Handler handler = new Handler();
+
 
     private GattServer(Context context) {
         this.context = context.getApplicationContext();
         initializeGattServer();
+        startPeriodicCheck();
     }
 
     /**
@@ -44,6 +48,67 @@ public class GattServer {
         }
         return instance;
     }
+
+    private final Runnable gattServerCheck = new Runnable() {
+        @Override
+        public void run() {
+            if (gattServer == null || getConnectedDevices().isEmpty()) {
+                Log.i(TAG, "Restarting GATT server due to inactivity.");
+                restartGattServer();
+            }
+            handler.postDelayed(this, 600000); // Check every 10 minutes
+        }
+    };
+
+    // Start periodic check
+    public void startPeriodicCheck() {
+        handler.postDelayed(gattServerCheck, 600000); // Initial delay of 10 minutes
+    }
+
+    // Stop periodic check
+    public void stop() {
+        handler.removeCallbacks(gattServerCheck);
+        if (gattServer != null) {
+            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                gattServer.close();
+            }
+            gattServer = null;
+        }
+    }
+
+    public void cleanupStaleConnections() {
+        List<BluetoothDevice> connectedDevices = getConnectedDevices();
+        for (BluetoothDevice device : connectedDevices) {
+            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                try {
+                    gattServer.cancelConnection(device);
+                    Log.i(TAG, "Stale connection removed: " + device.getAddress());
+                } catch (Exception e) {
+                    Log.e(TAG, "Error while removing stale connection: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    public void restartGattServer() {
+        if (gattServer != null) {
+            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                try {
+                    gattServer.close();
+                    Log.i(TAG, "GATT server closed for restart.");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error while closing GATT server: " + e.getMessage());
+                }
+            } else {
+                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot close GATT server.");
+            }
+            gattServer = null;
+        }
+        initializeGattServer();
+        Log.i(TAG, "GATT server restarted.");
+    }
+
+
 
     /**
      * Initializes the GATT server.
@@ -57,7 +122,9 @@ public class GattServer {
         BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager != null) {
             try {
-                gattServer = bluetoothManager.openGattServer(context, new CustomGattServerCallback());
+                CustomGattServerCallback gattServerCallback = new CustomGattServerCallback();
+                gattServer = bluetoothManager.openGattServer(context, gattServerCallback);
+
                 if (gattServer == null) {
                     Log.e(TAG, "Failed to open GATT server.");
                 } else {
@@ -245,12 +312,8 @@ public class GattServer {
             super.onConnectionStateChange(device, status, newState);
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.i(TAG, "Device connected: " + device.getAddress());
-//                if (!connectedDevices.contains(device)) {
-//                    connectedDevices.add(device);
-//                }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.i(TAG, "Device disconnected: " + device.getAddress());
-                //connectedDevices.remove(device);
 
                 // Cancel the connection with permission handling
                 if (checkPermissions()) {
@@ -304,67 +367,68 @@ public class GattServer {
                 int offset,
                 byte[] value) {
 
-            // only accept valid UUID
+            // Only accept valid UUID
             if (!CUSTOM_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
                 Log.e(TAG, "Request received for unknown characteristic: "
                         + characteristic.getUuid()
                         + " from " + device.getAddress()
-                        + " with value: " + new String(value)
-                );
+                        + " with value: " + new String(value));
                 return;
             }
-            // get the proper value for the request
-            String received = new String(value);
-            //Log.i(TAG, "Request received from " + device.getAddress() + ": " + received);
 
+            // Handle the write request in a new thread
             Thread thread = new Thread(() -> {
                 try {
-
-                    // Handle the request and prepare a response if needed
-                    BlueReceivingDataFromOutside dataWriteFromOutside = BlueReceivingDataFromOutside.getInstance();
+                    // Get the proper value for the request
+                    String received = new String(value);
+                    BlueReceiver dataWriteFromOutside = BlueReceiver.getInstance();
                     dataWriteFromOutside.receivingDataFromDevice(device.getAddress(), received, context);
 
-                    // Handle the request and prepare a response if needed
+                    // If response is needed, send it on the main thread
                     if (responseNeeded) {
-                        try {
-                            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-                                String responseMessage = "";//">T:ARRIVED";
-                                //"Your data: " + received;
-                                gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, responseMessage.getBytes());
-                                //Log.i(TAG, "Response sent to " + device.getAddress() + ": " + responseMessage);
-                            } else {
-                                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send response.");
+                        handler.post(() -> {
+                            try {
+                                if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                                    String responseMessage = "Acknowledged";
+                                    gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, responseMessage.getBytes());
+                                    Log.i(TAG, "Response sent to " + device.getAddress() + ": " + responseMessage);
+                                } else {
+                                    Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send response.");
+                                }
+                            } catch (SecurityException e) {
+                                Log.e(TAG, "SecurityException while sending write response: " + e.getMessage());
+                            } catch (Exception e) {
+                                Log.e(TAG, "Unexpected error while sending write response: " + e.getMessage());
                             }
-                        } catch (SecurityException e) {
-                            Log.e(TAG, "SecurityException while sending write response: " + e.getMessage());
-                        } catch (Exception e) {
-                            Log.e(TAG, "Unexpected error while sending write response: " + e.getMessage());
-                        }
+                        });
                     }
 
                     // Optionally notify the client if notifications are enabled
                     if ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
-                        try {
-                            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-                                characteristic.setValue("Notification: " + received);
-                                gattServer.notifyCharacteristicChanged(device, characteristic, false);
-                                Log.i(TAG, "Notification sent to " + device.getAddress() + ": " + received);
-                            } else {
-                                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send notification.");
+                        handler.post(() -> {
+                            try {
+                                if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                                    characteristic.setValue("Notification: " + received);
+                                    gattServer.notifyCharacteristicChanged(device, characteristic, false);
+                                    Log.i(TAG, "Notification sent to " + device.getAddress() + ": " + received);
+                                } else {
+                                    Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot send notification.");
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error while sending notification: " + e.getMessage());
                             }
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error while sending notification: " + e.getMessage());
-                        }
+                        });
                     }
 
                 } catch (Exception e) {
                     Log.e(TAG, "Exception while handling request: " + e.getMessage());
                 }
-
             });
             thread.start();
-
         }
+
+
+
     }
 
 }

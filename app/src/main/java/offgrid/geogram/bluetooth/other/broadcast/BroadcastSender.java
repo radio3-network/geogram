@@ -1,20 +1,19 @@
-package offgrid.geogram.bluetooth.broadcast;
+package offgrid.geogram.bluetooth.other.broadcast;
 
-import static offgrid.geogram.bluetooth.comms.BlueCommands.oneLineCommandGapBroadcast;
-import static offgrid.geogram.bluetooth.comms.BlueQueue.messagesReceivedAsBroadcast;
+import static offgrid.geogram.bluetooth.other.comms.BlueCommands.oneLineCommandGapBroadcast;
 
 import android.content.Context;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 
-import offgrid.geogram.bluetooth.DeviceFinder;
-import offgrid.geogram.bluetooth.BluetoothCentral;
-import offgrid.geogram.bluetooth.comms.BlueCommands;
-import offgrid.geogram.bluetooth.comms.BluePackage;
-import offgrid.geogram.bluetooth.comms.BlueQueue;
-import offgrid.geogram.bluetooth.comms.Bluecomm;
-import offgrid.geogram.bluetooth.comms.DataType;
+import offgrid.geogram.bluetooth.BlueQueueSending;
+import offgrid.geogram.bluetooth.other.DeviceFinder;
+import offgrid.geogram.bluetooth.other.BluetoothCentral;
+import offgrid.geogram.bluetooth.other.comms.BlueCommands;
+import offgrid.geogram.bluetooth.other.comms.BluePackage;
+import offgrid.geogram.bluetooth.Bluecomm;
+import offgrid.geogram.bluetooth.other.comms.DataType;
 import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioProfile;
@@ -83,14 +82,13 @@ import offgrid.geogram.things.DeviceReachable;
 
  */
 
-public class BroadcastSendMessage {
-    private static final String TAG_ID = "BroadcastSendMessage";
+public class BroadcastSender {
+    private static final String TAG_ID = "BroadcastSender";
 
     // Listener for message updates
     private static WeakReference<MessageUpdateListener> messageUpdateListener;
 
     public static void addMessage(BroadcastMessage message) {
-        messagesReceivedAsBroadcast.add(message);
         notifyMessageUpdate();
     }
 
@@ -200,7 +198,7 @@ public class BroadcastSendMessage {
                                             Context context) {
         try {
             // add this package on the archive of dispatched messages
-            BlueQueue.getInstance(context).addPackageToSending(packageToSend);
+            BlueQueueSending.getInstance(context).addPackageToSend(packageToSend);
             // reset the counter for this package
             packageToSend.resetParcelCounter();
             // send all parcels of the package to the other device
@@ -238,7 +236,7 @@ public class BroadcastSendMessage {
     /**
      * Notifies the listener about message updates.
      */
-    private static void notifyMessageUpdate() {
+    public static void notifyMessageUpdate() {
         if (messageUpdateListener != null) {
             MessageUpdateListener listener = messageUpdateListener.get();
             if (listener != null) {
@@ -268,7 +266,7 @@ public class BroadcastSendMessage {
 
         String message = BlueCommands.tagBio + profile.toJson();
         BroadcastMessage messageToBroadcast = new BroadcastMessage(message, deviceId, true);
-        BroadcastSendMessage.broadcastMessageToAllEddystoneDevices(messageToBroadcast, context);
+        BroadcastSender.broadcastMessageToAllEddystoneDevices(messageToBroadcast, context);
     }
 
 }

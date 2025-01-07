@@ -32,13 +32,14 @@
  *
  * This class is essential for managing data transfers where the size of a single transmission is limited.
  */
-package offgrid.geogram.bluetooth.comms;
+package offgrid.geogram.bluetooth.other.comms;
 
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Arrays;
 
+import offgrid.geogram.bluetooth.Bluecomm;
 import offgrid.geogram.core.Central;
 
 public class BluePackage {

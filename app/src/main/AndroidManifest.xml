@@ -50,7 +50,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.geogram"
         android:launchMode="singleInstance"
-        tools:targetApi="31">
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="33">
+
 
         <!-- Main Activity -->
         <activity
@@ -78,10 +80,7 @@
         </receiver>
 
 
-        <!-- Additional Service -->
-        <service
-            android:name="offgrid.geogram.core.old.ServiceTIO"
-            android:exported="false" />
+
 
     </application>
 

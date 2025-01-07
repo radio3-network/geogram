@@ -1,10 +1,10 @@
-package offgrid.geogram.bluetooth.comms;
+package offgrid.geogram.bluetooth.other.comms;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
+import offgrid.geogram.bluetooth.other.broadcast.BroadcastSender;
 import offgrid.geogram.core.Central;
 
 /**
@@ -66,7 +66,7 @@ public class BluePing {
             }
 
             String message = BlueCommands.oneLineCommandPing + Central.getInstance().getSettings().getIdDevice();
-            BroadcastSendMessage.broadcastMessageToAllEddystoneDevicesShort(message, context);
+            BroadcastSender.broadcastMessageToAllEddystoneDevicesShort(message, context);
 
             // Schedule the next ping
             handler.postDelayed(this, PING_INTERVAL_MS);

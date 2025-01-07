@@ -1,6 +1,6 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.other;
 
-import static offgrid.geogram.bluetooth.BluetoothCentral.EDDYSTONE_SERVICE_UUID;
+import static offgrid.geogram.bluetooth.other.BluetoothCentral.EDDYSTONE_SERVICE_UUID;
 
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
@@ -15,11 +15,11 @@ import java.nio.ByteBuffer;
 import offgrid.geogram.core.old.old.GenerateDeviceId;
 import offgrid.geogram.core.Log;
 
-public class EddyBeaconAdvertise {
+public class EddyDeviceAdvertise {
 
-    private static final String TAG = "EddyBeaconAdvertise";
+    private static final String TAG = "EddyDeviceAdvertise";
 
-    private static EddyBeaconAdvertise instance;
+    private static EddyDeviceAdvertise instance;
 
     private final Context context;
     private BluetoothLeAdvertiser advertiser;
@@ -33,17 +33,17 @@ public class EddyBeaconAdvertise {
     private int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY;
     private int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
 
-    private EddyBeaconAdvertise(Context context) {
+    private EddyDeviceAdvertise(Context context) {
         this.context = context.getApplicationContext();
         initializeAdvertiser();
     }
 
     /**
-     * Singleton access to the EddyBeaconAdvertise instance.
+     * Singleton access to the EddyDeviceAdvertise instance.
      */
-    public static synchronized EddyBeaconAdvertise getInstance(Context context) {
+    public static synchronized EddyDeviceAdvertise getInstance(Context context) {
         if (instance == null) {
-            instance = new EddyBeaconAdvertise(context);
+            instance = new EddyDeviceAdvertise(context);
         }
         return instance;
     }
@@ -63,7 +63,7 @@ public class EddyBeaconAdvertise {
     /**
      * Starts the Eddystone beacon advertisement.
      */
-    public void startBeacon() {
+    public void startBeaconDevice() {
         if (isAdvertising) {
             Log.i(TAG, "Beacon is already advertising.");
             return;
@@ -106,7 +106,7 @@ public class EddyBeaconAdvertise {
             );
 
             Log.i(TAG, "Beacon namespace ID: " + namespaceId);
-            Log.i(TAG, "Beacon instance/device ID: " + instanceId);
+            Log.i(TAG, "Device ID: " + instanceId);
 
 
             advertiseCallback = new AdvertiseCallback() {
@@ -168,7 +168,7 @@ public class EddyBeaconAdvertise {
      */
     public void restartBeacon() {
         stopBeacon();
-        startBeacon();
+        startBeaconDevice();
     }
 
     /**

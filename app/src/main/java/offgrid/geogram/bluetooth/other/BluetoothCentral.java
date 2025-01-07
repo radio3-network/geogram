@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.other;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -9,8 +9,8 @@ import android.os.ParcelUuid;
 import java.util.List;
 import java.util.UUID;
 
-import offgrid.geogram.bluetooth.comms.BluePing;
-import offgrid.geogram.bluetooth.old.BluetoothStateReceiver;
+import offgrid.geogram.bluetooth.other.comms.BluePing;
+import offgrid.geogram.bluetooth.other.old.BluetoothStateReceiver;
 import offgrid.geogram.core.Log;
 
 public class BluetoothCentral {
@@ -21,7 +21,7 @@ public class BluetoothCentral {
 
     private final Context context;
     private GattServer gattServer;
-    private EddyBeaconAdvertise beacon;
+    private EddyDeviceAdvertise beacon;
     private BluetoothAdapter bluetoothAdapter;
     private boolean isReceiverRegistered = false;
 
@@ -56,7 +56,7 @@ public class BluetoothCentral {
     private void initialize() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         gattServer = GattServer.getInstance(context);
-        beacon = EddyBeaconAdvertise.getInstance(context);
+        beacon = EddyDeviceAdvertise.getInstance(context);
 
         registerBluetoothStateReceiver();
 
@@ -99,7 +99,7 @@ public class BluetoothCentral {
         //gattServer = GattServer.getInstance(context);
 
         if (beacon != null && beacon.isAdvertising() == false) {
-            beacon.startBeacon();
+            beacon.startBeaconDevice();
             Log.i(TAG, "Beacon started.");
         }
 
@@ -125,6 +125,7 @@ public class BluetoothCentral {
 
         if (gattServer != null) {
             Log.i(TAG, "GATT server will be nullified");
+            gattServer.stop();
             gattServer = null;
         }
 
@@ -144,7 +145,7 @@ public class BluetoothCentral {
         if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
             DeviceFinder beaconFinder = DeviceFinder.getInstance(context);
             beaconFinder.startScanning();
-            Log.i(TAG, "Beacon scanning started from BluetoothCentral.");
+            Log.i(TAG, "Device scanning started");
             isScanning = true;
         } else {
             Log.i(TAG, "Bluetooth is not enabled. Cannot start scanning.");
@@ -163,7 +164,7 @@ public class BluetoothCentral {
         DeviceFinder beaconFinder = DeviceFinder.getInstance(context);
         beaconFinder.stopScanning();
         isScanning = false;
-        Log.i(TAG, "Beacon scanning stopped from BluetoothCentral.");
+        Log.i(TAG, "Device scanning stopped from BluetoothCentral.");
     }
 
     /**

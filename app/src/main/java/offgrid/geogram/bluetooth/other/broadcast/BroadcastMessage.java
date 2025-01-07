@@ -1,8 +1,8 @@
-package offgrid.geogram.bluetooth.broadcast;
+package offgrid.geogram.bluetooth.other.broadcast;
 
 import java.util.ArrayList;
 
-import offgrid.geogram.bluetooth.comms.BluePackage;
+import offgrid.geogram.bluetooth.other.comms.BluePackage;
 import offgrid.geogram.things.DeviceReachable;
 
 /**

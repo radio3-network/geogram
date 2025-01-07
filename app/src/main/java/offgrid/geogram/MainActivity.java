@@ -25,7 +25,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
-import offgrid.geogram.bluetooth.broadcast.BroadcastChatFragment;
+import offgrid.geogram.bluetooth.other.broadcast.BroadcastChatFragment;
 import offgrid.geogram.core.Art;
 import offgrid.geogram.core.BackgroundService;
 import offgrid.geogram.core.Log;

@@ -1,7 +1,7 @@
 package offgrid.geogram.settings;
 
 
-import static offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage.sendProfileToEveryone;
+import static offgrid.geogram.bluetooth.other.broadcast.BroadcastSender.sendProfileToEveryone;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;

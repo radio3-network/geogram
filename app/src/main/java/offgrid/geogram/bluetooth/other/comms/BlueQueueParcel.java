@@ -1,16 +1,16 @@
-package offgrid.geogram.bluetooth.comms;
+package offgrid.geogram.bluetooth.other.comms;
 
 /**
  * This is used when writing bluetooth messages.
  * Each message is placed on a queue waiting for
  * the most suited time to be sent.
  */
-public class BlueQueueItem {
+public class BlueQueueParcel {
     private final String macAddress;
     private final String data;
     private final long timestamp;
 
-    public BlueQueueItem(String macAddress, String data) {
+    public BlueQueueParcel(String macAddress, String data) {
         this.macAddress = macAddress;
         this.data = data;
         this.timestamp = System.currentTimeMillis();

@@ -1,19 +1,20 @@
-package offgrid.geogram.bluetooth.comms;
+package offgrid.geogram.bluetooth;
 
-import static offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage.sendPackageToDevice;
-import static offgrid.geogram.bluetooth.comms.BlueCommands.oneLineCommandBio;
-import static offgrid.geogram.bluetooth.comms.BlueCommands.oneLineCommandGapBroadcast;
-import static offgrid.geogram.bluetooth.comms.BlueCommands.gapREPEAT;
-import static offgrid.geogram.bluetooth.comms.BlueCommands.oneLineCommandPing;
-import static offgrid.geogram.bluetooth.comms.BlueQueue.messagesReceivedAsBroadcast;
+import static offgrid.geogram.bluetooth.other.broadcast.BroadcastSender.sendPackageToDevice;
+import static offgrid.geogram.bluetooth.other.comms.BlueCommands.oneLineCommandBio;
+import static offgrid.geogram.bluetooth.other.comms.BlueCommands.oneLineCommandGapBroadcast;
+import static offgrid.geogram.bluetooth.other.comms.BlueCommands.gapREPEAT;
+import static offgrid.geogram.bluetooth.other.comms.BlueCommands.oneLineCommandPing;
 
 import android.content.Context;
 
 import java.util.HashMap;
 
-import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
+import offgrid.geogram.bluetooth.other.broadcast.BroadcastMessage;
+import offgrid.geogram.bluetooth.other.comms.BlueCommands;
+import offgrid.geogram.bluetooth.other.comms.BluePackage;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.bluetooth.broadcast.LostAndFound;
+import offgrid.geogram.bluetooth.other.broadcast.LostAndFound;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
 
@@ -23,18 +24,18 @@ import offgrid.geogram.database.BioProfile;
  * in small little packages, this is where we keep track of
  * them.
  */
-public class BlueReceivingDataFromOutside {
+public class BlueReceiver {
 
     // the requests currently active
     // this is only used for read operations and will soon be phased out
     //private final HashMap<String, BluePackage> requests = new HashMap<>();
 
     // Static instance of the singleton
-    private static BlueReceivingDataFromOutside instance;
-    private static final String TAG = "BlueReceiveDataFromOutside";
+    private static BlueReceiver instance;
+    private static final String TAG = "BlueReceiver";
 
     // Private constructor to prevent instantiation from outside
-    private BlueReceivingDataFromOutside() {
+    private BlueReceiver() {
         //startCleanupThread(); // Start cleanup thread upon initialization
     }
 
@@ -43,9 +44,9 @@ public class BlueReceivingDataFromOutside {
      *
      * @return The singleton instance of BlueCentral.
      */
-    public static synchronized BlueReceivingDataFromOutside getInstance() {
+    public static synchronized BlueReceiver getInstance() {
         if (instance == null) {
-            instance = new BlueReceivingDataFromOutside();
+            instance = new BlueReceiver();
         }
         return instance;
     }
@@ -90,7 +91,7 @@ public class BlueReceivingDataFromOutside {
         String[] data = receivedData.split(":");
         String UID = data[0].substring(0, 2);
         HashMap<String, BluePackage> packagesBeingReceived =
-                BlueQueue.getInstance(context).packagesBeingReceived;
+                BlueQueueReceiving.getInstance(context).packagesReceivedRecently;
         // with a valid device, is there already a write request?
         BluePackage packageBeingReceived;
         // does it already exist?
@@ -161,7 +162,7 @@ public class BlueReceivingDataFromOutside {
             if(action.equals(gapREPEAT)){
                 String packageId = data[2];
                 BluePackage packageToResend =
-                        BlueQueue.getInstance(context).packagesBeingSent.get(packageId);
+                        BlueQueueSending.getInstance(context).packagesToSend.get(packageId);
                 // there is a package that we can send again
                 if(packageToResend != null){
                     Log.i(TAG, "Gap data: repeating package: " + packageId);
@@ -175,7 +176,7 @@ public class BlueReceivingDataFromOutside {
             Log.i(TAG, "Gap data: sending again id: "
                     + id + " and parcel " + parcelNumber);
             // send back the parcel to the other device
-            HashMap<String, BluePackage> packagesSentBefore = BlueQueue.getInstance(context).packagesBeingSent;
+            HashMap<String, BluePackage> packagesSentBefore = BlueQueueSending.getInstance(context).packagesToSend;
             BluePackage packageToSendAgain = packagesSentBefore.get(id);
             if(packageToSendAgain == null){
                 Log.e(TAG, "GapData: No write action found for id: " + id);
@@ -228,7 +229,7 @@ public class BlueReceivingDataFromOutside {
             case G -> {
             }
             case B -> {
-                writeBroadCastMessage(macAddress, packageReceived, context);
+                saveBroadCastMessage(macAddress, packageReceived, context);
             }
             default -> {
             }
@@ -239,7 +240,7 @@ public class BlueReceivingDataFromOutside {
      * Handle the broadcast message when being received from the outside
      * @param context
      */
-    private void writeBroadCastMessage(
+    private void saveBroadCastMessage(
             String macAddress,
             BluePackage packageReceived,
             Context context) {
@@ -262,7 +263,7 @@ public class BlueReceivingDataFromOutside {
         // this message was written by someone else
         BroadcastMessage messageReceived = new BroadcastMessage(messageText, deviceId, false);
         // place the message on the list
-        messagesReceivedAsBroadcast.add(messageReceived);
+        BlueQueueReceiving.getInstance(context).addBroadcastMessage(messageReceived);
     }
 
 

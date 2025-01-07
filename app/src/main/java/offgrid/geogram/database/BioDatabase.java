@@ -5,8 +5,8 @@ import android.content.Context;
 import java.io.File;
 import java.util.HashMap;
 
-import offgrid.geogram.bluetooth.DeviceFinder;
-import offgrid.geogram.bluetooth.broadcast.BroadcastSendMessage;
+import offgrid.geogram.bluetooth.other.DeviceFinder;
+import offgrid.geogram.bluetooth.other.broadcast.BroadcastSender;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.things.DeviceReachable;
 
@@ -217,6 +217,6 @@ public class BioDatabase {
 //        String message = BlueCommands.tagBio + profile.toJson();
 //        BluePackage packageToSend = BluePackage.createSender(DataType.B, message, deviceId);
 //        BroadcastSendMessage.sendPackageToDevice(macAddress, packageToSend, context);
-        BroadcastSendMessage.sendProfileToEveryone(context);
+        BroadcastSender.sendProfileToEveryone(context);
     }
 }

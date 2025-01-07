@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.comms;
+package offgrid.geogram.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -14,7 +14,10 @@ import android.os.Looper;
 
 import java.util.UUID;
 
-import offgrid.geogram.bluetooth.BluetoothCentral;
+import offgrid.geogram.bluetooth.other.BluetoothCentral;
+import offgrid.geogram.bluetooth.other.comms.BlueQueueParcel;
+import offgrid.geogram.bluetooth.other.comms.DataCallbackTemplate;
+import offgrid.geogram.bluetooth.other.comms.Mutex;
 import offgrid.geogram.core.Log;
 
 public class Bluecomm {
@@ -32,7 +35,7 @@ public class Bluecomm {
 
     public static final int
             timeBetweenChecks = 1000,
-            timeBetweenMessages = 1000,
+            timeBetweenMessages = 1500,
             maxSizeOfMessages = 14,
             packageTimeToBeActive = 3000
     ;
@@ -41,7 +44,8 @@ public class Bluecomm {
     private Bluecomm(Context context) {
         this.context = context.getApplicationContext();
         // start the queues when not started already
-        BlueQueue.getInstance(context).start();
+        BlueQueueReceiving.getInstance(context).start();
+        BlueQueueSending.getInstance(context).start();
     }
 
     /**
@@ -152,15 +156,15 @@ public class Bluecomm {
      * @param data text to be sent, attention to keep it short
      */
     public synchronized void writeData(String macAddress, String data) {
-        BlueQueueItem item = new BlueQueueItem(macAddress, data);
-        BlueQueue.getInstance(context).addQueueToSend(item);
+        BlueQueueParcel item = new BlueQueueParcel(macAddress, data);
+        BlueQueueSending.getInstance(context).addQueueToSend(item);
     }
 
     /**
      * Just send a write event to a device without waiting for the reply
      * This is useful for cases like broadcasting messages to devices
      */
-    public synchronized void writeData(BlueQueueItem item) {
+    public synchronized void writeData(BlueQueueParcel item) {
         // send data with just logging and no further reaction
         writeData(item.getMacAddress(), item.getData(), new DataCallbackTemplate() {
             @Override
@@ -187,9 +191,9 @@ public class Bluecomm {
             return;
         }
         // wait a bit until unlocked
-        Mutex.getInstance().waitUntilUnlocked();
+        //Mutex.getInstance().waitUntilUnlocked();
 
-        if (!checkPermissions()) {
+        if (checkPermissions() == false) {
             Log.i(TAG, "Missing required permissions to perform Bluetooth operations.");
             callback.onDataError("Missing required permissions.");
             return;
@@ -197,8 +201,9 @@ public class Bluecomm {
 
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
-            Log.i(TAG, "Bluetooth is not available or enabled.");
-            callback.onDataError("Bluetooth is not available or enabled.");
+            String message = "Bluetooth is not available or enabled";
+            Log.i(TAG, message);
+            callback.onDataError(message);
             return;
         }
 
@@ -297,8 +302,6 @@ public class Bluecomm {
                         gatt.disconnect();
                     }
                 }
-
-
 
 
             });

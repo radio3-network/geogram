@@ -1,10 +1,11 @@
-package offgrid.geogram.bluetooth.comms;
+package offgrid.geogram.bluetooth.other.comms;
 
-import static offgrid.geogram.bluetooth.comms.Bluecomm.timeBetweenChecks;
-import static offgrid.geogram.bluetooth.comms.Bluecomm.timeBetweenMessages;
+import static offgrid.geogram.bluetooth.Bluecomm.timeBetweenChecks;
+import static offgrid.geogram.bluetooth.Bluecomm.timeBetweenMessages;
 
 import android.content.Context;
 
+import offgrid.geogram.bluetooth.Bluecomm;
 import offgrid.geogram.core.Log;
 
 /**

@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.comms;
+package offgrid.geogram.bluetooth.other.comms;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -36,7 +36,7 @@ public class Mutex {
     /**
      * Acquires the lock. Blocks until the lock is available.
      */
-    public void lock() {
+    private void lock() {
         synchronized (lock) {
             while (isLocked) {
                 try {
@@ -55,7 +55,7 @@ public class Mutex {
     /**
      * Releases the lock and notifies waiting threads.
      */
-    public void unlock() {
+    private void unlock() {
         synchronized (lock) {
             if (isLocked) {
                 isLocked = false;
@@ -107,7 +107,7 @@ public class Mutex {
     /**
      * Makes the current thread wait until the lock is unlocked.
      */
-    public void waitUntilUnlocked() {
+    private void waitUntilUnlocked() {
         //return;
         synchronized (lock) {
             while (isLocked) {

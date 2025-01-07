@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.comms;
+package offgrid.geogram.bluetooth.other.comms;
 
 /**
  * Abstract class for data read/write operations.

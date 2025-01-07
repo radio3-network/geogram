@@ -1,6 +1,6 @@
-package offgrid.geogram.bluetooth;
+package offgrid.geogram.bluetooth.other;
 
-import static offgrid.geogram.bluetooth.BluetoothUtils.calculateDistance;
+import static offgrid.geogram.bluetooth.other.BluetoothUtils.calculateDistance;
 import static offgrid.geogram.util.DateUtils.getHumanReadableTime;
 
 import android.content.Context;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.broadcast.LostAndFound;
+import offgrid.geogram.bluetooth.other.broadcast.LostAndFound;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;

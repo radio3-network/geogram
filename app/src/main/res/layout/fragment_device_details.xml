@@ -79,7 +79,7 @@
 
             <!-- Chat -->
             <LinearLayout
-                android:id="@+id/chat_section"
+                android:id="@+id/section_chat"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -110,6 +110,7 @@
 
             <!-- Messages -->
             <LinearLayout
+                android:id="@+id/section_messages"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -138,6 +139,7 @@
 
             <!-- Collections -->
             <LinearLayout
+                android:id="@+id/section_collections"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -166,6 +168,7 @@
 
             <!-- Statistics -->
             <LinearLayout
+                android:id="@+id/section_stats"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"
@@ -194,6 +197,7 @@
 
             <!-- Settings -->
             <LinearLayout
+                android:id="@+id/section_settings"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_columnWeight="1"

@@ -3,8 +3,8 @@ package offgrid.grid.geogram;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import offgrid.geogram.bluetooth.comms.BluePackage;
-import offgrid.geogram.bluetooth.comms.DataType;
+import offgrid.geogram.bluetooth.other.comms.BluePackage;
+import offgrid.geogram.bluetooth.other.comms.DataType;
 
 public class BluePackageTest {
 
