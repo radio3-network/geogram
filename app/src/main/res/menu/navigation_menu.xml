@@ -3,7 +3,7 @@
     <item
         android:id="@+id/nav_broadcast"
         android:icon="@drawable/ic_tap_and_play"
-        android:title="Broadcast" />
+        android:title="Nearby" />
     <!--
     <item
         android:id="@+id/nav_groups"

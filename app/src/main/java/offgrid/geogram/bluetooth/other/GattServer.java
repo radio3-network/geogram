@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import offgrid.geogram.bluetooth.BlueQueueReceiving;
 import offgrid.geogram.bluetooth.BlueReceiver;
 import offgrid.geogram.core.Log;
 
@@ -52,7 +53,12 @@ public class GattServer {
     private final Runnable gattServerCheck = new Runnable() {
         @Override
         public void run() {
-            if (gattServer == null || getConnectedDevices().isEmpty()) {
+            // don't send messages while we are receiving data
+            if(BlueQueueReceiving.getInstance(context).stillReceivingMessages()){
+                return;
+            }
+            if (//gattServer == null ||
+                    getConnectedDevices().isEmpty()) {
                 Log.i(TAG, "Restarting GATT server due to inactivity.");
                 restartGattServer();
             }

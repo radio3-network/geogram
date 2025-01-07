@@ -193,8 +193,8 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
 
         long timeStamp = message.getTimestamp();
         String dateText = DateUtils.convertTimestampForChatMessage(timeStamp);
-        textBoxUpper.setText(dateText);
-        textBoxLower.setText("");
+        textBoxUpper.setText("");
+        textBoxLower.setText(dateText);
 
         chatMessageContainer.addView(userMessageView);
         chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
@@ -210,8 +210,8 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
                 .inflate(R.layout.item_received_message, chatMessageContainer, false);
 
         // Get the objects
-        TextView textBoxUpper = receivedMessageView.findViewById(R.id.sender_name);
-        TextView textBoxLower = receivedMessageView.findViewById(R.id.message_timestamp);
+        TextView textBoxUpper = receivedMessageView.findViewById(R.id.message_boxUpper);
+        TextView textBoxLower = receivedMessageView.findViewById(R.id.message_boxLower);
 
         BioProfile profile = BioDatabase.get(message.getDeviceId(), this.getContext());
         String nickname = "";
@@ -220,17 +220,20 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
             nickname = profile.getNick();
         }
 
+        // Add the timestamp
+        long timeStamp = message.getTimestamp();
+        String dateText = DateUtils.convertTimestampForChatMessage(timeStamp);
+        textBoxUpper.setText("");
+
         // Set the sender's name
         if (nickname.isEmpty() && message.getDeviceId() != null) {
             textBoxLower.setText(message.getDeviceId());
         } else {
-            textBoxLower.setText(nickname);
+            String idText = nickname + " " + dateText;
+            textBoxLower.setText(idText);
         }
 
-        // Add the timestamp
-        long timeStamp = message.getTimestamp();
-        String dateText = DateUtils.convertTimestampForChatMessage(timeStamp);
-        textBoxUpper.setText(dateText);
+
 
         // Set the message content
         String text = message.getMessage();
