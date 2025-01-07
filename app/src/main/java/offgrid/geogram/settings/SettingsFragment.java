@@ -21,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import offgrid.geogram.R;
+import offgrid.geogram.bluetooth.other.broadcast.BroadcastSender;
 import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 
@@ -119,6 +120,9 @@ public class SettingsFragment extends Fragment {
         View saveButton = view.findViewById(R.id.btn_save_settings);
         saveButton.setOnClickListener(v -> {
                 saveSettings(nickname, npub, nsec, preferredColorSpinner);
+                // send a bio update to everyone
+                BroadcastSender.sendProfileToEveryone(requireContext());
+                // go back on the screen
                 requireActivity().onBackPressed(); // Navigate back to the previous fragment
         });
 
