@@ -6,9 +6,9 @@ import java.io.File;
 import java.util.HashMap;
 
 import offgrid.geogram.bluetooth.other.DeviceFinder;
-import offgrid.geogram.bluetooth.other.broadcast.BroadcastSender;
+import offgrid.geogram.bluetooth.broadcast.BroadcastSender;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.things.DeviceReachable;
+import offgrid.geogram.devices.DeviceReachable;
 
 /**
  * Handles all data related to bio profiles that were sent

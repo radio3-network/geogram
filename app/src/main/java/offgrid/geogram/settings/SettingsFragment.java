@@ -1,7 +1,7 @@
 package offgrid.geogram.settings;
 
 
-import static offgrid.geogram.bluetooth.other.broadcast.BroadcastSender.sendProfileToEveryone;
+import static offgrid.geogram.bluetooth.broadcast.BroadcastSender.sendProfileToEveryone;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -21,7 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.other.broadcast.BroadcastSender;
+import offgrid.geogram.bluetooth.broadcast.BroadcastSender;
 import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 

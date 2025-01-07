@@ -1,9 +1,9 @@
-package offgrid.geogram.bluetooth.other.broadcast;
+package offgrid.geogram.bluetooth.broadcast;
 
 import java.util.ArrayList;
 
 import offgrid.geogram.bluetooth.other.comms.BluePackage;
-import offgrid.geogram.things.DeviceReachable;
+import offgrid.geogram.devices.DeviceReachable;
 
 /**
  * Stores a message that was broadcast to all devices within reach

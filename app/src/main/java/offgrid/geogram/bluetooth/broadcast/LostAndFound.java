@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.other.broadcast;
+package offgrid.geogram.bluetooth.broadcast;
 
 import static offgrid.geogram.bluetooth.other.comms.BlueCommands.gapREPEAT;
 

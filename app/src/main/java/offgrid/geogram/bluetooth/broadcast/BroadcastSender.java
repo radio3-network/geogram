@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.other.broadcast;
+package offgrid.geogram.bluetooth.broadcast;
 
 import static offgrid.geogram.bluetooth.other.comms.BlueCommands.oneLineCommandGapBroadcast;
 
@@ -18,7 +18,7 @@ import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.settings.SettingsUser;
-import offgrid.geogram.things.DeviceReachable;
+import offgrid.geogram.devices.DeviceReachable;
 
 /*
 

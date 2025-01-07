@@ -16,7 +16,7 @@ import java.io.File;
 
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BeaconDatabase;
-import offgrid.geogram.things.DeviceReachable;
+import offgrid.geogram.devices.DeviceReachable;
 
 /**
  * Test beacons inside an Android device.

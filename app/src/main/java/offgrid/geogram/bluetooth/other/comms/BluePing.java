@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-import offgrid.geogram.bluetooth.other.broadcast.BroadcastSender;
+import offgrid.geogram.bluetooth.broadcast.BroadcastSender;
 import offgrid.geogram.core.Central;
 
 /**

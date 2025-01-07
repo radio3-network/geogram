@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.HashMap;
 
 import offgrid.geogram.core.Log;
-import offgrid.geogram.things.DeviceReachable;
+import offgrid.geogram.devices.DeviceReachable;
 
 /**
  * Handles all data related to beacons that have been found

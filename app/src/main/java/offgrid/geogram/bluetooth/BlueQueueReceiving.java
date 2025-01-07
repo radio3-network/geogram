@@ -1,13 +1,11 @@
 package offgrid.geogram.bluetooth;
 
-import static offgrid.geogram.bluetooth.other.broadcast.BroadcastSender.notifyMessageUpdate;
-
 import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import offgrid.geogram.bluetooth.other.broadcast.BroadcastMessage;
+import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.bluetooth.other.comms.BluePackage;
 import offgrid.geogram.core.Log;
 

@@ -1,4 +1,4 @@
-package offgrid.geogram.fragments;
+package offgrid.geogram.devices;
 
 import android.os.Bundle;
 import android.os.Looper;
@@ -23,7 +23,6 @@ import offgrid.geogram.bluetooth.other.comms.DataCallbackTemplate;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
-import offgrid.geogram.things.DeviceReachable;
 import offgrid.geogram.bluetooth.other.comms.DataType;
 
 public class DeviceDetailsFragment extends Fragment {

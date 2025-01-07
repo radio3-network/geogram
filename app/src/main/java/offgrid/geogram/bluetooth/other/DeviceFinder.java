@@ -1,7 +1,7 @@
 package offgrid.geogram.bluetooth.other;
 
 import static offgrid.geogram.bluetooth.other.BluetoothCentral.EDDYSTONE_SERVICE_UUID;
-import static offgrid.geogram.bluetooth.other.broadcast.BroadcastSender.sendProfileToEveryone;
+import static offgrid.geogram.bluetooth.broadcast.BroadcastSender.sendProfileToEveryone;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -16,9 +16,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import offgrid.geogram.bluetooth.other.comms.Mutex;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.things.DeviceReachable;
+import offgrid.geogram.devices.DeviceReachable;
 
 public class DeviceFinder {
 

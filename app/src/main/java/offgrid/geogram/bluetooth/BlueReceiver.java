@@ -1,6 +1,6 @@
 package offgrid.geogram.bluetooth;
 
-import static offgrid.geogram.bluetooth.other.broadcast.BroadcastSender.sendPackageToDevice;
+import static offgrid.geogram.bluetooth.broadcast.BroadcastSender.sendPackageToDevice;
 import static offgrid.geogram.bluetooth.other.comms.BlueCommands.oneLineCommandBio;
 import static offgrid.geogram.bluetooth.other.comms.BlueCommands.oneLineCommandGapBroadcast;
 import static offgrid.geogram.bluetooth.other.comms.BlueCommands.gapREPEAT;
@@ -10,11 +10,11 @@ import android.content.Context;
 
 import java.util.HashMap;
 
-import offgrid.geogram.bluetooth.other.broadcast.BroadcastMessage;
+import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.bluetooth.other.comms.BlueCommands;
 import offgrid.geogram.bluetooth.other.comms.BluePackage;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.bluetooth.other.broadcast.LostAndFound;
+import offgrid.geogram.bluetooth.broadcast.LostAndFound;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
 

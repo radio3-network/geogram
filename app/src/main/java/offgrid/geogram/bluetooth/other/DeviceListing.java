@@ -13,13 +13,13 @@ import java.util.HashMap;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.other.broadcast.LostAndFound;
+import offgrid.geogram.bluetooth.broadcast.LostAndFound;
 import offgrid.geogram.database.BeaconDatabase;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
-import offgrid.geogram.things.DeviceReachable;
+import offgrid.geogram.devices.DeviceReachable;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.fragments.DeviceDetailsFragment;
+import offgrid.geogram.devices.DeviceDetailsFragment;
 
 /**
  * Manages the list of beacons that were found

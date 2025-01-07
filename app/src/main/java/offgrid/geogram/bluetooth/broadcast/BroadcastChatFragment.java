@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.other.broadcast;
+package offgrid.geogram.bluetooth.broadcast;
 
 import static offgrid.geogram.bluetooth.other.comms.BlueCommands.tagBio;
 
@@ -31,7 +31,7 @@ import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
-import offgrid.geogram.fragments.DeviceDetailsFragment;
+import offgrid.geogram.devices.DeviceDetailsFragment;
 import offgrid.geogram.util.ASCII;
 import offgrid.geogram.util.DateUtils;
 
@@ -45,6 +45,8 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
     private final Handler handler = new Handler(Looper.getMainLooper());
     Runnable runningPoll = null;
     private static final int REFRESH_INTERVAL_MS = 2000;
+    public static String TAG = "BroadcastChatFragment";
+
 
     public BroadcastChatFragment() {
         // Required empty public constructor
@@ -275,9 +277,17 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
         if (btnAdd != null) {
             btnAdd.hide();
         }
+
+        // clear all messages from the view
+        displayedMessages.clear();
+
+        if (chatMessageContainer != null) {
+            chatMessageContainer.removeAllViews();
+        }
+
         // update the messages, ignoring the already written ones
         updateMessages();
-        Log.i("BroadcastChatFragment", "onResume");
+        Log.i(TAG, "onResume");
     }
 
 

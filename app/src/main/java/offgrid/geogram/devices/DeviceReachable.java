@@ -1,4 +1,4 @@
-package offgrid.geogram.things;
+package offgrid.geogram.devices;
 
 import android.content.Context;
 
