@@ -76,13 +76,31 @@ public class BioDatabase {
         return folderDevice;
     }
 
+
+    private static void mergeRelevantSettings(BioProfile profile, Context appContext){
+        String deviceId = profile.getDeviceId();
+        if (deviceId == null) {
+            Log.e(TAG, "Device Id is null");
+            return;
+        }
+        // merge relevant settings
+        BioProfile existingProfile = get(deviceId, appContext);
+        if (existingProfile != null) {
+            if(profile.getExtra() == null &&
+                    existingProfile.getExtra() != null){
+                profile.setExtra(existingProfile.getExtra());
+                Log.i(TAG, "Merged extra: " + profile.getExtra());
+            }
+        }
+    }
+
     /**
      * Saves a discovered thing to the database.
      *
      * @param profile     The profile to save or merge.
      * @param appContext The application context.
      */
-    public static void saveToDisk(BioProfile profile, Context appContext) {
+    private static void saveToDisk(BioProfile profile, Context appContext) {
         String deviceId = profile.getDeviceId();
         if (deviceId == null) {
             Log.e(TAG, "Device Id is null");
@@ -95,12 +113,7 @@ public class BioDatabase {
         File file = new File(folderDevice, FILE_NAME);
 
         // merge relevant settings
-        BioProfile existingProfile = get(deviceId, appContext);
-        if (existingProfile != null) {
-            if(profile.getExtra() == null && existingProfile.getExtra() != null){
-                profile.setExtra(existingProfile.getExtra());
-            }
-        }
+        mergeRelevantSettings(profile, appContext);
 
 
         try {
@@ -161,6 +174,10 @@ public class BioDatabase {
         if (deviceId == null) {
             Log.e(TAG, "Device Id is null");
         }
+
+        // merge any relevant settings
+        mergeRelevantSettings(profile, context);
+
         profiles.put(deviceId, profile);
         saveToDisk(profile, context);
     }

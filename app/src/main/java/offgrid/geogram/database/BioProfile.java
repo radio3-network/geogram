@@ -30,8 +30,10 @@ public class BioProfile {
     @Expose
     private String npub;
 
+    @Expose
     private String extra;
-    // only used during runtimg
+
+    // only used during runtime
     private String distance = null;
 
     /**

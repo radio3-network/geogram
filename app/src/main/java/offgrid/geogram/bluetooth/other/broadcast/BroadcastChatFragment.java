@@ -229,7 +229,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
         if (nickname.isEmpty() && message.getDeviceId() != null) {
             textBoxLower.setText(message.getDeviceId());
         } else {
-            String idText = nickname + " " + dateText;
+            String idText = nickname + ": " + dateText;
             textBoxLower.setText(idText);
         }
 
