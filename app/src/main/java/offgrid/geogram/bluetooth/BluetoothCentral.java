@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.other;
+package offgrid.geogram.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -9,8 +9,12 @@ import android.os.ParcelUuid;
 import java.util.List;
 import java.util.UUID;
 
+import offgrid.geogram.bluetooth.other.DeviceFinder;
+import offgrid.geogram.bluetooth.other.EddyDeviceAdvertise;
+import offgrid.geogram.bluetooth.other.GattServer;
 import offgrid.geogram.bluetooth.other.comms.BluePing;
 import offgrid.geogram.bluetooth.other.old.BluetoothStateReceiver;
+import offgrid.geogram.bluetooth.watchdog.WatchDogMissingParcels;
 import offgrid.geogram.core.Log;
 
 public class BluetoothCentral {
@@ -106,6 +110,9 @@ public class BluetoothCentral {
         // Start the ping service
         BluePing.getInstance(context).start();
 
+        // start the watchdog for lost parcels
+        WatchDogMissingParcels.getInstance().startLoop(context);
+
         // synchronize messages
         if (isScanning == false){
             startScanning();
@@ -129,8 +136,11 @@ public class BluetoothCentral {
             gattServer = null;
         }
 
-        // Start the ping service
+        // Stop the ping service
         BluePing.getInstance(context).stop();
+
+        // Stop the watchdog for lost parcels
+        WatchDogMissingParcels.getInstance().stopLoop();
     }
 
     /**

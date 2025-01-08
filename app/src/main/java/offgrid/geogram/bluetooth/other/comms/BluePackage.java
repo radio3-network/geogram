@@ -450,6 +450,9 @@ public class BluePackage {
         transmissionTimeLastActive = System.currentTimeMillis();
     }
 
+    public long timeSinceLastPing(){
+        return System.currentTimeMillis() - transmissionTimeLastActive;
+    }
     /**
      * Checks if the data transmission is still active.
      * @return

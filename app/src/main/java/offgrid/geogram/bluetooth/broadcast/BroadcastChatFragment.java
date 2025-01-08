@@ -77,6 +77,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
                 //Toast.makeText(getContext(), "Message cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
+
             // add this message to our list of sent messages
             String deviceId = Central.getInstance().getSettings().getIdDevice();
             BroadcastMessage messageToBroadcast = new BroadcastMessage(message, deviceId, true);
@@ -85,7 +86,7 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
 
 
             new Thread(() -> {
-                // Send the message via BroadcastChat
+               // Send the message via BroadcastChat
                 boolean success = BroadcastSender.broadcast(messageToBroadcast, getContext());
                 requireActivity().runOnUiThread(() -> {
                     if (success) {
@@ -97,6 +98,8 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
                         Toast.makeText(getContext(), "Failed to send message. Please check Bluetooth.", Toast.LENGTH_SHORT).show();
                     }
                 });
+
+
             }).start();
 
         });
@@ -105,9 +108,10 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
         startMessagePolling();
 
         // Register the fragment as a listener for updates
-        BroadcastSender.setMessageUpdateListener(this);
+        //BroadcastSender.setMessageUpdateListener(this);
 
         // update the message right now on the chat box
+        this.eraseMessagesFromWindow();
         updateMessages();
 
         return view;
@@ -278,16 +282,21 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
             btnAdd.hide();
         }
 
+        // clear the messages to refresh the window
+        eraseMessagesFromWindow();
+
+        // update the messages, ignoring the already written ones
+        updateMessages();
+        Log.i(TAG, "onResume");
+    }
+
+    private void eraseMessagesFromWindow(){
         // clear all messages from the view
         displayedMessages.clear();
 
         if (chatMessageContainer != null) {
             chatMessageContainer.removeAllViews();
         }
-
-        // update the messages, ignoring the already written ones
-        updateMessages();
-        Log.i(TAG, "onResume");
     }
 
 

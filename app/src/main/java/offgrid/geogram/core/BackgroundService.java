@@ -22,7 +22,7 @@ import androidx.core.app.NotificationCompat;
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.other.DeviceListing;
-import offgrid.geogram.bluetooth.other.BluetoothCentral;
+import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
 import offgrid.geogram.wifi.WiFiDirectDiscovery;

@@ -14,10 +14,8 @@ import android.os.Looper;
 
 import java.util.UUID;
 
-import offgrid.geogram.bluetooth.other.BluetoothCentral;
 import offgrid.geogram.bluetooth.other.comms.BlueQueueParcel;
 import offgrid.geogram.bluetooth.other.comms.DataCallbackTemplate;
-import offgrid.geogram.bluetooth.other.comms.Mutex;
 import offgrid.geogram.core.Log;
 
 public class Bluecomm {
@@ -156,6 +154,13 @@ public class Bluecomm {
      * @param data text to be sent, attention to keep it short
      */
     public synchronized void writeData(String macAddress, String data) {
+        if(data == null){
+            return;
+        }
+        // avoid sending duplicates
+        if(BlueQueueSending.getInstance(context).isAlreadyOnQueueToSend(data, macAddress)){
+            return;
+        }
         BlueQueueParcel item = new BlueQueueParcel(macAddress, data);
         BlueQueueSending.getInstance(context).addQueueToSend(item);
     }
@@ -187,7 +192,7 @@ public class Bluecomm {
      */
     public synchronized void writeData(String macAddress, String data, DataCallbackTemplate callback) {
         if(data == null){
-            Log.e(TAG, "Null data received for write operation in " + macAddress);
+            Log.e(TAG, "Null data received for write operation to "  + macAddress);
             return;
         }
         // wait a bit until unlocked
@@ -271,6 +276,8 @@ public class Bluecomm {
                             try {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                     int result = gatt.writeCharacteristic(characteristic, data.getBytes(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+                                    //experiment
+                                    //gatt.disconnect();
                                     if (result != BluetoothGatt.GATT_SUCCESS) {
                                         Log.e(TAG, "GATT write failed with status: " + result);
                                         callback.onDataError("GATT write failed with status: " + result);
@@ -282,7 +289,7 @@ public class Bluecomm {
                                     // For older APIs, use the legacy method
                                     characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
                                     boolean success = gatt.writeCharacteristic(characteristic);
-                                    if (!success) {
+                                    if (success == false) {
                                         Log.i(TAG, "Failed to initiate write operation.");
                                         callback.onDataError("Failed to initiate write operation.");
                                         gatt.disconnect();
@@ -290,10 +297,14 @@ public class Bluecomm {
                                         Log.i(TAG, "Write operation initiated successfully.");
                                         callback.onDataSuccess("Write operation initiated.");
                                     }
+                                    //experiment
+                                    gatt.disconnect();
                                 }
                             } catch (Exception e) {
                                 Log.e(TAG, "Exception during write operation: " + e.getMessage());
                                 callback.onDataError("Exception during write operation: " + e.getMessage());
+                                //experiment
+                                gatt.disconnect();
                             }
                         }, 300); // Delay of 200ms to avoid back-to-back operations
                     } else {
@@ -309,8 +320,10 @@ public class Bluecomm {
             Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());
             callback.onDataError("Security exception occurred.");
             //Mutex.getInstance().unlock();
+
         }
         //Mutex.getInstance().unlock();
+
     }
 
     /**

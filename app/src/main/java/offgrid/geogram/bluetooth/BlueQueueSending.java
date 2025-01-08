@@ -81,6 +81,10 @@ public class BlueQueueSending {
      * @param item The BlueQueueItem to be sent elsewhere
      */
     public void addQueueToSend(BlueQueueParcel item) {
+        if(item == null || item.getData() == null){
+            Log.e(TAG, "Null item received for sending");
+            return;
+        }
         queueParcelToSend.add(item);
     }
 
@@ -111,6 +115,9 @@ public class BlueQueueSending {
                         try {
                             // get the oldest parcel on the queue
                             BlueQueueParcel item = queueParcelToSend.get(0);
+                            if(item == null || item.getData() == null){
+                                continue;
+                            }
                             // send it to the target device
                             Bluecomm.getInstance(context).writeData(item);
                             // remove the item from the queue

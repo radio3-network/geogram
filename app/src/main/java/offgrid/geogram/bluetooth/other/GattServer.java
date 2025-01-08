@@ -1,7 +1,7 @@
 package offgrid.geogram.bluetooth.other;
 
-import static offgrid.geogram.bluetooth.other.BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
-import static offgrid.geogram.bluetooth.other.BluetoothCentral.CUSTOM_SERVICE_UUID;
+import static offgrid.geogram.bluetooth.BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
+import static offgrid.geogram.bluetooth.BluetoothCentral.CUSTOM_SERVICE_UUID;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;

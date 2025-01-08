@@ -41,8 +41,14 @@ public class LostAndFound {
         }
         // get the package id
         String packageId = data[0].substring(0, 2);
-        String message = gapREPEAT + ":" +packageId;
 
+        // resend the package
+        askToResendPackage(macAddress, packageId, context);
+        Log.i(TAG, "Lost package detected, requesting to be sent again: " + receivedData);
+    }
+
+    public static void askToResendPackage(String macAddress, String packageId, Context context) {
+        String message = gapREPEAT + ":" +packageId;
         // avoid sending duplicates
         if(BlueQueueSending.getInstance(context).isAlreadyOnQueueToSend(message, macAddress)){
             return;
@@ -50,7 +56,6 @@ public class LostAndFound {
 
         // ask for the whole package to be sent again
         BroadcastSender.sendParcelToDevice(macAddress, message, context);
-        Log.i(TAG, "Lost package detected, requesting to be sent again: " + receivedData);
     }
 
     /**
@@ -67,16 +72,8 @@ public class LostAndFound {
         }
 
         String packageId = packageIncomplete.getId();
-        String message = gapREPEAT + ":" +packageId;
-
-        // avoid sending duplicates
-        if(BlueQueueSending.getInstance(context).isAlreadyOnQueueToSend(message, macAddress)){
-            return true;
-        }
-
-        // do a full repeat of the message
-        BroadcastSender.sendParcelToDevice(macAddress, gapREPEAT
-                + ":" +packageId, context);
+        // resend the package
+        askToResendPackage(macAddress, packageId, context);
         Log.i(TAG, "Lost package detected, requesting to be sent again: " + packageId);
 //        // get the first gap that is missing
 //        String gapIndex = packageIncomplete.getFirstGapParcel();

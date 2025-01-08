@@ -1,6 +1,6 @@
 package offgrid.geogram.bluetooth.other;
 
-import static offgrid.geogram.bluetooth.other.BluetoothCentral.EDDYSTONE_SERVICE_UUID;
+import static offgrid.geogram.bluetooth.BluetoothCentral.EDDYSTONE_SERVICE_UUID;
 
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
