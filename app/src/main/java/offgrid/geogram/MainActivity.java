@@ -191,15 +191,24 @@ public class MainActivity extends AppCompatActivity {
      * Start the background service.
      */
     private void startBackgroundService() {
-        serviceIntent = new Intent(this, BackgroundService.class);
-
+        Intent serviceIntent = new Intent(this, BackgroundService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             log(TAG, "Starting BackgroundService as a foreground service");
-            startForegroundService(serviceIntent);
+            startForegroundService(serviceIntent); // For Android 8.0 (Oreo) and above
         } else {
             log(TAG, "Starting BackgroundService as a normal service");
-            startService(serviceIntent);
+            startService(serviceIntent); // For Android versions below 8.0
         }
+
+//        serviceIntent = new Intent(this, BackgroundService.class);
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            log(TAG, "Starting BackgroundService as a foreground service");
+//            startForegroundService(serviceIntent);
+//        } else {
+//            log(TAG, "Starting BackgroundService as a normal service");
+//            startService(serviceIntent);
+//        }
     }
 
     /**

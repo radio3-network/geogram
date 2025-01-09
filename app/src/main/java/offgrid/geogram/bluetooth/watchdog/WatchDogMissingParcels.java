@@ -16,7 +16,7 @@ import offgrid.geogram.devices.DeviceReachable;
 
 public class WatchDogMissingParcels {
 
-    private long timeForMessageIsNotMoving = 15000;
+    private final long timeForMessageIsNotMoving = 15000;
 
     /*
 
