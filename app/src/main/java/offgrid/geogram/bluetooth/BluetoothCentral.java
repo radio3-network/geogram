@@ -15,6 +15,7 @@ import offgrid.geogram.bluetooth.other.GattServer;
 import offgrid.geogram.bluetooth.other.comms.BluePing;
 import offgrid.geogram.bluetooth.other.old.BluetoothStateReceiver;
 import offgrid.geogram.bluetooth.watchdog.WatchDogMissingParcels;
+import offgrid.geogram.bluetooth.watchdog.WatchDogRestartGATT;
 import offgrid.geogram.core.Log;
 
 public class BluetoothCentral {
@@ -112,6 +113,7 @@ public class BluetoothCentral {
 
         // start the watchdog for lost parcels
         WatchDogMissingParcels.getInstance().startLoop(context);
+        WatchDogRestartGATT.getInstance().startLoop(context);
 
         // synchronize messages
         if (isScanning == false){
@@ -188,13 +190,13 @@ public class BluetoothCentral {
      * Handles Bluetooth state changes.
      */
     public void handleBluetoothStateChange(boolean isEnabled) {
-        if (isEnabled) {
-            Log.i(TAG, "Bluetooth enabled. Starting services...");
-            start();
-        } else {
-            Log.i(TAG, "Bluetooth disabled. Stopping services...");
-            stop();
-        }
+//        if (isEnabled) {
+//            Log.i(TAG, "Bluetooth enabled. Starting services...");
+//            start();
+//        } else {
+//            Log.i(TAG, "Bluetooth disabled. Stopping services...");
+//            stop();
+//        }
     }
 
     /**

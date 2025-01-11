@@ -1,4 +1,4 @@
-package offgrid.geogram.wifi;
+package offgrid.geogram.wifi.old;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;

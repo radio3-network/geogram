@@ -103,7 +103,7 @@ public class BroadcastSender {
         BluetoothCentral bluetoothCentral = BluetoothCentral.getInstance(context);
         if (bluetoothCentral.isBluetoothAvailable()) {
             // Bluetooth is available and enabled, proceed with operations
-            bluetoothCentral.start();
+            //bluetoothCentral.start();
         } else {
             // Bluetooth is either not supported or not enabled
             Log.i(TAG_ID, "Bluetooth is not ready. Please enable it to continue.");

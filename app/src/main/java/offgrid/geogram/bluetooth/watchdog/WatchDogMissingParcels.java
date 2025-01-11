@@ -79,7 +79,7 @@ public class WatchDogMissingParcels {
                 if (isLoopRunning == false) return;
 
                 // Your looped logic here
-                Log.i(TAG, "Checking for missing parcels...");
+                Log.i(TAG, "Checking for missing parcels");
 
                 // list the current packages being received
                 HashMap<String, BluePackage> items = BlueQueueReceiving.getInstance(context).packagesReceivedRecently;

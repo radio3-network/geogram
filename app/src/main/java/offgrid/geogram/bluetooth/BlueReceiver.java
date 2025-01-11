@@ -11,6 +11,7 @@ import android.content.Context;
 import java.util.HashMap;
 
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
+import offgrid.geogram.bluetooth.other.DeviceFinder;
 import offgrid.geogram.bluetooth.other.comms.BlueCommands;
 import offgrid.geogram.bluetooth.other.comms.BluePackage;
 import offgrid.geogram.core.Log;
@@ -74,6 +75,12 @@ public class BlueReceiver {
         // needs to always contain an :
         if(receivedData == null || !receivedData.contains(":")){
             Log.e(TAG, "Invalid data received: " + receivedData);
+            return;
+        }
+
+
+        // was this parcel received before?
+        if(wasSameParcelReceivedRecently(macAddress, receivedData, context)){
             return;
         }
 
@@ -141,6 +148,32 @@ public class BlueReceiver {
             //packagesBeingReceived.remove(UID);
         }
 
+    }
+
+    /**
+     * Reduce CPU effort when the same parcel was delivered recently before
+     * from the same MAC address
+     * @param macAddress
+     * @param receivedData
+     * @param context
+     * @return
+     */
+    private boolean wasSameParcelReceivedRecently(String macAddress, String receivedData, Context context) {
+        // go through all the packages
+        for(BluePackage packageReceivedEarlier : BlueQueueReceiving.getInstance(context).packagesReceivedRecently.values()){
+            // check each of the received parcels
+            for(String data : packageReceivedEarlier.getDataParcels()){
+                // no data on the expected parcel? don't care
+                if(data == null){
+                    continue;
+                }
+                // there is a match, let's inform about this
+                if(data.equalsIgnoreCase(receivedData)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

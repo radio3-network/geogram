@@ -12,8 +12,10 @@ import android.os.Build;
 
 import java.nio.ByteBuffer;
 
+import offgrid.geogram.bluetooth.eddystone.EddystoneNamespaceGenerator;
 import offgrid.geogram.core.old.old.GenerateDeviceId;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.wifi.WiFiCommon;
 
 public class EddyDeviceAdvertise {
 
@@ -89,9 +91,16 @@ public class EddyDeviceAdvertise {
                     .setConnectable(true)
                     .build();
 
+
+            if(WiFiCommon.ssid != null){
+                namespaceId = EddystoneNamespaceGenerator.generateNamespaceId(WiFiCommon.ssid, WiFiCommon.passphrase);
+            }
+
+
             AdvertiseData advertiseData = new AdvertiseData.Builder()
                     .addServiceUuid(EDDYSTONE_SERVICE_UUID)
-                    .addServiceData(EDDYSTONE_SERVICE_UUID, buildEddystoneUidFrame(namespaceId))
+                    .addServiceData(EDDYSTONE_SERVICE_UUID,
+                            buildEddystoneUidFrame(namespaceId))
                     .setIncludeDeviceName(false)
                     .build();
 

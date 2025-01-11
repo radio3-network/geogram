@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import offgrid.geogram.bluetooth.BlueQueueReceiving;
+import offgrid.geogram.bluetooth.BlueQueueSending;
 import offgrid.geogram.bluetooth.BlueReceiver;
 import offgrid.geogram.core.Log;
 
@@ -37,7 +38,7 @@ public class GattServer {
     private GattServer(Context context) {
         this.context = context.getApplicationContext();
         initializeGattServer();
-        startPeriodicCheck();
+        //startPeriodicCheck();
     }
 
     /**
@@ -50,30 +51,10 @@ public class GattServer {
         return instance;
     }
 
-    private final Runnable gattServerCheck = new Runnable() {
-        @Override
-        public void run() {
-            // don't send messages while we are receiving data
-            if(BlueQueueReceiving.getInstance(context).stillReceivingMessages()){
-                return;
-            }
-            if (//gattServer == null ||
-                    getConnectedDevices().isEmpty()) {
-                Log.i(TAG, "Restarting GATT server due to inactivity.");
-                restartGattServer();
-            }
-            handler.postDelayed(this, 600000); // Check every 10 minutes
-        }
-    };
 
-    // Start periodic check
-    public void startPeriodicCheck() {
-        handler.postDelayed(gattServerCheck, 600000); // Initial delay of 10 minutes
-    }
-
-    // Stop periodic check
+    // Stop the GATT server
     public void stop() {
-        handler.removeCallbacks(gattServerCheck);
+        //handler.removeCallbacks(gattServerCheck);
         if (gattServer != null) {
             if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
                 gattServer.close();
@@ -97,20 +78,28 @@ public class GattServer {
     }
 
     public void restartGattServer() {
+        Log.i(TAG, "Restarting GATT server.");
         if (gattServer != null) {
-            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-                try {
-                    gattServer.close();
-                    Log.i(TAG, "GATT server closed for restart.");
-                } catch (Exception e) {
-                    Log.e(TAG, "Error while closing GATT server: " + e.getMessage());
-                }
-            } else {
-                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot close GATT server.");
-            }
-            gattServer = null;
+            cleanupStaleConnections();
+            // clean the messages on the queue
+            BlueQueueReceiving.getInstance(context).clear();
+            BlueQueueSending.getInstance(context).clear();
+            //gattServer.close();
+//            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+//                try {
+//                    cleanupStaleConnections();
+//                    gattServer.clearServices();
+//                    gattServer.close();
+//                    Log.i(TAG, "GATT server closed for restart.");
+//                } catch (Exception e) {
+//                    Log.e(TAG, "Error while closing GATT server: " + e.getMessage());
+//                }
+//            } else {
+//                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot close GATT server.");
+//            }
+//            gattServer = null;
         }
-        initializeGattServer();
+       // initializeGattServer();
         Log.i(TAG, "GATT server restarted.");
     }
 

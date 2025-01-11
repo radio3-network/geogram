@@ -156,4 +156,9 @@ public class BlueQueueSending {
         }
         return false;
     }
+
+    public void clear() {
+        packagesToSend.clear();
+        queueParcelToSend.clear();
+    }
 }

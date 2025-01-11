@@ -1,11 +1,13 @@
 package offgrid.geogram.wifi;
 
+import static offgrid.geogram.core.Messages.log;
 import static offgrid.geogram.wifi.WiFiCommon.channel;
 import static offgrid.geogram.wifi.WiFiCommon.passphrase;
 import static offgrid.geogram.wifi.WiFiCommon.ssid;
 import static offgrid.geogram.wifi.WiFiCommon.wifiP2pManager;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,22 +17,25 @@ import android.net.wifi.p2p.WifiP2pManager;
 
 import androidx.core.app.ActivityCompat;
 
+import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.core.Log;
 
 public class WiFiDirectAdvertiser {
     private static final String TAG = "WiFiDirectAdvertiser";
 
+    private static volatile WiFiDirectAdvertiser instance;
     private final BroadcastReceiver receiver;
     private final Context context;
+    private boolean isAdvertising = false;
 
-    public WiFiDirectAdvertiser(Context context) {
+    private WiFiDirectAdvertiser(Context context) {
         this.context = context;
 
         // Initialize the Wi-Fi P2P Manager
-        if(wifiP2pManager == null) {
+        if (wifiP2pManager == null) {
             wifiP2pManager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
         }
-        if(channel == null) {
+        if (channel == null) {
             channel = wifiP2pManager.initialize(context, context.getMainLooper(), null);
         }
 
@@ -67,10 +72,22 @@ public class WiFiDirectAdvertiser {
         };
     }
 
+    public static WiFiDirectAdvertiser getInstance(Context context) {
+        if (instance == null) {
+            synchronized (WiFiDirectAdvertiser.class) {
+                if (instance == null) {
+                    instance = new WiFiDirectAdvertiser(context.getApplicationContext());
+                }
+            }
+        }
+        return instance;
+    }
+
     /**
      * Logs the SSID and passphrase of the group if available.
      */
     private void logGroupDetails() {
+
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "Permission ACCESS_FINE_LOCATION not granted. Cannot retrieve group details.");
             return;
@@ -83,6 +100,7 @@ public class WiFiDirectAdvertiser {
                     passphrase = group.getPassphrase();
                     Log.i(TAG, "Group SSID: " + ssid);
                     Log.i(TAG, "Group Passphrase: " + passphrase);
+                    startBluetooth();
                 } else {
                     Log.e(TAG, "No group information available.");
                 }
@@ -90,6 +108,18 @@ public class WiFiDirectAdvertiser {
         } catch (SecurityException e) {
             Log.e(TAG, "SecurityException while retrieving group details: " + e.getMessage());
         }
+    }
+
+    private void startBluetooth() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            log(TAG, "Bluetooth is not supported on this device.");
+            return;
+        } else if (!bluetoothAdapter.isEnabled()) {
+            log(TAG, "Bluetooth is disabled. Please turn it on");
+            return;
+        }
+        BluetoothCentral.getInstance(this.context).start();
     }
 
     /**
@@ -118,11 +148,18 @@ public class WiFiDirectAdvertiser {
     /**
      * Starts advertising as a Wi-Fi Direct group owner.
      */
-    public void startAdvertising() {
+    public synchronized void startAdvertising() {
+        if (isAdvertising) {
+            Log.i(TAG, "Wi-Fi Direct advertising is already running.");
+            return;
+        }
+
         if (!hasPermissions()) {
             Log.e(TAG, "Missing necessary permissions. Cannot start advertising.");
             return;
         }
+
+        isAdvertising = true;
 
         // Ensure any existing group is removed
         wifiP2pManager.removeGroup(channel, new WifiP2pManager.ActionListener() {
@@ -173,11 +210,18 @@ public class WiFiDirectAdvertiser {
     /**
      * Stops advertising and removes the group.
      */
-    public void stopAdvertising() {
+    public synchronized void stopAdvertising() {
+        if (!isAdvertising) {
+            Log.i(TAG, "Wi-Fi Direct advertising is not running.");
+            return;
+        }
+
         if (!hasPermissions()) {
             Log.e(TAG, "Missing necessary permissions. Cannot stop advertising.");
             return;
         }
+
+        isAdvertising = false;
 
         try {
             wifiP2pManager.removeGroup(channel, new WifiP2pManager.ActionListener() {

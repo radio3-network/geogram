@@ -79,9 +79,27 @@ public class BlueQueueReceiving {
         return messagesReceivedAsBroadcast;
     }
 
+    /**
+     * These are messages received for the broadcast chat
+     * @param message
+     */
     public void addBroadcastMessage(BroadcastMessage message){
+        // avoid duplicate cases
+        for(BroadcastMessage messageReceived : messagesReceivedAsBroadcast){
+            if(messageReceived.getDeviceId().equals(message.getDeviceId()) == false){
+                continue;
+            }
+            // same message? then avoid it
+            if(messageReceived.getMessage().equals(message.getMessage())){
+                return;
+            }
+        }
         Log.i(TAG, "Adding broadcast message: " + message.getMessage());
         messagesReceivedAsBroadcast.add(message);
     }
 
+    public void clear() {
+        packagesReceivedRecently.clear();
+        messagesReceivedAsBroadcast.clear();
+    }
 }

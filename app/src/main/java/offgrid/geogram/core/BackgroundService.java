@@ -25,7 +25,8 @@ import offgrid.geogram.bluetooth.other.DeviceListing;
 import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
-import offgrid.geogram.wifi.WiFiDirectDiscovery;
+import offgrid.geogram.wifi.old.WiFiDirectDiscovery;
+import offgrid.geogram.wifi.WifiScanner;
 
 public class BackgroundService extends Service {
 
@@ -34,7 +35,6 @@ public class BackgroundService extends Service {
     private Handler handler;
     private Runnable logTask;
 
-    private WiFiDirectAdvertiser wifiDirectAdvertiser; // Wi-Fi Direct Advertiser instance
     private WiFiDirectDiscovery wifiDiscover = null;
 
     // how long between scans
@@ -55,12 +55,19 @@ public class BackgroundService extends Service {
         createNotificationChannel();
         initializePermissions();
 
-        // Initialize Bluetooth services
-        startBluetooth();
 
         // Start the web server
         Thread serverThread = new Thread(new SimpleSparkServer());
         serverThread.start();
+
+        // start the Wi-Fi hotspot
+        startWiFiAdvertise();
+        // start Wi-Fi discovery
+        WifiScanner.getInstance(this.getApplicationContext());
+        WifiScanner.getInstance(this.getApplicationContext()).startScanning();
+
+        // Initialize Bluetooth services
+        //startBluetooth();
 
         // Initialize periodic task
         handler = new Handler();
@@ -136,14 +143,8 @@ public class BackgroundService extends Service {
     }
 
     private void startWiFiAdvertise() {
-        boolean wifiAdvertiseEnabled = true;
-        if (wifiAdvertiseEnabled) {
-            wifiDirectAdvertiser = new WiFiDirectAdvertiser(this);
-            wifiDirectAdvertiser.startAdvertising();
-            log(TAG_ID, "WiFi advertise initialized");
-        } else {
-            log(TAG_ID, "WiFi advertise disabled");
-        }
+        WiFiDirectAdvertiser.getInstance(this.getApplicationContext()).startAdvertising();
+        log(TAG_ID, "WiFi advertise initialized");
     }
 
     @Override
@@ -181,11 +182,8 @@ public class BackgroundService extends Service {
         }
 
         BluetoothCentral.getInstance(this).stop();
+        WiFiDirectAdvertiser.getInstance(this.getApplicationContext()).stopAdvertising();
 
-        if (wifiDirectAdvertiser != null) {
-            wifiDirectAdvertiser.stopAdvertising();
-            log(TAG_ID, "Wi-Fi advertise stopped");
-        }
     }
 
     private void runBackgroundTask() {

@@ -1,5 +1,7 @@
 package offgrid.geogram.devices;
 
+import static offgrid.geogram.util.WiFiUtils.compareSsidHash;
+
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -16,7 +18,10 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+
 import offgrid.geogram.R;
+import offgrid.geogram.bluetooth.eddystone.EddystoneNamespaceGenerator;
 import offgrid.geogram.bluetooth.other.DeviceFinder;
 import offgrid.geogram.bluetooth.other.comms.BlueDataWriteAndReadToOutside;
 import offgrid.geogram.bluetooth.other.comms.DataCallbackTemplate;
@@ -24,6 +29,9 @@ import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.bluetooth.other.comms.DataType;
+import offgrid.geogram.wifi.WiFiDatabase;
+import offgrid.geogram.wifi.WifiScanner;
+import offgrid.geogram.wifi.details.WiFiNetwork;
 
 public class DeviceDetailsFragment extends Fragment {
 
@@ -82,6 +90,11 @@ public class DeviceDetailsFragment extends Fragment {
             return view;
         }
 
+        // bio can be obtained by bluetooth or wi-fi
+        getDataFromWiFi(deviceDiscovered);
+
+
+
         BioProfile profile = BioDatabase.get(deviceId, this.getContext());
         if(profile == null){
             Log.i(TAG, "No bio data found for " + deviceId);
@@ -137,6 +150,35 @@ public class DeviceDetailsFragment extends Fragment {
         chatSection.setOnClickListener(v -> launchMessage(deviceDiscovered));
 
         return view;
+    }
+
+    private void getDataFromWiFi(DeviceReachable deviceDiscovered) {
+        // get the namespace info
+        String[] data = EddystoneNamespaceGenerator.extractNamespaceDetails(
+                deviceDiscovered.getNamespaceId()
+        );
+        // needs to have valid data inside
+        if(data[0] == null && data[1] == null){
+            return;
+        }
+
+        // basic info
+        String ssidHash = data[0];
+        String ssidPassword = data[1];
+        String deviceId = deviceDiscovered.getDeviceId();
+
+        WiFiNetwork networkReachable =
+                WiFiDatabase.getInstance(this.getContext()).getReachableNetwork(ssidHash);
+
+        if(networkReachable == null){
+            Log.e(TAG, "SSID not found for hash: " + ssidHash);
+            return;
+        }
+
+
+        Log.i(TAG, "Target device SSID: " + networkReachable);
+        Log.i(TAG, "Target device password: " + ssidPassword);
+
     }
 
     private void disableIcon(View view, int value) {

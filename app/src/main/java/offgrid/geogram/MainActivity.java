@@ -32,6 +32,7 @@ import offgrid.geogram.core.Log;
 import offgrid.geogram.core.PermissionsHelper;
 import offgrid.geogram.fragments.AboutFragment;
 import offgrid.geogram.fragments.DebugFragment;
+import offgrid.geogram.fragments.NetworksFragment;
 import offgrid.geogram.settings.SettingsFragment;
 import offgrid.geogram.util.BatteryOptimizationHelper;
 
@@ -152,14 +153,22 @@ public class MainActivity extends AppCompatActivity {
             FragmentTransaction transaction = fragmentManager.beginTransaction();
 
             if (item.getItemId() == R.id.nav_settings) {
-                transaction.replace(R.id.main, new SettingsFragment());
+                transaction.replace(R.id.main, new SettingsFragment())
+                        .addToBackStack(null);
             } else if (item.getItemId() == R.id.nav_broadcast) {
-                transaction.replace(R.id.main, new BroadcastChatFragment());
+                transaction.replace(R.id.main, new BroadcastChatFragment())
+                        .addToBackStack(null);
             } else if (item.getItemId() == R.id.nav_debug) {
-                transaction.replace(R.id.main, new DebugFragment());
+                transaction.replace(R.id.main, new DebugFragment())
+                        .addToBackStack(null);
             } else if (item.getItemId() == R.id.nav_about) {
-                transaction.replace(R.id.main, new AboutFragment());
+                transaction.replace(R.id.main, new AboutFragment())
+                        .addToBackStack(null);
+            } else if (item.getItemId() == R.id.nav_networks) {
+                transaction.replace(R.id.main, new NetworksFragment())
+                        .addToBackStack(null);
             }
+
             transaction.addToBackStack(null).commit();
             btnAdd.hide(); // Hide FAB on navigating to any fragment
 

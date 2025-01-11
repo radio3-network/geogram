@@ -1,4 +1,4 @@
-package offgrid.geogram.wifi;
+package offgrid.geogram.wifi.old;
 
 import static offgrid.geogram.MainActivity.activity;
 import static offgrid.geogram.wifi.WiFiCommon.channel;

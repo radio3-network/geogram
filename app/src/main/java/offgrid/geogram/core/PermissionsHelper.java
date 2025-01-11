@@ -16,6 +16,7 @@ public class PermissionsHelper {
 
     // List of required permissions
     private static final String[] REQUIRED_PERMISSIONS = {
+
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.CHANGE_WIFI_STATE,

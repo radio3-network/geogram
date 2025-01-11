@@ -261,4 +261,6 @@ public class DeviceFinder {
     public void update(DeviceReachable beacon) {
         beaconMap.put(beacon.getDeviceId(), beacon);
     }
+
+
 }
