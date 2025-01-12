@@ -1,10 +1,14 @@
 package offgrid.geogram.wifi;
 
+import static offgrid.geogram.wifi.details.WiFiGuessing.detectNetworkType;
+
 import android.content.Context;
 
 import java.util.HashMap;
 
+import offgrid.geogram.core.Log;
 import offgrid.geogram.wifi.details.WiFiNetwork;
+import offgrid.geogram.wifi.details.WiFiType;
 
 /**
  * Singleton class for managing Wi-Fi database operations.
@@ -17,6 +21,7 @@ public class WiFiDatabase {
 
     // Static instance of the singleton
     private static WiFiDatabase instance;
+    private static final String TAG = "WiFiDatabase";
 
     // Stored context
     private final Context context;
@@ -45,29 +50,36 @@ public class WiFiDatabase {
 
     /**
      * Adds a Wi-Fi host to the database.
-     *
-     * @param ssidHash SSID hash to be added
-     * @param deviceId Device ID
-     * @param ssid     SSID
-     * @param password Password
      */
     public void addNetworkReachable(WiFiNetwork network) {
         if(network.isNotMinimallyComplete()){
+            //Log.i(TAG, "Network not complete: " + network.getSSID());
             return;
         }
-        if (networksReachable.containsKey(network.getSSIDhash())) {
-            WiFiNetwork networkExisting = networksReachable.get(network.getSSIDhash());
-            if (networkExisting != null) {
-                networkExisting.setTimeLastSeen(System.currentTimeMillis());
+
+        for(WiFiNetwork networkExisting : networksReachable.values()){
+            if(networkExisting.getSSID().equals(network.getSSID()) == false){
+                continue;
+            }
+            // there is a match
+            networkExisting.setTimeLastSeen(System.currentTimeMillis());
+            if(network.getPassword() != null){
                 networkExisting.setPassword(network.getPassword());
-                networkExisting.setTimeLastSeen(System.currentTimeMillis());
             }
             return;
         }
-        // Place the host on the reachable list
+
+        // add our metadata
         network.setTimeFirstSeen(System.currentTimeMillis());
         network.setTimeLastSeen(System.currentTimeMillis());
+
+        // detect type of network and try to improve the data
+        detectNetworkType(network);
+
+
+        // Place the network on the reachable list
         networksReachable.put(network.getSSIDhash(), network);
+        Log.i(TAG, "Added: " + network.getSSID());
     }
 
     /**

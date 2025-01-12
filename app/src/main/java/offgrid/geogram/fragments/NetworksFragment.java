@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -18,6 +19,7 @@ import offgrid.geogram.R;
 
 public class NetworksFragment extends Fragment {
 
+    private ImageButton btnBack;
     private Switch bluetoothSwitch;
     private EditText deviceIdField, macAddressField;
     private Switch wifiSwitch;
@@ -34,6 +36,10 @@ public class NetworksFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_networks, container, false);
+
+        // Back button functionality
+        btnBack = view.findViewById(R.id.btn_back);
+
 
         // Initialize Bluetooth Section
         bluetoothSwitch = view.findViewById(R.id.switch_bluetooth);
@@ -58,6 +64,9 @@ public class NetworksFragment extends Fragment {
     }
 
     private void setupListeners() {
+        // Back button functionality
+        btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
+
         // Bluetooth Switch Listener
         bluetoothSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             String message = isChecked ? "Bluetooth Enabled" : "Bluetooth Disabled";

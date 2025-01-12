@@ -1,19 +1,31 @@
 package offgrid.geogram.wifi.details;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * Documents the networks reachable at some point
  * It does not mean that they are reachable
  */
 public class WiFiNetwork {
     private String SSIDhash;
+    @Expose
     private String SSID;
+    @Expose
     private String BSSID;
+    @Expose
     private String capabilities;
+    @Expose
     private String password;
-    private Coordinates positionApproximate;
+    @Expose
     private long timeFirstSeen;
+    @Expose
     private long timeLastSeen;
+    @Expose
     private WiFiType type = WiFiType.UNKNOWN;
+    @Expose
+    private WiFiMobility mobility = WiFiMobility.UNKNOWN;
+    @Expose
+    private Coordinates positionMostRecent = null;
 
     public String getSSIDhash() {
         return SSIDhash;
@@ -39,12 +51,8 @@ public class WiFiNetwork {
         this.password = password;
     }
 
-    public Coordinates getPositionApproximate() {
-        return positionApproximate;
-    }
-
-    public void setPositionApproximate(Coordinates positionApproximate) {
-        this.positionApproximate = positionApproximate;
+    public void setPositionRecent(Coordinates positionApproximate) {
+        this.positionMostRecent = positionApproximate;
     }
 
     public long getTimeFirstSeen() {
@@ -87,10 +95,31 @@ public class WiFiNetwork {
         this.capabilities = capabilities;
     }
 
+    public WiFiMobility getMobility() {
+        return mobility;
+    }
+
+    public void setMobility(WiFiMobility mobility) {
+        this.mobility = mobility;
+    }
+
+    public Coordinates getPositionMostRecent() {
+        return positionMostRecent;
+    }
+
+    public void setPositionMostRecent(Coordinates positionMostRecent) {
+        this.positionMostRecent = positionMostRecent;
+    }
+
     public boolean isNotMinimallyComplete() {
         if(this.SSID == null || this.SSID.isEmpty()){
-            return false;
+            return true;
         }
-        return true;
+        if(this.BSSID == null){
+            return true;
+        }
+        return false;
     }
+
+
 }

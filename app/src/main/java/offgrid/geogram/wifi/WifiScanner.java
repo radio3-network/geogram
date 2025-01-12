@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -15,6 +16,7 @@ import android.content.pm.PackageManager;
 import java.util.List;
 
 import offgrid.geogram.util.WiFiUtils;
+import offgrid.geogram.wifi.details.Coordinates;
 import offgrid.geogram.wifi.details.WiFiNetwork;
 import offgrid.geogram.wifi.details.WiFiType;
 
@@ -30,6 +32,8 @@ public class WifiScanner {
     private final Context context;
     private final WifiManager wifiManager;
     private boolean isRunning = false;
+
+    private final Handler handler = new Handler();
 
     private WifiScanner(Context context) {
         this.context = context.getApplicationContext();
@@ -50,7 +54,7 @@ public class WifiScanner {
     }
 
     /**
-     * Returns the singleton instance of the WifiScanner.
+     * Returns the singleton instance of WifiScanner.
      *
      * @param context the application context
      * @return the singleton instance
@@ -63,7 +67,7 @@ public class WifiScanner {
     }
 
     /**
-     * Starts the passive Wi-Fi scanning by enabling the BroadcastReceiver.
+     * Starts the passive Wi-Fi scanning by enabling the BroadcastReceiver and scheduling active scans.
      */
     public synchronized void startScanning() {
         if (!isRunning) {
@@ -81,16 +85,48 @@ public class WifiScanner {
             }
             isRunning = true;
             Log.i(TAG, "Passive Wi-Fi scanning started.");
+
+            // Schedule an initial active scan after 10 seconds
+            handler.postDelayed(this::triggerActiveScan, 10000);
+
+            // Schedule recurring active scans every 1 minute
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (isRunning) {
+                        triggerActiveScan();
+                        handler.postDelayed(this, 60000); // Schedule next scan in 1 minute
+                    }
+                }
+            }, 60000);
         }
     }
 
     /**
-     * Stops receiving Wi-Fi scan results.
+     * Stops receiving Wi-Fi scan results and cancels active scan tasks.
      */
     public synchronized void stopScanning() {
         if (isRunning) {
             isRunning = false;
+            handler.removeCallbacksAndMessages(null);
             Log.i(TAG, "Passive Wi-Fi scanning stopped.");
+        }
+    }
+
+    /**
+     * Triggers an active Wi-Fi scan.
+     */
+    private void triggerActiveScan() {
+        if (!wifiManager.isWifiEnabled()) {
+            Log.e(TAG, "Wi-Fi is disabled. Cannot trigger active scan.");
+            return;
+        }
+
+        boolean scanStarted = wifiManager.startScan();
+        if (scanStarted) {
+            Log.i(TAG, "Active Wi-Fi scan triggered successfully.");
+        } else {
+            Log.e(TAG, "Failed to trigger active Wi-Fi scan.");
         }
     }
 
@@ -106,25 +142,26 @@ public class WifiScanner {
         try {
             List<ScanResult> results = wifiManager.getScanResults();
             Log.i(TAG, "Scan result count: " + (results != null ? results.size() : "null"));
-            WiFiDatabase.getInstance(context).clearReachableNetworks();
-            if(results != null){
+            // get the current coordinates
+            Coordinates coordinates = Coordinates.createFromContext(this.context);
+            if (results != null) {
                 for (ScanResult result : results) {
-                    addReachableNetwork(result);
+                    addReachableNetwork(result, coordinates);
                 }
             }
-            // Log the number of networks found
             Log.i(TAG, "Wi-Fi Scan Complete: "
                     + WiFiDatabase.getInstance(context).getNumberOfNetworksReachable()
-                    + " networks found.");
+                    + " networks are listed");
         } catch (SecurityException e) {
             Log.e(TAG, "SecurityException while retrieving Wi-Fi scan results: " + e.getMessage());
         }
     }
 
-    private void addReachableNetwork(ScanResult result) {
+    private void addReachableNetwork(ScanResult result, Coordinates coordinates) {
         String SSID = result.SSID;
         String BSSID = result.BSSID;
         String capabilities = result.capabilities;
+
         WiFiNetwork network = new WiFiNetwork();
         String hash = WiFiUtils.generateHashSSID(SSID);
         network.setSSIDhash(hash);
@@ -132,14 +169,15 @@ public class WifiScanner {
         network.setBSSID(BSSID);
         network.setCapabilities(capabilities);
         network.setType(WiFiType.UNKNOWN);
+
+        // mark the position for this device
+        if(coordinates != null){
+            network.setPositionRecent(coordinates);
+        }
+
         WiFiDatabase.getInstance(context).addNetworkReachable(network);
     }
 
-    /**
-     * Checks if the necessary permissions are granted.
-     *
-     * @return true if all required permissions are granted, false otherwise
-     */
     private boolean hasPermissions() {
         boolean fineLocationGranted = ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         boolean wifiStateGranted = ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_WIFI_STATE) == PackageManager.PERMISSION_GRANTED;
@@ -151,11 +189,6 @@ public class WifiScanner {
         return fineLocationGranted && wifiStateGranted && changeWifiGranted;
     }
 
-    /**
-     * Checks if location services are enabled on the device.
-     *
-     * @return true if location services are enabled, false otherwise
-     */
     private boolean isLocationEnabled() {
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         boolean locationEnabled = locationManager != null && (
@@ -165,6 +198,4 @@ public class WifiScanner {
         Log.i(TAG, "Location services enabled: " + locationEnabled);
         return locationEnabled;
     }
-
-
 }
