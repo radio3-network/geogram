@@ -29,7 +29,9 @@ import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.bluetooth.other.comms.DataType;
+import offgrid.geogram.util.WiFiUtils;
 import offgrid.geogram.wifi.WiFiDatabase;
+import offgrid.geogram.wifi.WiFiDirectConnector;
 import offgrid.geogram.wifi.WifiScanner;
 import offgrid.geogram.wifi.details.WiFiNetwork;
 
@@ -175,9 +177,71 @@ public class DeviceDetailsFragment extends Fragment {
             return;
         }
 
+        new Thread(() -> {
+            try {
+                Log.i(TAG, "Target device SSID: " + networkReachable.getSSID());
+                Log.i(TAG, "Target device password: " + ssidPassword);
 
-        Log.i(TAG, "Target device SSID: " + networkReachable);
-        Log.i(TAG, "Target device password: " + ssidPassword);
+                // save the current WiFi connected
+                WiFiDirectConnector.getInstance(this.getContext()).saveCurrentConnection();
+
+                // connect to that Wi-Fi network
+                boolean connected = WiFiDirectConnector.getInstance(this.getContext())
+                        .connectToNetwork(networkReachable.getSSID(), ssidPassword);
+
+                if (connected) {
+                    Log.i(TAG, "Connected to Wi-Fi network: " + networkReachable.getSSID());
+                } else {
+                    Log.e(TAG, "Failed to connect to Wi-Fi network: " + networkReachable.getSSID());
+                    return;
+                }
+
+                // get the IP address of the other device
+                String addressIP = WiFiDirectConnector.getInstance(getContext()).getCurrentIpAddress();
+                Log.i(TAG, "IP address of this device: " + addressIP);
+
+                String dhcpIP = WiFiDirectConnector.getInstance(getContext()).getDhcpServerIpAddress();
+                Log.i(TAG, "DHCP address: " + dhcpIP);
+
+                //WiFiDirectConnector.getInstance(this.getContext()).reconnectToPreviousNetwork();
+
+                // disable certificates
+                //WiFiUtils.disableCertificateValidation();
+
+                // 192.168.49.1:5050/ask?text=Hello
+                // Ayvic6em
+
+                Log.i(TAG, "Fetching a webpage at: " + dhcpIP + ":5050/?text=Hello" );
+                WiFiDirectConnector.getInstance(getContext()).fetchWebPage(dhcpIP, 5050, "");
+
+//                boolean connectedOld = WiFiDirectConnector.getInstance(this.getContext())
+//                        .connectToNetwork(ssidOld, passwordOld);
+
+
+            } catch (Exception e) {
+                Log.e(TAG, "Error fetching web page: " + e.getMessage());
+            }
+        }).start();
+
+        // stop the connection
+        //WiFiDirectConnector.getInstance(this.getContext()).disconnect();
+
+//        new Thread(() -> {
+//            // get the IP address of the other device
+//            String addressIP = WiFiDirectConnector.getInstance(getContext()).getPeerIpAddress();
+//
+//            if (addressIP == null) {
+//                Log.e(TAG, "Failed to get IP address of the other device");
+//                return;
+//            }
+//
+//            Log.i(TAG, "IP address of the other device: " + addressIP);
+//
+//            // test getting a web page
+//            WiFiDirectConnector.getInstance(getContext()).fetchWebPage(addressIP, 5050, "/ask?text=Hello");
+//
+//        }).start();
+
 
     }
 

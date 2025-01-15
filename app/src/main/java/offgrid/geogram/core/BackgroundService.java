@@ -25,12 +25,13 @@ import offgrid.geogram.bluetooth.other.DeviceListing;
 import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.wifi.WiFiDirectAdvertiser;
+import offgrid.geogram.wifi.WiFiDirectConnector;
 import offgrid.geogram.wifi.old.WiFiDirectDiscovery;
 import offgrid.geogram.wifi.WifiScanner;
 
 public class BackgroundService extends Service {
 
-    private static final String TAG_ID = "offgrid-service";
+    private static final String TAG = "offgrid-service";
     private static final String CHANNEL_ID = "ForegroundServiceChannel";
     private Handler handler;
     private Runnable logTask;
@@ -46,8 +47,8 @@ public class BackgroundService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        log(TAG_ID, "Geogram is starting");
-        log(TAG_ID, "Creating the background service");
+        log(TAG, "Geogram is starting");
+        log(TAG, "Creating the background service");
 
         // Load settings
         Central.getInstance().loadSettings(this.getApplicationContext());
@@ -59,6 +60,8 @@ public class BackgroundService extends Service {
         // Start the web server
         Thread serverThread = new Thread(new SimpleSparkServer());
         serverThread.start();
+
+
 
         // start the Wi-Fi hotspot
         startWiFiAdvertise();
@@ -77,14 +80,14 @@ public class BackgroundService extends Service {
                 if (hasNecessaryPermissions) {
                     runBackgroundTask();
                 } else {
-                    log(TAG_ID, "Missing permissions, cannot proceed");
+                    log(TAG, "Missing permissions, cannot proceed");
                 }
                 handler.postDelayed(this, intervalSeconds * 1000); // Repeat every interval
             }
         };
         handler.post(logTask);
 
-        log(TAG_ID, "Geogram was launched");
+        log(TAG, "Geogram was launched");
     }
 
     private void createNotificationChannel() {
@@ -98,22 +101,22 @@ public class BackgroundService extends Service {
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
                 manager.createNotificationChannel(serviceChannel);
-                log(TAG_ID, "Notification channel created");
+                log(TAG, "Notification channel created");
             } else {
-                log(TAG_ID, "NotificationManager is null");
+                log(TAG, "NotificationManager is null");
             }
         }
     }
 
     private void initializePermissions() {
         if (activity == null) {
-            log(TAG_ID, "Activity is null, skipping permission initialization");
+            log(TAG, "Activity is null, skipping permission initialization");
             return;
         }
         hasNecessaryPermissions = PermissionsHelper.requestPermissionsIfNecessary(activity);
 
         if (!hasNecessaryPermissions) {
-            log(TAG_ID, "Permissions are not granted yet. Waiting for user response.");
+            log(TAG, "Permissions are not granted yet. Waiting for user response.");
             PermissionsHelper.requestPermissionsIfNecessary(activity);
         }
     }
@@ -124,10 +127,10 @@ public class BackgroundService extends Service {
     private void startBluetooth() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
-            log(TAG_ID, "Bluetooth is not supported on this device.");
+            log(TAG, "Bluetooth is not supported on this device.");
             return;
         } else if (!bluetoothAdapter.isEnabled()) {
-            log(TAG_ID, "Bluetooth is disabled. Please turn it on");
+            log(TAG, "Bluetooth is disabled. Please turn it on");
             return;
         }
         BluetoothCentral.getInstance(this).start();
@@ -135,16 +138,16 @@ public class BackgroundService extends Service {
 
     private void startWiFiDiscover() {
         if (wifiDiscoverEnabled) {
-            log(TAG_ID, "WiFi discovery initialized");
+            log(TAG, "WiFi discovery initialized");
             wifiDiscover = new WiFiDirectDiscovery(this);
         } else {
-            log(TAG_ID, "WiFi discovery disabled");
+            log(TAG, "WiFi discovery disabled");
         }
     }
 
     private void startWiFiAdvertise() {
         WiFiDirectAdvertiser.getInstance(this.getApplicationContext()).startAdvertising();
-        log(TAG_ID, "WiFi advertise initialized");
+        log(TAG, "WiFi advertise initialized");
     }
 
     @Override
@@ -175,7 +178,7 @@ public class BackgroundService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        log(TAG_ID, "Service destroyed");
+        log(TAG, "Service destroyed");
 
         if (handler != null) {
             handler.removeCallbacks(logTask);
@@ -201,7 +204,7 @@ public class BackgroundService extends Service {
             return;
         }
         for (WifiP2pDevice device : peers.getDeviceList()) {
-            log(TAG_ID, "Found P2P available: " + device.deviceName);
+            log(TAG, "Found P2P available: " + device.deviceName);
         }
     }
 }

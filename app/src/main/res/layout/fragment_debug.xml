@@ -70,6 +70,13 @@
         android:padding="10dp"
         android:inputType="none"
         android:textIsSelectable="true"
-        android:textSize="10sp" />
+        android:textSize="10sp"
+        android:scrollHorizontally="true"
+        android:ellipsize="none"
+        android:overScrollMode="always"
+        android:scrollbars="vertical"
+        android:maxLines="99999"
+        android:lineSpacingExtra="2dp" />
+
 
 </LinearLayout>

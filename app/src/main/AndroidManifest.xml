@@ -51,7 +51,9 @@
         android:theme="@style/Theme.geogram"
         android:launchMode="singleInstance"
         android:enableOnBackInvokedCallback="true"
+        android:usesCleartextTraffic="true"
         tools:targetApi="33">
+
 
 
         <!-- Main Activity -->

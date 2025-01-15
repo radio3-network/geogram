@@ -13,6 +13,8 @@ public class Log {
 
     private static EditText logWindow;
 
+    private static int sizeOfLog = 50000;
+
     public static void setLogWindow(EditText editText) {
         logWindow = editText;
     }
@@ -42,8 +44,8 @@ public class Log {
 
         // Archive the current text
         currentText += "\n" + formattedMessage;
-        if (currentText.length() > 5000) { // Example: Keep last 5000 characters
-            currentText = currentText.substring(currentText.length() - 5000);
+        if (currentText.length() > sizeOfLog) { // Example: Keep last 5000 characters
+            currentText = currentText.substring(currentText.length() - sizeOfLog);
         }
 
         // Append the message to the log window

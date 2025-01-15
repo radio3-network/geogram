@@ -23,6 +23,6 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <!-- Customize your theme here. -->
-        <item name="android:fontFamily">@font/retro_font</item>
+
     </style>
 </resources>
