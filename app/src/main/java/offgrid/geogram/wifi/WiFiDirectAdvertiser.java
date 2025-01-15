@@ -87,7 +87,6 @@ public class WiFiDirectAdvertiser {
      * Logs the SSID and passphrase of the group if available.
      */
     private void logGroupDetails() {
-
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.e(TAG, "Permission ACCESS_FINE_LOCATION not granted. Cannot retrieve group details.");
             return;
@@ -100,6 +99,14 @@ public class WiFiDirectAdvertiser {
                     passphrase = group.getPassphrase();
                     Log.i(TAG, "Group SSID: " + ssid);
                     Log.i(TAG, "Group Passphrase: " + passphrase);
+
+                    if (group.isGroupOwner()) {
+                        String groupOwnerIp = "192.168.49.1";
+                        Log.i(TAG, "Device is Group Owner. IP Address: " + groupOwnerIp);
+                    } else {
+                        Log.i(TAG, "Device is Client. Group Owner IP: " + group.getOwner().deviceAddress);
+                    }
+
                     startBluetooth();
                 } else {
                     Log.e(TAG, "No group information available.");
@@ -109,6 +116,7 @@ public class WiFiDirectAdvertiser {
             Log.e(TAG, "SecurityException while retrieving group details: " + e.getMessage());
         }
     }
+
 
     private void startBluetooth() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();

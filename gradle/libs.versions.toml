@@ -1,5 +1,5 @@
 [versions]
-agp = "8.7.3"
+agp = "8.8.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -12,7 +12,9 @@ sparkCore = "2.9.4"
 carUiLib = "2.6.0"
 gson = "2.11.0"
 bcprovJdk15to18 = "1.79"
-junitJupiter = "5.8.1"
+junitJupiter = "5.11.4"
+bcprovJdk15on = "1.70"
+bcpkixJdk15on = "1.70"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -28,6 +30,8 @@ car-ui-lib = { group = "com.android.car.ui", name = "car-ui-lib", version.ref = 
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 bcprov-jdk15to18 = { group = "org.bouncycastle", name = "bcprov-jdk15to18", version.ref = "bcprovJdk15to18" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
+bcprov-jdk15on = { group = "org.bouncycastle", name = "bcprov-jdk15on", version.ref = "bcprovJdk15on" }
+bcpkix-jdk15on = { group = "org.bouncycastle", name = "bcpkix-jdk15on", version.ref = "bcpkixJdk15on" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

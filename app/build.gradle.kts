@@ -3,6 +3,10 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+        }
+    }
     namespace = "offgrid.geogram"
     compileSdk = 34
 
@@ -11,7 +15,7 @@ android {
         minSdk = 29
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "chat testing"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         applicationIdSuffix = "geogram"
@@ -43,6 +47,8 @@ dependencies {
     implementation(libs.spark.core)
     implementation(libs.car.ui.lib)
     implementation(libs.gson)
+    implementation(libs.bcprov.jdk15on)
+    implementation(libs.bcpkix.jdk15on)
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.ext.junit)

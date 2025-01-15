@@ -30,6 +30,6 @@ public class SimpleSparkServer implements Runnable {
             return String.format("{ \"message\": \"Hello from Spark Java!\", \"input\": \"%s\" }", inputText);
         });
 
-        log(TAG_ID, "Server is running on http://localhost:5050/ask/");
+        log(TAG_ID, "Server is running on http://localhost:5050/");
     }
 }

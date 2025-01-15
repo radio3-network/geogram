@@ -8,6 +8,7 @@ public class WiFiGuessing {
 
     private static final String[] listStartRouters = new String[]{
             "TP-Link",
+            "Vodafone",
             "Vodafone Hotspot",
             "FRITZ!Box"
     };
@@ -65,7 +66,7 @@ public class WiFiGuessing {
                                                WiFiType wiFiType, WiFiMobility mobility) {
         String SSID = network.getSSID();
         for(String name : list){
-            if(SSID.startsWith(name) && SSID.contains(keyword)){
+            if(SSID.startsWith(keyword) && SSID.contains(name)){
                 network.setType(wiFiType);
                 network.setMobility(mobility);
                 Log.i(TAG, "Device with " + SSID + " is: " + wiFiType.toString());
