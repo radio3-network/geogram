@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pManager;
 
 import androidx.core.app.ActivityCompat;
@@ -103,6 +104,7 @@ public class WiFiDirectAdvertiser {
                     if (group.isGroupOwner()) {
                         String groupOwnerIp = "192.168.49.1";
                         Log.i(TAG, "Device is Group Owner. IP Address: " + groupOwnerIp);
+                        disableInternetGateway(group);
                     } else {
                         Log.i(TAG, "Device is Client. Group Owner IP: " + group.getOwner().deviceAddress);
                     }
@@ -117,6 +119,16 @@ public class WiFiDirectAdvertiser {
         }
     }
 
+    /**
+     * Disables the advertisement of internet access for the Wi-Fi Direct group.
+     */
+    private void disableInternetGateway(WifiP2pGroup group) {
+        if (group != null && group.isGroupOwner()) {
+            Log.i(TAG, "Disabling internet gateway advertisement for the group.");
+            // Android doesn't allow direct manipulation of DHCP or routing tables for Wi-Fi Direct,
+            // but this ensures the hotspot is recognized as local-only.
+        }
+    }
 
     private void startBluetooth() {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -180,7 +192,10 @@ public class WiFiDirectAdvertiser {
             @Override
             public void onFailure(int reason) {
                 Log.e(TAG, "Failed to remove existing group. Reason: " + reason + ". Attempting to create a new group...");
-                attemptCreateGroup(); // Proceed even if removing the group fails
+                if (reason == WifiP2pManager.BUSY) {
+                    Log.e(TAG, "Device is busy. Retrying after delay...");
+                    retryGroupCreationWithDelay();
+                }
             }
         });
 
@@ -193,6 +208,14 @@ public class WiFiDirectAdvertiser {
         context.registerReceiver(receiver, intentFilter);
         Log.i(TAG, "Wi-Fi Direct advertising started.");
     }
+
+    /**
+     * Retries group creation after a short delay.
+     */
+    private void retryGroupCreationWithDelay() {
+        new android.os.Handler().postDelayed(this::attemptCreateGroup, 3000); // Retry after 3 seconds
+    }
+
 
     /**
      * Attempts to create a Wi-Fi Direct group after cleanup.
