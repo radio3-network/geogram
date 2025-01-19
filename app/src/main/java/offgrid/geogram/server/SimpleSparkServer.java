@@ -3,6 +3,8 @@ package offgrid.geogram.server;
 import static offgrid.geogram.core.Messages.log;
 import static spark.Spark.*;
 
+import offgrid.geogram.core.Central;
+
 public class SimpleSparkServer implements Runnable {
 
     private static final String TAG_ID = "offgrid-server";
@@ -26,8 +28,12 @@ public class SimpleSparkServer implements Runnable {
             // Set response type to JSON
             res.type("application/json");
 
+            String deviceId = Central.getInstance().getSettings().getIdDevice();
+
             // Create the JSON response
-            return String.format("{ \"message\": \"Hello from Spark Java!\", \"input\": \"%s\" }", inputText);
+            return String.format("{ \"message\": \"I am " +
+                    deviceId +
+                    "\", \"input\": \"%s\" }", inputText);
         });
 
         log(TAG_ID, "Server is running on http://localhost:5050/");

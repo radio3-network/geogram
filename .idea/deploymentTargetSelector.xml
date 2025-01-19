@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-01-08T16:14:55.518723542Z">
+        <DropdownSelection timestamp="2025-01-19T23:06:26.487483346Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/home/brito/.config/.android/avd/Medium_Phone_API_34.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=TANK200000007933" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -15,7 +15,7 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="PhysicalDevice" identifier="serial=HGR4BQ7D" />
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=f3d78b3e" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">

@@ -101,9 +101,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Feature not yet implemented", Toast.LENGTH_SHORT).show()
         );
 
-        // Set the log window for the log system
-        Log.setLogWindow(logWindow);
-
         // Handle window insets for modern devices
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -159,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
                 transaction.replace(R.id.main, new BroadcastChatFragment())
                         .addToBackStack(null);
             } else if (item.getItemId() == R.id.nav_debug) {
-                transaction.replace(R.id.main, new DebugFragment())
+                transaction.replace(R.id.main, DebugFragment.getInstance())
                         .addToBackStack(null);
             } else if (item.getItemId() == R.id.nav_about) {
                 transaction.replace(R.id.main, new AboutFragment())

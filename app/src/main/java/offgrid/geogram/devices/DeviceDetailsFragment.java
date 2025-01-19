@@ -32,6 +32,7 @@ import offgrid.geogram.bluetooth.other.comms.DataType;
 import offgrid.geogram.util.WiFiUtils;
 import offgrid.geogram.wifi.WiFiDatabase;
 import offgrid.geogram.wifi.WiFiDirectConnector;
+import offgrid.geogram.wifi.WiFiRequestor;
 import offgrid.geogram.wifi.WifiScanner;
 import offgrid.geogram.wifi.details.WiFiNetwork;
 
@@ -182,46 +183,71 @@ public class DeviceDetailsFragment extends Fragment {
                 Log.i(TAG, "Target device SSID: " + networkReachable.getSSID());
                 Log.i(TAG, "Target device password: " + ssidPassword);
 
-                // save the current WiFi connected
+                // Save the current Wi-Fi connection
                 WiFiDirectConnector.getInstance(this.getContext()).saveCurrentConnection();
 
-                // connect to that Wi-Fi network
+                // Connect to the Wi-Fi Direct hotspot
                 boolean connected = WiFiDirectConnector.getInstance(this.getContext())
                         .connectToNetwork(networkReachable.getSSID(), ssidPassword);
 
                 if (connected) {
-                    Log.i(TAG, "Connected to Wi-Fi network: " + networkReachable.getSSID());
+                    Log.i(TAG, "Connected to Wi-Fi Direct network: " + networkReachable.getSSID());
                 } else {
-                    Log.e(TAG, "Failed to connect to Wi-Fi network: " + networkReachable.getSSID());
+                    Log.e(TAG, "Failed to connect to Wi-Fi Direct network: " + networkReachable.getSSID());
                     return;
                 }
 
-                // get the IP address of the other device
-                String addressIP = WiFiDirectConnector.getInstance(getContext()).getCurrentIpAddress();
+                // Get the IP address of this device
+                String addressIP = WiFiDirectConnector.getInstance(this.getContext()).getCurrentIpAddress();
                 Log.i(TAG, "IP address of this device: " + addressIP);
 
-                String dhcpIP = WiFiDirectConnector.getInstance(getContext()).getDhcpServerIpAddress();
+                // Get the DHCP server IP address
+                String dhcpIP = WiFiDirectConnector.getInstance(this.getContext()).getDhcpServerIpAddress();
                 Log.i(TAG, "DHCP address: " + dhcpIP);
 
-                //WiFiDirectConnector.getInstance(this.getContext()).reconnectToPreviousNetwork();
+                // Perform necessary actions (e.g., web requests)
+                Log.i(TAG, "Performing actions with the Wi-Fi Direct network...");
+                //Thread.sleep(2000); // Simulate task delay
 
-                // disable certificates
-                //WiFiUtils.disableCertificateValidation();
 
-                // 192.168.49.1:5050/ask?text=Hello
-                // Ayvic6em
+                // Example usage of WiFiRequestor
+                WiFiRequestor requestor = WiFiRequestor.getInstance(getContext());
+                String response = requestor.getPage("http://" +
+                        dhcpIP +
+                        ":5050");
 
-                Log.i(TAG, "Fetching a webpage at: " + dhcpIP + ":5050/?text=Hello" );
-                WiFiDirectConnector.getInstance(getContext()).fetchWebPage(dhcpIP, 5050, "");
+                if (response != null) {
+                    Log.i("Test", "Response: " + response);
+                } else {
+                    Log.e("Test", "Failed to fetch the page.");
+                }
 
-//                boolean connectedOld = WiFiDirectConnector.getInstance(this.getContext())
-//                        .connectToNetwork(ssidOld, passwordOld);
 
+
+                // Disconnect from the Wi-Fi Direct hotspot
+                Log.i(TAG, "Disconnecting from Wi-Fi Direct hotspot...");
+                WiFiDirectConnector.getInstance(this.getContext()).disconnect();
+                Thread.sleep(2000); // Wait for the group to be fully cleaned up
+
+//                Log.i(TAG, "Reconnecting to original router...");
+//                boolean reconnected = WiFiDirectConnector.getInstance(this.getContext())
+//                        .connectToNetwork("---___---", "vodafone");
+//
+//                if (reconnected) {
+//                    Log.i(TAG, "Successfully reconnected to router: ---___---");
+//                } else {
+//                    Log.e(TAG, "Failed to reconnect to router: ---___---");
+//                }
+
+                // Group SSID: DIRECT-Uj-TANK2
+                // Group Passphrase: p3IWg01x
+                // IP Address: 192.168.49.1:5050
 
             } catch (Exception e) {
-                Log.e(TAG, "Error fetching web page: " + e.getMessage());
+                Log.e(TAG, "Error in network operations: " + e.getMessage());
             }
         }).start();
+
 
         // stop the connection
         //WiFiDirectConnector.getInstance(this.getContext()).disconnect();

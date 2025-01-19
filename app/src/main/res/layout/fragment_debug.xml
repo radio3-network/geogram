@@ -1,10 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
     android:background="@color/dark_gray_background">
 
     <!-- Top Bar -->
@@ -31,52 +29,174 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:text="Log Messages"
+            android:text="Developer Options"
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
             android:paddingStart="8dp" />
-
-        <!-- Clear Log Button -->
-        <ImageButton
-            android:id="@+id/btn_clear_log"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:contentDescription="Clear Log"
-            android:src="@drawable/ic_clear"
-            app:tint="@color/white"
-            android:background="@android:color/transparent"
-            android:layout_marginEnd="8dp" />
-
-        <!-- Copy to Clipboard Button -->
-        <ImageButton
-            android:id="@+id/btn_copy_log"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:contentDescription="Copy to Clipboard"
-            android:src="@drawable/ic_copy"
-            app:tint="@color/white"
-            android:background="@android:color/transparent" />
     </LinearLayout>
 
-    <!-- Log Window -->
-    <EditText
-        android:id="@+id/lv_log"
+    <!-- Tab Layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@color/black"
+        android:padding="4dp">
+
+        <!-- Log Tab -->
+        <Button
+            android:id="@+id/tab_log"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/black"
+            android:text="Log"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:stateListAnimator="@null" />
+
+        <!-- Options Tab -->
+        <Button
+            android:id="@+id/tab_options"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/black"
+            android:text="Options"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+
+    <!-- Tab Content -->
+    <FrameLayout
+        android:id="@+id/tab_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#352F2F"
-        android:gravity="start|top"
-        android:padding="10dp"
-        android:inputType="none"
-        android:textIsSelectable="true"
-        android:textSize="10sp"
-        android:scrollHorizontally="true"
-        android:ellipsize="none"
-        android:overScrollMode="always"
-        android:scrollbars="vertical"
-        android:maxLines="99999"
-        android:lineSpacingExtra="2dp" />
+        android:layout_weight="1">
 
+        <!-- Log Tab -->
+        <LinearLayout
+            android:id="@+id/log_tab"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:background="@color/black"
+            android:visibility="visible">
 
+            <!-- Log Controls -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="start"
+                android:paddingBottom="8dp">
+
+                <!-- Pause/Play Toggle Button -->
+                <ImageButton
+                    android:id="@+id/btn_pause_log"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="Pause Log"
+                    android:src="@drawable/ic_pause"
+                    android:background="@android:color/transparent"
+                    app:tint="@color/white"
+                    android:layout_marginEnd="8dp" />
+
+                <!-- Filter Input -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:background="@drawable/input_background"
+                    android:padding="4dp"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_search"
+                        app:tint="@color/white"
+                        android:paddingEnd="4dp" />
+
+                    <EditText
+                        android:id="@+id/log_filter"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:hint="Filter"
+                        android:background="@android:color/transparent"
+                        android:textColor="@color/white"
+                        android:padding="4dp"
+                        android:inputType="text" />
+                </LinearLayout>
+
+                <!-- Clear Log Button -->
+                <ImageButton
+                    android:id="@+id/btn_clear_log"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="Clear Log"
+                    android:src="@drawable/ic_clear"
+                    android:background="@android:color/transparent"
+                    app:tint="@color/white"
+                    android:layout_marginStart="8dp" />
+
+                <!-- Copy to Clipboard Button -->
+                <ImageButton
+                    android:id="@+id/btn_copy_log"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="Copy to Clipboard"
+                    android:src="@drawable/ic_copy"
+                    app:tint="@color/white"
+                    android:background="@android:color/transparent"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <!-- Log Window -->
+            <EditText
+                android:id="@+id/lv_log"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@color/black"
+                android:gravity="start|top"
+                android:padding="8dp"
+                android:inputType="none"
+                android:textIsSelectable="true"
+                android:textSize="10sp"
+                android:scrollHorizontally="true"
+                android:ellipsize="none"
+                android:overScrollMode="always"
+                android:scrollbars="vertical"
+                android:maxLines="99999"
+                android:lineSpacingExtra="2dp"
+                android:textColor="@color/white" />
+        </LinearLayout>
+
+        <!-- Options Tab -->
+        <LinearLayout
+            android:id="@+id/options_tab"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@color/black"
+            android:visibility="gone">
+
+            <!-- Placeholder Content -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Options content will be added here."
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:padding="16dp" />
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>
