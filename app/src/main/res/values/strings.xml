@@ -80,5 +80,6 @@
     <string name="back">Back</string>
     <string name="reset_settings">Reset Settings</string>
     <string name="about_geogram">About Geogram</string>
+    <string name="filter">Filter</string>
 
 </resources>

@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -37,7 +39,8 @@ public class DebugFragment extends Fragment {
     private EditText logFilter;
     private boolean isPaused = false; // Log pause state
     private List<String> allLogMessages = new ArrayList<>(); // Store all log messages
-    private EditText logWindow;
+    private TextView logWindow;
+    private ScrollView logScrollView;
 
     // Private constructor to prevent direct instantiation
     private DebugFragment() {
@@ -73,6 +76,7 @@ public class DebugFragment extends Fragment {
 
         // Initialize log window
         logWindow = view.findViewById(R.id.lv_log);
+        logScrollView = view.findViewById(R.id.log_scroll_view);
 
         logUpdateAllMessages();
 
@@ -213,7 +217,7 @@ public class DebugFragment extends Fragment {
 
             // write everything on the UI
             logWindow.setText(text);
-            logWindow.setSelection(logWindow.getText().length()); // Auto-scroll
+            logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
         });
     }
 
