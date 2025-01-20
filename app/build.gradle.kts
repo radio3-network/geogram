@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.bcprov.jdk15on)
     implementation(libs.bcpkix.jdk15on)
+    implementation(libs.viewpager2)
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.ext.junit)

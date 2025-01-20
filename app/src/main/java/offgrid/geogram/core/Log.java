@@ -5,28 +5,36 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import offgrid.geogram.fragments.DebugFragment;
-
 public class Log {
 
     private static final int sizeOfLog = 500;
 
-    // list of messages received
+    // List of messages received
     public static final CopyOnWriteArrayList<String> logMessages = new CopyOnWriteArrayList<>();
 
+    // Callback interface
+    public interface LogListener {
+        void onLogUpdated(String message);
+    }
 
+    private static LogListener logListener;
+
+    // Method to set the listener
+    public static void setLogListener(LogListener listener) {
+        logListener = listener;
+    }
 
     public static void clear() {
         logMessages.clear();
+        if (logListener != null) {
+            logListener.onLogUpdated(null); // Notify of cleared logs
+        }
     }
-
 
     public static void log(int priority, String tag, String message) {
         // Get the current timestamp
         String timestamp = new SimpleDateFormat("HH:mm:ss", Locale.getDefault())
                 .format(Calendar.getInstance().getTime());
-//        String timestamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.getDefault())
-//                .format(Calendar.getInstance().getTime());
 
         // Format the message with the timestamp
         String formattedMessage = timestamp + " [" + tag + "] " + message;
@@ -34,15 +42,18 @@ public class Log {
         // Write to the system log
         android.util.Log.println(priority, tag, formattedMessage);
 
-        // add the message
+        // Add the message
         logMessages.add(formattedMessage);
 
-        if(logMessages.size() > sizeOfLog){
+        // Trim log size
+        if (logMessages.size() > sizeOfLog) {
             logMessages.remove(0);
         }
 
-        DebugFragment.getInstance().logUpdateAllMessages();
-
+        // Notify the listener
+        if (logListener != null) {
+            logListener.onLogUpdated(formattedMessage);
+        }
     }
 
     public static void d(String tag, String message) {
@@ -56,6 +67,4 @@ public class Log {
     public static void i(String tag, String message) {
         log(android.util.Log.INFO, tag, message);
     }
-
-    // Add other levels if needed (WARN, VERBOSE, etc.)
 }

@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 transaction.replace(R.id.main, new BroadcastChatFragment())
                         .addToBackStack(null);
             } else if (item.getItemId() == R.id.nav_debug) {
-                transaction.replace(R.id.main, DebugFragment.getInstance())
+                transaction.replace(R.id.main, new DebugFragment())
                         .addToBackStack(null);
             } else if (item.getItemId() == R.id.nav_about) {
                 transaction.replace(R.id.main, new AboutFragment())

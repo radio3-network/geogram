@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/black">
+    android:background="@color/black"
+    android:padding="16dp">
 
     <!-- Placeholder Content -->
     <TextView
@@ -20,14 +21,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/reset_settings"
-        android:backgroundTint="@color/material_dynamic_neutral40"
         android:textColor="@color/white"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:backgroundTint="@color/material_dynamic_neutral40"
         android:layout_marginTop="8dp"
-        android:layout_gravity="start" />
+        android:layout_gravity="start"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp" />
 
     <!-- Shutdown App Button -->
     <Button
@@ -35,12 +36,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/shutdown_app"
-        android:backgroundTint="@color/material_dynamic_neutral40"
         android:textColor="@color/white"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:backgroundTint="@color/material_dynamic_neutral40"
         android:layout_marginTop="8dp"
-        android:layout_gravity="start" />
+        android:layout_gravity="start"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp" />
 </LinearLayout>
