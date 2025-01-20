@@ -1,9 +1,6 @@
 package offgrid.geogram.core;
 
-import android.widget.EditText;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -12,7 +9,7 @@ import offgrid.geogram.fragments.DebugFragment;
 
 public class Log {
 
-    private static int sizeOfLog = 500;
+    private static final int sizeOfLog = 500;
 
     // list of messages received
     public static final CopyOnWriteArrayList<String> logMessages = new CopyOnWriteArrayList<>();
@@ -46,10 +43,6 @@ public class Log {
 
         DebugFragment.getInstance().logUpdateAllMessages();
 
-//        logWindow.post(() -> {
-//            logWindow.setText(currentText);
-//            logWindow.setSelection(logWindow.getText().length()); // Auto-scroll
-//        });
     }
 
     public static void d(String tag, String message) {

@@ -48,7 +48,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.geogram"
+        android:theme="@style/AppTheme"
         android:launchMode="singleInstance"
         android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true"

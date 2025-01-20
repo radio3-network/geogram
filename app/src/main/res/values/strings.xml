@@ -69,5 +69,16 @@
     when we are more worried about basic things like survival.
 
 </string>
+    <string name="dev_options_button_warning">Please be careful, the buttons below are only meant for debug purposes.</string>
+    <string name="shutdown_app">Shutdown App</string>
+    <string name="copy_to_clipboard">Copy to Clipboard</string>
+    <string name="clear_log">Clear Log</string>
+    <string name="pause_log">Pause Log</string>
+    <string name="options">Options</string>
+    <string name="log">Log</string>
+    <string name="developer_options">Developer Options</string>
+    <string name="back">Back</string>
+    <string name="reset_settings">Reset Settings</string>
+    <string name="about_geogram">About Geogram</string>
 
 </resources>

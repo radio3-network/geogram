@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
@@ -58,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Permissions are not granted yet. Waiting for user response.");
             return; // Defer initialization until permissions are granted
         }
+
+        // ask to use the dark theme as default
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
 
         // load all the beacons we have seen before
@@ -150,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
             FragmentTransaction transaction = fragmentManager.beginTransaction();
 
             if (item.getItemId() == R.id.nav_settings) {
-                transaction.replace(R.id.main, new SettingsFragment())
+                transaction.replace(R.id.main, SettingsFragment.getInstance())
                         .addToBackStack(null);
             } else if (item.getItemId() == R.id.nav_broadcast) {
                 transaction.replace(R.id.main, new BroadcastChatFragment())

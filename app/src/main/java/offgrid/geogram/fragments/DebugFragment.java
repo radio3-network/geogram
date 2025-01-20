@@ -23,6 +23,8 @@ import java.util.Locale;
 
 import offgrid.geogram.R;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.settings.SettingsFragment;
+import offgrid.geogram.settings.SettingsLoader;
 
 public class DebugFragment extends Fragment {
 
@@ -107,6 +109,29 @@ public class DebugFragment extends Fragment {
             btnPauseLog.setImageResource(isPaused ? R.drawable.ic_autorenew : R.drawable.ic_pause);
             Toast.makeText(getContext(), isPaused ? "Log paused" : "Log resumed", Toast.LENGTH_SHORT).show();
         });
+
+
+        // buttons for the options
+
+        // Shutdown Button
+        Button shutdownButton = view.findViewById(R.id.btn_shutdown_app);
+        shutdownButton.setOnClickListener(v -> {
+            requireActivity().finish();
+            System.exit(0);
+        });
+
+        // Reset Button
+        Button resetButton = view.findViewById(R.id.btn_reset_settings);
+        resetButton.setOnClickListener(v -> {
+            // Delete settings file
+            SettingsLoader.deleteSettings(requireContext());
+
+            // Reload settings and update the UI
+            //SettingsFragment.getInstance().reloadSettings();
+            Toast.makeText(requireContext(), "Settings reset to defaults.", Toast.LENGTH_SHORT).show();
+        });
+
+
 
         // Filter log messages
         EditText logFilter = view.findViewById(R.id.log_filter);
