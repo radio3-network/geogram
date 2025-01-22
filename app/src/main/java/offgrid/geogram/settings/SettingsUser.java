@@ -42,6 +42,9 @@ public class SettingsUser {
     @Expose
     private String idDevice; // Limit: 5 characters (numbers only)
 
+    @Expose
+    private String emoticon; // one-line ascii representing the user
+
     // Getters and Setters with Validation
     public boolean isInvisibleMode() {
         return invisibleMode;
@@ -49,6 +52,14 @@ public class SettingsUser {
 
     public void setInvisibleMode(boolean invisibleMode) {
         this.invisibleMode = invisibleMode;
+    }
+
+    public String getEmoticon() {
+        return emoticon;
+    }
+
+    public void setEmoticon(String emoticon) {
+        this.emoticon = emoticon;
     }
 
     public String getNickname() {

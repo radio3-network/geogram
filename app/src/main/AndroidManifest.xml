@@ -55,7 +55,6 @@
         tools:targetApi="33">
 
 
-
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"

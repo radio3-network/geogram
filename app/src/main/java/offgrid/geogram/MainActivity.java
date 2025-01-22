@@ -121,6 +121,11 @@ public class MainActivity extends AppCompatActivity {
         // Handle back button press
         setupBackPressedHandler();
 
+        // Hide the default ActionBar title
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
         // Check Bluetooth status
         checkBluetoothStatus();
 

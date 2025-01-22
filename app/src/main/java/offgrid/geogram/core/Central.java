@@ -84,6 +84,7 @@ public class Central {
         return true;
     }
 
+
     public void loadSettings(Context context) {
         try {
             settings = SettingsLoader.loadSettings(context);

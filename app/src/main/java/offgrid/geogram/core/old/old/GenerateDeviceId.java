@@ -5,11 +5,21 @@ import android.provider.Settings;
 
 import java.util.Locale;
 
+import offgrid.geogram.core.Central;
+
 public class GenerateDeviceId {
 
-    public static String generateInstanceId(Context context) {
+    public static String getAndroidId(Context context){
+        if(context == null){
+            return "a1b2c3d4e5f67890";
+        }else{
+            return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        }
+    }
+
+    public static String generate(Context context) {
         // Retrieve ANDROID_ID
-        String androidId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String androidId = getAndroidId(context);
         if (androidId == null || androidId.isEmpty()) {
             throw new IllegalStateException("ANDROID_ID is unavailable.");
         }

@@ -417,7 +417,7 @@ public class EddystoneBeacon {
             byte[] namespaceBytes = hexStringToByteArray(namespaceId);
 
             // Generate a unique Instance ID
-            BeaconDefinitions.deviceId = GenerateDeviceId.generateInstanceId(context);
+            BeaconDefinitions.deviceId = GenerateDeviceId.generate(context);
             byte[] instanceBytes = hexStringToByteArray(BeaconDefinitions.deviceId);
 
             ByteBuffer buffer = ByteBuffer.allocate(20);

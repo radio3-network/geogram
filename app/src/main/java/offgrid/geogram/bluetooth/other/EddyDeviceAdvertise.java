@@ -83,7 +83,7 @@ public class EddyDeviceAdvertise {
 
         try {
             // setup the basic identifiers
-            instanceId = GenerateDeviceId.generateInstanceId(context);
+            instanceId = GenerateDeviceId.generate(context);
 
             AdvertiseSettings settings = new AdvertiseSettings.Builder()
                     .setAdvertiseMode(advertiseMode)
@@ -274,7 +274,7 @@ public class EddyDeviceAdvertise {
             byte[] namespaceBytes = hexStringToByteArray(namespaceId);
 
             // Generate a unique Instance ID
-            String deviceId = GenerateDeviceId.generateInstanceId(context);
+            String deviceId = GenerateDeviceId.generate(context);
             byte[] instanceBytes = hexStringToByteArray(deviceId);
 
             ByteBuffer buffer = ByteBuffer.allocate(20);

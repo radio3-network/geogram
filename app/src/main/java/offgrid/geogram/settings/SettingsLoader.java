@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.Random;
 
 import offgrid.geogram.core.old.old.GenerateDeviceId;
+import offgrid.geogram.util.ASCII;
 import offgrid.geogram.util.nostr.Identity;
 import offgrid.geogram.util.NicknameGenerator;
 
@@ -42,15 +43,15 @@ public class SettingsLoader {
                 return settings;
             } catch (IOException e) {
                 Log.e("SettingsLoader", "Failed to read settings file, creating default settings.", e);
-                return createDefaultSettings(context, gson);
+                return createDefaultSettings(context);
             }
         } else {
             Log.i("SettingsLoader", "Settings file not found, creating default settings.");
-            return createDefaultSettings(context, gson);
+            return createDefaultSettings(context);
         }
     }
 
-    private static SettingsUser createDefaultSettings(Context context, Gson gson) {
+    public static SettingsUser createDefaultSettings(Context context) {
 
             // Generate identity keys
             Identity user = Identity.generateRandomIdentity();
@@ -61,19 +62,22 @@ public class SettingsLoader {
             SettingsUser defaultSettings = new SettingsUser();
             defaultSettings.setNickname(NicknameGenerator.generateNickname());
             defaultSettings.setIntro(NicknameGenerator.generateIntro());
+            // generate the emoticon
+            defaultSettings.setEmoticon(ASCII.getRandomOneliner());
             defaultSettings.setInvisibleMode(false);
             defaultSettings.setNsec(nsec);
             defaultSettings.setNpub(npub);
             defaultSettings.setBeaconType("person");
             defaultSettings.setIdGroup(generateRandomNumber());
             // generate the device ID
-            String deviceId = GenerateDeviceId.generateInstanceId(context);
+            String deviceId = GenerateDeviceId.generate(context);
             defaultSettings.setIdDevice(deviceId);
             defaultSettings.setPreferredColor(selectRandomColor()); // Assign a random color
             defaultSettings.setBeaconNickname(generateRandomBeaconNickname()); // Default beacon nickname
         // Save default settings
-        saveSettings(context, defaultSettings);
-
+        if(context != null) {
+            saveSettings(context, defaultSettings);
+        }
         return defaultSettings;
     }
 
