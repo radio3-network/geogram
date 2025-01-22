@@ -6,6 +6,7 @@ package offgrid.geogram.wifi.comm;
 public enum CID {
     HELLO,
     HELLO_REPLY,
-    NOT_FOUND
+    ADDED_QUEUE,
+    DUPLICATED, NOT_FOUND
 
 }

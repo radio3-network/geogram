@@ -1,7 +1,5 @@
 package offgrid.geogram.devices;
 
-import static offgrid.geogram.util.WiFiUtils.compareSsidHash;
-
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -18,8 +16,6 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.eddystone.EddystoneNamespaceGenerator;
 import offgrid.geogram.bluetooth.other.DeviceFinder;
@@ -29,11 +25,9 @@ import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.bluetooth.other.comms.DataType;
-import offgrid.geogram.util.WiFiUtils;
 import offgrid.geogram.wifi.WiFiDatabase;
 import offgrid.geogram.wifi.WiFiDirectConnector;
 import offgrid.geogram.wifi.WiFiRequestor;
-import offgrid.geogram.wifi.WifiScanner;
 import offgrid.geogram.wifi.details.WiFiNetwork;
 
 public class DeviceDetailsFragment extends Fragment {

@@ -40,7 +40,11 @@ public class Log {
         String formattedMessage = timestamp + " [" + tag + "] " + message;
 
         // Write to the system log
-        android.util.Log.println(priority, tag, formattedMessage);
+        try {
+            android.util.Log.println(priority, tag, formattedMessage);
+        }catch (Exception e) {
+            // don't print messages
+        }
 
         // Add the message
         logMessages.add(formattedMessage);

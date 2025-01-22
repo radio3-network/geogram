@@ -23,6 +23,42 @@ public class WiFiMessage {
 
     private int attemptedToSend = 0;
 
+    public CID getCIDtype() {
+        return CIDtype;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public Message getMessage() {
+        return message;
+    }
+
+    public DeliveryPriority getPriority() {
+        return priority;
+    }
+
+    public String getTargetSSID() {
+        return targetSSID;
+    }
+
+    public String getTargetIP() {
+        return targetIP;
+    }
+
+    public long getTimeLastAttemptToSend() {
+        return timeLastAttemptToSend;
+    }
+
+    public long getTimeToExpireFromSending() {
+        return timeToExpireFromSending;
+    }
+
+    public int getAttemptedToSend() {
+        return attemptedToSend;
+    }
+
     public WiFiMessage(String targetSSID, String targetIP, Message message) {
         this.CIDtype = message.getCid();
         this.timeStamp = message.getTimeStamp();
