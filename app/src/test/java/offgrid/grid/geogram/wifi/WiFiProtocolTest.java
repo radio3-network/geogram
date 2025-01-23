@@ -15,6 +15,7 @@ import offgrid.geogram.settings.SettingsLoader;
 import offgrid.geogram.settings.SettingsUser;
 import offgrid.geogram.util.JsonUtils;
 import offgrid.geogram.wifi.WiFiRequestor;
+import offgrid.geogram.wifi.comm.WiFiMessage;
 import offgrid.geogram.wifi.comm.WiFiReceiver;
 import offgrid.geogram.wifi.comm.WiFiSender;
 import offgrid.geogram.wifi.comm.WiFiSenderDelete;
@@ -80,6 +81,7 @@ public class WiFiProtocolTest {
          */
         SettingsUser settings = SettingsLoader.createDefaultSettings(null);
         Central.getInstance().setSettings(settings);
+        Central.debugForLocalTests = true;
 
         // Start the web server
         Thread serverThread = new Thread(new SimpleSparkServer());
@@ -89,16 +91,19 @@ public class WiFiProtocolTest {
 
         // create a basic Hello message
         MessageHello_v1 hello = new MessageHello_v1();
+        String targetSSID = "TestNetwork";
+        String targetIP = "192.168.49.1";
         String text = JsonUtils.convertToJsonText(hello);
         assertNotNull(hello);
-        System.out.println(text);
+        System.out.println("Sending: " + text);
 
         // send the json to the local server
         String reply = WiFiRequestor
                 .getInstance(null)
                 .postJson("http://localhost:5050", text);
         assertNotNull(reply);
-
+        Message replyMessage = JsonUtils.parseJson(reply, Message.class);
+        assertNotEquals(hello.getTimeStamp(), replyMessage.getTimeStamp());
     }
 
 

@@ -52,6 +52,8 @@ dependencies {
     implementation(libs.viewpager2)
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.slf4j.simple)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 

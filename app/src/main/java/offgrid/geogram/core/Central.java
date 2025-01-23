@@ -20,6 +20,10 @@ public class Central {
      */
     private SettingsUser settings = null;
 
+    public static boolean debugForLocalTests = false;
+
+
+
     /*
      * Old settings, need to be incrementally removed
      */

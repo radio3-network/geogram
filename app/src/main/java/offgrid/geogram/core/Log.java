@@ -40,12 +40,14 @@ public class Log {
         String formattedMessage = timestamp + " [" + tag + "] " + message;
 
         // Write to the system log
-        try {
-            android.util.Log.println(priority, tag, formattedMessage);
-        }catch (Exception e) {
-            // don't print messages
+        if(Central.debugForLocalTests == false) {
+            try {
+                android.util.Log.println(priority, tag, formattedMessage);
+            } catch (Exception e) {
+                // don't print messages
+                e.printStackTrace();
+            }
         }
-
         // Add the message
         logMessages.add(formattedMessage);
 

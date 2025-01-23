@@ -25,22 +25,34 @@ public class SimpleSparkServer implements Runnable {
         post("/", (req, res) -> {
             res.type("application/json");
 
-            // Parse the incoming JSON object
-            JsonObject requestBody = gson.fromJson(req.body(), JsonObject.class);
-            if (requestBody == null) {
+//            // Parse the incoming JSON object
+//            JsonObject requestBody = gson.fromJson(req.body(), JsonObject.class);
+//            if (requestBody == null) {
+//                res.status(400);
+//                return gson.toJson(createErrorResponse("Invalid JSON input"));
+//            }
+
+            //log(TAG_ID, "Received JSON request: " + requestBody);
+
+            //Message message = JsonUtils.parseJson(requestBody.toString(), Message.class);
+            //Gson gson = GsonUtils.createGson();
+
+            String text = req.body();
+
+            Message message;
+            try{
+                message = gson.fromJson(text, Message.class);
+            } catch (Exception e){
+
+                message = null;
+            }
+
+            if (message == null) {
                 res.status(400);
                 return gson.toJson(createErrorResponse("Invalid JSON input"));
             }
 
-            log(TAG_ID, "Received JSON request: " + requestBody);
-
-            WiFiMessage wifiMessage = JsonUtils.parseJson(requestBody.toString(), WiFiMessage.class);
-            if (wifiMessage == null) {
-                res.status(400);
-                return gson.toJson(createErrorResponse("Invalid WiFiMessage input"));
-            }
-
-            Message reply = WiFiReceiver.processReceivedMessage(wifiMessage.getMessage());
+            Message reply = WiFiReceiver.processReceivedMessage(message);
             if(reply != null){
                 return JsonUtils.convertToJsonText(reply);
             }else{

@@ -2,7 +2,7 @@ package offgrid.geogram.wifi.messages;
 
 import offgrid.geogram.wifi.comm.CID;
 
-public abstract class Message {
+public class Message {
     final CID cid;
     final long timeStamp;
 

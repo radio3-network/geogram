@@ -1,5 +1,10 @@
 package offgrid.geogram.util;
 
+import com.google.gson.Gson;
+
+import offgrid.geogram.wifi.messages.Message;
+import offgrid.geogram.wifi.messages.MessageHello_v1;
+
 public class JsonUtils {
 
     public static String convertToJsonText(Object object) {
