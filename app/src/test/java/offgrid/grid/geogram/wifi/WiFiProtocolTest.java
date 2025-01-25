@@ -1,11 +1,8 @@
 package offgrid.grid.geogram.wifi;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -15,10 +12,8 @@ import offgrid.geogram.settings.SettingsLoader;
 import offgrid.geogram.settings.SettingsUser;
 import offgrid.geogram.util.JsonUtils;
 import offgrid.geogram.wifi.WiFiRequestor;
-import offgrid.geogram.wifi.comm.WiFiMessage;
 import offgrid.geogram.wifi.comm.WiFiReceiver;
 import offgrid.geogram.wifi.comm.WiFiSender;
-import offgrid.geogram.wifi.comm.WiFiSenderDelete;
 import offgrid.geogram.wifi.messages.Message;
 import offgrid.geogram.wifi.messages.MessageHello_v1;
 /*

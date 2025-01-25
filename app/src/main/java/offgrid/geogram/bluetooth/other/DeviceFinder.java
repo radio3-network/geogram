@@ -192,6 +192,7 @@ public class DeviceFinder {
                     + result.getDevice().getAddress()
             );
 
+
             // update the list visible on the main screen
             DeviceListing.getInstance().updateList(this.context);
             Log.i(TAG, "Updating beacon list on UI");

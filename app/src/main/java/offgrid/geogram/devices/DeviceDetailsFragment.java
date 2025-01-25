@@ -17,7 +17,6 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.eddystone.EddystoneNamespaceGenerator;
 import offgrid.geogram.bluetooth.other.DeviceFinder;
 import offgrid.geogram.bluetooth.other.comms.BlueDataWriteAndReadToOutside;
 import offgrid.geogram.bluetooth.other.comms.DataCallbackTemplate;
@@ -25,10 +24,8 @@ import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
 import offgrid.geogram.bluetooth.other.comms.DataType;
-import offgrid.geogram.wifi.WiFiDatabase;
-import offgrid.geogram.wifi.WiFiDirectConnector;
-import offgrid.geogram.wifi.WiFiRequestor;
-import offgrid.geogram.wifi.details.WiFiNetwork;
+import offgrid.geogram.wifi.WiFiUpdates;
+import offgrid.geogram.wifi.messages.MessageHello_v1;
 
 public class DeviceDetailsFragment extends Fragment {
 
@@ -87,10 +84,22 @@ public class DeviceDetailsFragment extends Fragment {
             return view;
         }
 
-        // bio can be obtained by bluetooth or wi-fi
-        getDataFromWiFi(deviceDiscovered);
-
-
+        // try to say hello using Wi-Fi
+        new Thread(() -> {
+            // perform the request on its own thread to prevent blocking the UI
+            MessageHello_v1 hello = WiFiUpdates.sayHello(deviceDiscovered, getContext());
+            if(hello != null){
+                Log.i(TAG, "Hello reply received: " + hello.getBioProfile().getNick());
+                Toast.makeText(getContext(),
+                        "Hello reply received: " + hello.getBioProfile().getNick(),
+                        Toast.LENGTH_SHORT).show();
+            }else{
+                Log.e(TAG, "Hello reply was not received");
+                Toast.makeText(getContext(),
+                        "Hello reply was not received",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }).start();
 
         BioProfile profile = BioDatabase.get(deviceId, this.getContext());
         if(profile == null){
@@ -149,121 +158,7 @@ public class DeviceDetailsFragment extends Fragment {
         return view;
     }
 
-    private void getDataFromWiFi(DeviceReachable deviceDiscovered) {
-        // get the namespace info
-        String[] data = EddystoneNamespaceGenerator.extractNamespaceDetails(
-                deviceDiscovered.getNamespaceId()
-        );
-        // needs to have valid data inside
-        if(data[0] == null && data[1] == null){
-            return;
-        }
 
-        // basic info
-        String ssidHash = data[0];
-        String ssidPassword = data[1];
-        String deviceId = deviceDiscovered.getDeviceId();
-
-        WiFiNetwork networkReachable =
-                WiFiDatabase.getInstance(this.getContext()).getReachableNetwork(ssidHash);
-
-        if(networkReachable == null){
-            Log.e(TAG, "SSID not found for hash: " + ssidHash);
-            return;
-        }
-
-        new Thread(() -> {
-            try {
-                Log.i(TAG, "Target device SSID: " + networkReachable.getSSID());
-                Log.i(TAG, "Target device password: " + ssidPassword);
-
-                // Save the current Wi-Fi connection
-                WiFiDirectConnector.getInstance(this.getContext()).saveCurrentConnection();
-
-                // Connect to the Wi-Fi Direct hotspot
-                boolean connected = WiFiDirectConnector.getInstance(this.getContext())
-                        .connectToNetwork(networkReachable.getSSID(), ssidPassword);
-
-                if (connected) {
-                    Log.i(TAG, "Connected to Wi-Fi Direct network: " + networkReachable.getSSID());
-                } else {
-                    Log.e(TAG, "Failed to connect to Wi-Fi Direct network: " + networkReachable.getSSID());
-                    return;
-                }
-
-                // Get the IP address of this device
-                String addressIP = WiFiDirectConnector.getInstance(this.getContext()).getCurrentIpAddress();
-                Log.i(TAG, "IP address of this device: " + addressIP);
-
-                // Get the DHCP server IP address
-                String dhcpIP = WiFiDirectConnector.getInstance(this.getContext()).getDhcpServerIpAddress();
-                Log.i(TAG, "DHCP address: " + dhcpIP);
-
-                // Perform necessary actions (e.g., web requests)
-                Log.i(TAG, "Performing actions with the Wi-Fi Direct network...");
-                //Thread.sleep(2000); // Simulate task delay
-
-
-                // Example usage of WiFiRequestor
-                WiFiRequestor requestor = WiFiRequestor.getInstance(getContext());
-                String response = requestor.getPage("http://" +
-                        dhcpIP +
-                        ":5050");
-
-                if (response != null) {
-                    Log.i("Test", "Response: " + response);
-                } else {
-                    Log.e("Test", "Failed to fetch the page.");
-                }
-
-
-
-                // Disconnect from the Wi-Fi Direct hotspot
-                Log.i(TAG, "Disconnecting from Wi-Fi Direct hotspot...");
-                WiFiDirectConnector.getInstance(this.getContext()).disconnect();
-                Thread.sleep(2000); // Wait for the group to be fully cleaned up
-
-//                Log.i(TAG, "Reconnecting to original router...");
-//                boolean reconnected = WiFiDirectConnector.getInstance(this.getContext())
-//                        .connectToNetwork("---___---", "vodafone");
-//
-//                if (reconnected) {
-//                    Log.i(TAG, "Successfully reconnected to router: ---___---");
-//                } else {
-//                    Log.e(TAG, "Failed to reconnect to router: ---___---");
-//                }
-
-                // Group SSID: DIRECT-Uj-TANK2
-                // Group Passphrase: p3IWg01x
-                // IP Address: 192.168.49.1:5050
-
-            } catch (Exception e) {
-                Log.e(TAG, "Error in network operations: " + e.getMessage());
-            }
-        }).start();
-
-
-        // stop the connection
-        //WiFiDirectConnector.getInstance(this.getContext()).disconnect();
-
-//        new Thread(() -> {
-//            // get the IP address of the other device
-//            String addressIP = WiFiDirectConnector.getInstance(getContext()).getPeerIpAddress();
-//
-//            if (addressIP == null) {
-//                Log.e(TAG, "Failed to get IP address of the other device");
-//                return;
-//            }
-//
-//            Log.i(TAG, "IP address of the other device: " + addressIP);
-//
-//            // test getting a web page
-//            WiFiDirectConnector.getInstance(getContext()).fetchWebPage(addressIP, 5050, "/ask?text=Hello");
-//
-//        }).start();
-
-
-    }
 
     private void disableIcon(View view, int value) {
         LinearLayout icons = view.findViewById(value);
