@@ -20,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -37,6 +39,9 @@ public class WiFiDirectConnector {
 
     private final Context context;
     private ConnectivityManager.NetworkCallback networkCallback;
+    private final Map<String, ConnectivityManager.NetworkCallback>
+            networkCallbacks = new ConcurrentHashMap<>();
+
     private WifiManager wifiManager;
     private String previousSsid = null;
     private int previousNetworkId = -1;
@@ -186,7 +191,13 @@ public class WiFiDirectConnector {
             CountDownLatch latch = new CountDownLatch(1);
             final boolean[] result = {false};
 
-            networkCallback = new ConnectivityManager.NetworkCallback() {
+            // Check if a previous callback for this SSID exists and unregister it
+            if (networkCallbacks.containsKey(ssid)) {
+                connectivityManager.unregisterNetworkCallback(networkCallbacks.get(ssid));
+                networkCallbacks.remove(ssid);
+            }
+
+            ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
                 @Override
                 public void onAvailable(@NonNull Network network) {
                     Log.i(TAG, "Connected to Wi-Fi Direct network: " + ssid);
@@ -201,15 +212,31 @@ public class WiFiDirectConnector {
                     result[0] = false;
                     latch.countDown();
                 }
+
+                @Override
+                public void onLost(@NonNull Network network) {
+                    Log.i(TAG, "Wi-Fi Direct network lost: " + ssid);
+                    // Optionally handle the network being lost
+                }
             };
 
-            connectivityManager.requestNetwork(request, networkCallback);
+            networkCallbacks.put(ssid, networkCallback); // Track the callback for this SSID
 
             try {
-                latch.await(30, TimeUnit.SECONDS);
+                connectivityManager.requestNetwork(request, networkCallback);
+
+                // Wait for connection result with a timeout
+                if (!latch.await(30, TimeUnit.SECONDS)) {
+                    Log.e(TAG, "Connection to Wi-Fi Direct network timed out: " + ssid);
+                    result[0] = false;
+                }
             } catch (InterruptedException e) {
                 Log.e(TAG, "Connection interrupted: " + e.getMessage());
                 return false;
+            } finally {
+                // Ensure callback is removed after the connection attempt
+                connectivityManager.unregisterNetworkCallback(networkCallback);
+                networkCallbacks.remove(ssid);
             }
 
             return result[0];
@@ -306,16 +333,20 @@ public class WiFiDirectConnector {
      * Disconnects from the Wi-Fi Direct network and releases the resources.
      */
     public void disconnect() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (networkCallback != null) {
-                connectivityManager.unregisterNetworkCallback(networkCallback);
-                networkCallback = null;
+        try {
+            ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (networkCallback != null) {
+                    connectivityManager.unregisterNetworkCallback(networkCallback);
+                    networkCallback = null;
+                }
             }
+            if (wifiManager != null) {
+                wifiManager.disconnect();
+            }
+            Log.i(TAG, "Disconnected from the Wi-Fi Direct network.");
+        } catch (Exception e) {
+            Log.e(TAG, "Error disconnecting from the Wi-Fi Direct network: " + e.getMessage());
         }
-        if (wifiManager != null) {
-            wifiManager.disconnect();
-        }
-        Log.i(TAG, "Disconnected from the Wi-Fi Direct network.");
     }
 }

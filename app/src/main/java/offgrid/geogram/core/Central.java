@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import offgrid.geogram.core.old.WiFi_control;
+import offgrid.geogram.server.SimpleSparkServer;
 import offgrid.geogram.settings.SettingsLoader;
 import offgrid.geogram.settings.SettingsUser;
 
@@ -29,6 +30,9 @@ public class Central {
      */
     private static Central instance; // Singleton instance
     public static WiFi_control wifiControl;
+
+    public static SimpleSparkServer server = null;
+
     public static boolean alreadyStarted = false;
     public static String device_name = null;
     public static boolean hasNeededPermissions = false;

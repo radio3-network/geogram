@@ -1,6 +1,7 @@
 package offgrid.geogram.core;
 
 import static offgrid.geogram.MainActivity.activity;
+import static offgrid.geogram.core.Central.server;
 import static offgrid.geogram.core.Messages.log;
 import static offgrid.geogram.wifi.WiFiCommon.peers;
 
@@ -58,9 +59,13 @@ public class BackgroundService extends Service {
 
 
         // Start the web server
-        Thread serverThread = new Thread(new SimpleSparkServer());
-        serverThread.start();
+//        serverThread = new Thread(new SimpleSparkServer());
+//        serverThread.start();
 
+        server = new SimpleSparkServer();
+        Thread serverThread = new Thread(server);
+        // Start the server
+        serverThread.start();
 
 
         // start the Wi-Fi hotspot

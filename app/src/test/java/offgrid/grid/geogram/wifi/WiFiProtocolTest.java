@@ -94,7 +94,7 @@ public class WiFiProtocolTest {
 
         // send the json to the local server
         String reply = WiFiRequestor
-                .getInstance(null)
+                //.getInstance(null)
                 .postJson("http://localhost:5050", text);
         assertNotNull(reply);
         Message replyMessage = JsonUtils.parseJson(reply, Message.class);

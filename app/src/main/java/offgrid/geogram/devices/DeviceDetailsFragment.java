@@ -87,17 +87,21 @@ public class DeviceDetailsFragment extends Fragment {
         // try to say hello using Wi-Fi
         new Thread(() -> {
             // perform the request on its own thread to prevent blocking the UI
-            MessageHello_v1 hello = WiFiUpdates.sayHello(deviceDiscovered, getContext());
-            if(hello != null){
-                Log.i(TAG, "Hello reply received: " + hello.getBioProfile().getNick());
+            MessageHello_v1 helloReceived = WiFiUpdates.sayHello(deviceDiscovered, getContext());
+            if(helloReceived != null){
+                Log.i(TAG, "Hello reply received: " + helloReceived.getBioProfile().getNick());
+                getActivity().runOnUiThread(() -> {
                 Toast.makeText(getContext(),
-                        "Hello reply received: " + hello.getBioProfile().getNick(),
+                        "Hello reply received: " + helloReceived.getBioProfile().getNick(),
                         Toast.LENGTH_SHORT).show();
+                });
             }else{
+                getActivity().runOnUiThread(() -> {
                 Log.e(TAG, "Hello reply was not received");
                 Toast.makeText(getContext(),
                         "Hello reply was not received",
                         Toast.LENGTH_SHORT).show();
+                });
             }
         }).start();
 

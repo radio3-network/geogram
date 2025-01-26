@@ -41,9 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     public static MainActivity activity = null;
-    public static EditText logWindow = null;
     public static ListView beacons = null;
-    private Intent serviceIntent = null;
     private FloatingActionButton btnAdd;
     private static boolean wasCreatedBefore = false;
 
@@ -70,13 +68,6 @@ public class MainActivity extends AppCompatActivity {
         initializeApp();
     }
 
-//    /**
-//     * Load all the beacons we have seen before from the database.
-//     */
-//    private void loadBeaconsOnDatabase() {
-//        BeaconDatabase.updateBeacons(this.getApplicationContext());
-//        BeaconListing.getInstance().updateList(this.getApplicationContext());
-//    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
