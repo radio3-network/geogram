@@ -16,7 +16,7 @@ import offgrid.geogram.devices.DeviceReachable;
 
 public class WatchDogMissingParcels {
 
-    private final long timeForMessageIsNotMoving = 15000;
+    private final long timeForMessageIsNotMoving = 15 * 1000;
 
     /*
 
@@ -76,44 +76,18 @@ public class WatchDogMissingParcels {
         Runnable loopRunnable = new Runnable() {
             @Override
             public void run() {
-                if (isLoopRunning == false) return;
-
-                // Your looped logic here
-                Log.i(TAG, "Checking for missing parcels");
-
-                // list the current packages being received
-                HashMap<String, BluePackage> items = BlueQueueReceiving.getInstance(context).packagesReceivedRecently;
-                ArrayList<BluePackage> itemsToRemove = new ArrayList<>();
-
-                for(BluePackage item : items.values()){
-                    // no need to include the ones that are already valid
-                    if (item.allParcelsReceivedAndValid()) {
-                        itemsToRemove.add(item);
-                        continue;
-                    }
-                    // is this package not moving?
-                    if (item.timeSinceLastPing() < timeForMessageIsNotMoving) {
-                        continue;
-                    }
-                    // time to ask for resending the package
-                    String packageId = item.getId();
-                    String deviceId = item.getDeviceId();
-                    // get the most up-to-date MAC address for the device
-                    DeviceReachable device = DeviceFinder.getInstance(context).getDeviceMap().get(deviceId);
-                    if(device == null){
-                        Log.e(TAG, "Device not found for id: " + deviceId);
-                        continue;
-                    }
-                    // resend the package
-                    askToResendPackage(device.getMacAddress(), packageId, context);
+                if (isLoopRunning == false){
+                    return;
                 }
 
-                // remove completed items from the queue
-                if(itemsToRemove.isEmpty() == false){
-                    for(BluePackage item : itemsToRemove){
-                        items.remove(item.getId());
-                        Log.i(TAG, "Removed package from received queue: " + item.getId());
-                    }
+                // The looped logic here
+                //Log.i(TAG, "Checking for missing parcels");
+                try {
+                    // keep running it
+                    runTask(context);
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception happened: " + e.getMessage());
                 }
 
 
@@ -121,8 +95,44 @@ public class WatchDogMissingParcels {
                 handler.postDelayed(this, 15000); // Run every 15 seconds
             }
         };
-
         handler.post(loopRunnable);
+    }
+
+    private void runTask(Context context){
+        // list the current packages being received
+        HashMap<String, BluePackage> items = BlueQueueReceiving.getInstance(context).packagesReceivedRecently;
+        ArrayList<BluePackage> itemsToRemove = new ArrayList<>();
+
+        for(BluePackage item : items.values()){
+            // no need to include the ones that are already valid
+            if (item.allParcelsReceivedAndValid()) {
+                itemsToRemove.add(item);
+                continue;
+            }
+            // is this package not moving?
+            if (item.timeSinceLastPing() < timeForMessageIsNotMoving) {
+                continue;
+            }
+            // time to ask for resending the package
+            String packageId = item.getId();
+            String deviceId = item.getDeviceId();
+            // get the most up-to-date MAC address for the device
+            DeviceReachable device = DeviceFinder.getInstance(context).getDeviceMap().get(deviceId);
+            if(device == null){
+                Log.e(TAG, "Device not found for id: " + deviceId);
+                continue;
+            }
+            // resend the package
+            askToResendPackage(device.getMacAddress(), packageId, context);
+        }
+
+        // remove completed items from the queue
+        if(itemsToRemove.isEmpty() == false){
+            for(BluePackage item : itemsToRemove){
+                items.remove(item.getId());
+                Log.i(TAG, "Removed package from received queue: " + item.getId());
+            }
+        }
     }
 
     /**

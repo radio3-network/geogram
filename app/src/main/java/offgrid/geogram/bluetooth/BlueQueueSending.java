@@ -1,16 +1,18 @@
 package offgrid.geogram.bluetooth;
 
-import static offgrid.geogram.bluetooth.Bluecomm.timeBetweenChecks;
 import static offgrid.geogram.bluetooth.Bluecomm.timeBetweenMessages;
 
 import android.content.Context;
 
 import java.util.HashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import offgrid.geogram.bluetooth.other.comms.BluePackage;
 import offgrid.geogram.bluetooth.other.comms.BlueQueueParcel;
-import offgrid.geogram.bluetooth.other.comms.Mutex;
 import offgrid.geogram.core.Log;
 
 /**
@@ -20,17 +22,13 @@ import offgrid.geogram.core.Log;
 public class BlueQueueSending {
 
     // Queue for outgoing packages
-    // <UID, BluePackage> // UID is the random identifier for the package
-    // this is only used as archive, therefore has no MAC addresses inside the package
     public final HashMap<String, BluePackage> packagesToSend = new HashMap<>();
 
     // Queue for outgoing parcels
-    private final CopyOnWriteArrayList<BlueQueueParcel>
-            queueParcelToSend = new CopyOnWriteArrayList<>();
+    private final BlockingQueue<BlueQueueParcel> queueParcelToSend = new LinkedBlockingQueue<>();
 
-
-    // thread to send messages when possible
-    private Thread queueThreadToSend = null;
+    // Scheduler for message dispatching
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private static final String TAG = "BlueQueueSending";
     private static BlueQueueSending instance = null;
     private final Context context;
@@ -52,10 +50,8 @@ public class BlueQueueSending {
         return instance;
     }
 
-    public void start(){
-        if(queueThreadToSend == null){
-            startThreadToSendMessagesInQueue();
-        }
+    public void start() {
+        scheduler.scheduleWithFixedDelay(this::processQueue, 0, timeBetweenMessages, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -63,12 +59,12 @@ public class BlueQueueSending {
      * in cases where it is needed to send again
      * @param packageToSend the data to be dispatched
      */
-    public void addPackageToSend(BluePackage packageToSend){
+    public void addPackageToSend(BluePackage packageToSend) {
         String uid = packageToSend.getId();
         HashMap<String, BluePackage> packagesReceivedRecently
                 = BlueQueueReceiving.getInstance(context).packagesReceivedRecently;
-        // avoid duplicates
-        if(packagesReceivedRecently.containsKey(uid)){
+        // Avoid duplicates
+        if (packagesReceivedRecently.containsKey(uid)) {
             return;
         }
         Log.i(TAG, "Adding package to send: " + uid);
@@ -81,7 +77,7 @@ public class BlueQueueSending {
      * @param item The BlueQueueItem to be sent elsewhere
      */
     public void addQueueToSend(BlueQueueParcel item) {
-        if(item == null || item.getData() == null){
+        if (item == null || item.getData() == null) {
             Log.e(TAG, "Null item received for sending");
             return;
         }
@@ -89,52 +85,25 @@ public class BlueQueueSending {
     }
 
     /**
-     * The thread that keeps sending messages that were placed
-     * on the queue
+     * Processes the message queue.
      */
-    private void startThreadToSendMessagesInQueue() {
-        queueThreadToSend = new Thread(() -> {
-            Log.i(TAG, "Starting thread to send messages in queue");
-            try {
-                while(true) {
-                    Thread.sleep(timeBetweenChecks); // Pause for a bit
-                    // nothing to send
-                    if(queueParcelToSend.isEmpty()){
-                        continue;
-                    }
-
-                    // don't send messages while we are receiving data
-                    if(BlueQueueReceiving.getInstance(context).stillReceivingMessages()){
-                        continue;
-                    }
-
-                    // there is something to send
-                    while(queueParcelToSend.isEmpty() == false){
-                        //Mutex.getInstance().waitUntilUnlocked();
-                        //Mutex.getInstance().lock();
-                        try {
-                            // get the oldest parcel on the queue
-                            BlueQueueParcel item = queueParcelToSend.get(0);
-                            if(item == null || item.getData() == null){
-                                continue;
-                            }
-                            // send it to the target device
-                            Bluecomm.getInstance(context).writeData(item);
-                            // remove the item from the queue
-                            queueParcelToSend.remove(0);
-                        }catch (Exception e){
-                            Log.e(TAG, "Error sending data: " + e.getMessage());
-                        }
-                        //Mutex.getInstance().unlock();
-                        Thread.sleep(timeBetweenMessages);
-                    }
-
-                }
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Thread interrupted: " + e.getMessage());
+    private void processQueue() {
+        try {
+            if (queueParcelToSend.isEmpty()) {
+                return;
             }
-        });
-        queueThreadToSend.start(); // Starts the thread
+
+            if (BlueQueueReceiving.getInstance(context).stillReceivingMessages()) {
+                return;
+            }
+
+            BlueQueueParcel item = queueParcelToSend.poll();
+            if (item != null && item.getData() != null) {
+                Bluecomm.getInstance(context).writeData(item);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error sending data: " + e.getMessage());
+        }
     }
 
     /**
@@ -144,13 +113,13 @@ public class BlueQueueSending {
      * @return true when it is a duplicate message
      */
     public boolean isAlreadyOnQueueToSend(String message, String macAddress) {
-        for(BlueQueueParcel item : queueParcelToSend){
-            // needs to match the mac address
-            if(item.getMacAddress().equals(macAddress) == false){
+        for (BlueQueueParcel item : queueParcelToSend) {
+            // Needs to match the mac address
+            if (!item.getMacAddress().equals(macAddress)) {
                 continue;
             }
-            // is the data same?
-            if(item.getData().equals(message)){
+            // Is the data same?
+            if (item.getData().equals(message)) {
                 return true;
             }
         }

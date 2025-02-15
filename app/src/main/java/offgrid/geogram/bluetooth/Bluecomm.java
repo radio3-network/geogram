@@ -28,8 +28,8 @@ public class Bluecomm {
     private BluetoothGatt bluetoothGatt;
 
     // UUIDs for service and characteristic
-    private static final UUID SERVICE_UUID = BluetoothCentral.CUSTOM_SERVICE_UUID;
-    private static final UUID CHARACTERISTIC_UUID = BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
+    private static final UUID SERVICE_UUID = BluetoothCentral.UUID_SERVICE_WALKIETALKIE;
+    private static final UUID CHARACTERISTIC_UUID = BluetoothCentral.UUID_CHARACTERISTIC_GENERAL;
 
     public static final int
             timeBetweenChecks = 1000,

@@ -32,6 +32,8 @@ import offgrid.geogram.wifi.WifiScanner;
 
 public class BackgroundService extends Service {
 
+    boolean startWifi = false;
+
     private static final String TAG = "offgrid-service";
     private static final String CHANNEL_ID = "ForegroundServiceChannel";
     private Handler handler;
@@ -69,13 +71,15 @@ public class BackgroundService extends Service {
 
 
         // start the Wi-Fi hotspot
-        startWiFiAdvertise();
-        // start Wi-Fi discovery
-        WifiScanner.getInstance(this.getApplicationContext());
-        WifiScanner.getInstance(this.getApplicationContext()).startScanning();
+        if(startWifi) {
+            startWiFiAdvertise();
+            // start Wi-Fi discovery
+            WifiScanner.getInstance(this.getApplicationContext());
+            WifiScanner.getInstance(this.getApplicationContext()).startScanning();
+        }
 
         // Initialize Bluetooth services
-        //startBluetooth();
+        startBluetooth();
 
         // Initialize periodic task
         handler = new Handler();

@@ -1,7 +1,7 @@
 package offgrid.geogram.bluetooth.other;
 
-import static offgrid.geogram.bluetooth.BluetoothCentral.CUSTOM_CHARACTERISTIC_UUID;
-import static offgrid.geogram.bluetooth.BluetoothCentral.CUSTOM_SERVICE_UUID;
+import static offgrid.geogram.bluetooth.BluetoothCentral.UUID_CHARACTERISTIC_GENERAL;
+import static offgrid.geogram.bluetooth.BluetoothCentral.UUID_SERVICE_WALKIETALKIE;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -38,7 +38,6 @@ public class GattServer {
     private GattServer(Context context) {
         this.context = context.getApplicationContext();
         initializeGattServer();
-        //startPeriodicCheck();
     }
 
     /**
@@ -65,6 +64,9 @@ public class GattServer {
 
     public void cleanupStaleConnections() {
         List<BluetoothDevice> connectedDevices = getConnectedDevices();
+        if(gattServer == null){
+            return;
+        }
         for (BluetoothDevice device : connectedDevices) {
             if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
                 try {
@@ -98,6 +100,8 @@ public class GattServer {
 //                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot close GATT server.");
 //            }
 //            gattServer = null;
+        }else{
+            initializeGattServer();
         }
        // initializeGattServer();
         Log.i(TAG, "GATT server restarted.");
@@ -143,10 +147,10 @@ public class GattServer {
 
         try {
             BluetoothGattService customService = new BluetoothGattService(
-                    CUSTOM_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
+                    UUID_SERVICE_WALKIETALKIE, BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
             BluetoothGattCharacteristic customCharacteristic = new BluetoothGattCharacteristic(
-                    CUSTOM_CHARACTERISTIC_UUID,
+                    UUID_CHARACTERISTIC_GENERAL,
                     BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_WRITE,
                     BluetoothGattCharacteristic.PERMISSION_READ | BluetoothGattCharacteristic.PERMISSION_WRITE
             );
@@ -231,13 +235,13 @@ public class GattServer {
             return new ArrayList<>();
         }
 
-        BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        try {
+            BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager == null) {
             Log.i(TAG, "BluetoothManager is not available.");
             return new ArrayList<>();
         }
 
-        try {
             return bluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER);
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while getting connected devices: " + e.getMessage());
@@ -263,7 +267,7 @@ public class GattServer {
         List<BluetoothDevice> connectedDevices = new ArrayList<>();
         try {
             for (BluetoothDevice device : bluetoothManager.getConnectedDevices(BluetoothProfile.GATT_SERVER)) {
-                BluetoothGattService service = gattServer.getService(CUSTOM_SERVICE_UUID);
+                BluetoothGattService service = gattServer.getService(UUID_SERVICE_WALKIETALKIE);
                 if (service != null) {
                     connectedDevices.add(device);
                     Log.i(TAG, "Eddystone device found: " + device.getAddress());
@@ -332,7 +336,7 @@ public class GattServer {
         // Answer to a previous request
         @Override
         public void onCharacteristicReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattCharacteristic characteristic) {
-            if (!CUSTOM_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
+            if (!UUID_CHARACTERISTIC_GENERAL.equals(characteristic.getUuid())) {
                 return;
             }
 //            try {
@@ -363,7 +367,7 @@ public class GattServer {
                 byte[] value) {
 
             // Only accept valid UUID
-            if (!CUSTOM_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
+            if (!UUID_CHARACTERISTIC_GENERAL.equals(characteristic.getUuid())) {
                 Log.e(TAG, "Request received for unknown characteristic: "
                         + characteristic.getUuid()
                         + " from " + device.getAddress()

@@ -21,7 +21,7 @@ public class BluePing {
     // Handler for managing delayed tasks
     private Handler handler;
     private final int INITIAL_DELAY_MS = 60000; // 60 seconds
-    private final int PING_INTERVAL_MS = 60000; // 60 seconds for the loop
+    private final int PING_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes for the loop
 
     // Indicates whether the ping service is running
     private boolean isRunning = false;

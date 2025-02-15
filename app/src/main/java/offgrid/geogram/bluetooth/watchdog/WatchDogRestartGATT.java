@@ -17,7 +17,7 @@ import offgrid.geogram.devices.DeviceReachable;
 
 public class WatchDogRestartGATT {
 
-    private final long timeBetweenRestarts = 2 * 60 * 1000;
+    private final long timeBetweenRestarts = 10 * 60 * 1000;
 
     /*
 

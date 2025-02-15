@@ -37,8 +37,8 @@ public class BluetoothCentral {
     // Eddystone Service UUID
     public static String EDDYSTONE_SERVICE_ID = "0000FEAA-0000-1000-8000-00805F9B34FB";
     public static final ParcelUuid EDDYSTONE_SERVICE_UUID = ParcelUuid.fromString(EDDYSTONE_SERVICE_ID);
-    public static final UUID CUSTOM_SERVICE_UUID = UUID.fromString("12345678-1234-5678-1234-56789abcdef0");
-    public static final UUID CUSTOM_CHARACTERISTIC_UUID = UUID.fromString("abcdef12-3456-7890-abcd-ef1234567890");
+    public static final UUID UUID_SERVICE_WALKIETALKIE = UUID.fromString("12345678-1234-5678-1234-56789abcdef0");
+    public static final UUID UUID_CHARACTERISTIC_GENERAL = UUID.fromString("abcdef12-3456-7890-abcd-ef1234567890");
 
     private BluetoothCentral(Context context) {
         this.context = context.getApplicationContext();
@@ -117,7 +117,7 @@ public class BluetoothCentral {
 
         // synchronize messages
         if (isScanning == false){
-            startScanning();
+            startScanningForNewBLE();
         }
     }
 
@@ -125,7 +125,7 @@ public class BluetoothCentral {
      * Stops the GATT server and beacon.
      */
     public void stop() {
-        stopScanning();
+        stopScanningForBLE();
 
         if (beacon != null) {
             beacon.stopBeacon();
@@ -148,7 +148,7 @@ public class BluetoothCentral {
     /**
      * Starts Bluetooth scanning.
      */
-    private void startScanning() {
+    private void startScanningForNewBLE() {
         if (isScanning) {
             Log.i(TAG, "Scanning is already active.");
             return;
@@ -167,7 +167,7 @@ public class BluetoothCentral {
     /**
      * Stops Bluetooth scanning.
      */
-    private void stopScanning() {
+    private void stopScanningForBLE() {
         if (!isScanning) {
             Log.i(TAG, "Scanning is not active.");
             return;

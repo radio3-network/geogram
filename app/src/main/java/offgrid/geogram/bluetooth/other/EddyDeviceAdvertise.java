@@ -32,7 +32,7 @@ public class EddyDeviceAdvertise {
     private String instanceId;
 
     // Default Advertise Settings
-    private int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY;
+    private int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
     private int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
 
     private EddyDeviceAdvertise(Context context) {
@@ -92,6 +92,7 @@ public class EddyDeviceAdvertise {
                     .build();
 
 
+            // add WiFi access and password
             if(WiFiCommon.ssid != null){
                 namespaceId = EddystoneNamespaceGenerator.generateNamespaceId(WiFiCommon.ssid, WiFiCommon.passphrase);
             }
