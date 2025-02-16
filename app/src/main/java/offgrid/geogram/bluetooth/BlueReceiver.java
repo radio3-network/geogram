@@ -11,7 +11,6 @@ import android.content.Context;
 import java.util.HashMap;
 
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
-import offgrid.geogram.bluetooth.other.DeviceFinder;
 import offgrid.geogram.bluetooth.other.comms.BlueCommands;
 import offgrid.geogram.bluetooth.other.comms.BluePackage;
 import offgrid.geogram.core.Log;
@@ -153,10 +152,6 @@ public class BlueReceiver {
     /**
      * Reduce CPU effort when the same parcel was delivered recently before
      * from the same MAC address
-     * @param macAddress
-     * @param receivedData
-     * @param context
-     * @return
      */
     private boolean wasSameParcelReceivedRecently(String macAddress, String receivedData, Context context) {
         // go through all the packages

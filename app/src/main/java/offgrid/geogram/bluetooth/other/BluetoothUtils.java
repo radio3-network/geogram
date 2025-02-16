@@ -1,5 +1,11 @@
 package offgrid.geogram.bluetooth.other;
 
+import android.bluetooth.BluetoothGatt;
+
+import java.lang.reflect.Method;
+
+import offgrid.geogram.core.Log;
+
 public class BluetoothUtils {
 
     public static final String TAG = "BluetoothUtils";
@@ -26,6 +32,18 @@ public class BluetoothUtils {
         } else {
             return String.format("%.2f meters", distance);
         }
+    }
+
+    public static boolean refreshDeviceCache(BluetoothGatt gatt) {
+        try {
+            Method refresh = gatt.getClass().getMethod("refresh");
+            if (refresh != null) {
+                return (Boolean) refresh.invoke(gatt);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Could not refresh device cache: " + e.getMessage());
+        }
+        return false;
     }
 
 }

@@ -16,7 +16,7 @@ import offgrid.geogram.core.Log;
 public class BlueQueueReceiving {
 
     private static BlueQueueReceiving instance = null;
-    private final Context context;
+    //private final Context context;
 
    // The queue for incoming transmissions
     //private final CopyOnWriteArrayList<BlueQueueItem> queueToReceive = new CopyOnWriteArrayList<>();
@@ -30,7 +30,8 @@ public class BlueQueueReceiving {
 
     // These are the messages visible from the UI
     // This gets updated even when the UI is not selected
-    private ArrayList<BroadcastMessage> messagesReceivedAsBroadcast = new ArrayList<>();
+    private final ArrayList<BroadcastMessage>
+            messagesReceivedAsBroadcast = new ArrayList<>();
 
 
 
@@ -38,7 +39,7 @@ public class BlueQueueReceiving {
 
     // Private constructor to prevent external instantiation
     private BlueQueueReceiving(Context context) {
-        this.context = context.getApplicationContext();
+        //this.context = context.getApplicationContext();
     }
 
     /**
@@ -81,7 +82,6 @@ public class BlueQueueReceiving {
 
     /**
      * These are messages received for the broadcast chat
-     * @param message
      */
     public void addBroadcastMessage(BroadcastMessage message){
         // avoid duplicate cases

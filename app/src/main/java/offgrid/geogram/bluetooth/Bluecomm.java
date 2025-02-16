@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 import offgrid.geogram.bluetooth.other.comms.BlueQueueParcel;
@@ -84,13 +85,20 @@ public class Bluecomm {
         }
 
         try {
+
+
+
+
             bluetoothGatt = device.connectGatt(context, false, new BluetoothGattCallback() {
                 @Override
                 public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                     super.onConnectionStateChange(gatt, status, newState);
                     if (newState == BluetoothGatt.STATE_CONNECTED) {
                         Log.i(TAG, "Connected to GATT server.");
-                        gatt.discoverServices();
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            //refreshDeviceCache(gatt);
+                            gatt.discoverServices();
+                        }, 1000); // Delay 1 second
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                         Log.i(TAG, "Disconnected from GATT server.");
                         //  callback.onDataReadError("Disconnected from device.");
@@ -139,7 +147,7 @@ public class Bluecomm {
                     }
                     gatt.disconnect();
                 }
-            });
+            }, BluetoothDevice.TRANSPORT_LE);
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());
             callback.onDataError("Security exception occurred.");
@@ -230,7 +238,9 @@ public class Bluecomm {
                     super.onConnectionStateChange(gatt, status, newState);
                     if (newState == BluetoothGatt.STATE_CONNECTED) {
                         Log.i(TAG, "Connected to GATT server.");
-                        gatt.discoverServices();
+                        //refreshDeviceCache(gatt);
+                        new Handler(Looper.getMainLooper()).postDelayed(
+                                gatt::discoverServices, 1000); // Delay 1 second
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                         Log.i(TAG, "Disconnected from GATT server.");
                         bluetoothGatt.close();
