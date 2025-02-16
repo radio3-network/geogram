@@ -36,7 +36,7 @@ public class Mutex {
     /**
      * Acquires the lock. Blocks until the lock is available.
      */
-    private void lock() {
+    public void lock() {
         synchronized (lock) {
             while (isLocked) {
                 try {
@@ -55,7 +55,7 @@ public class Mutex {
     /**
      * Releases the lock and notifies waiting threads.
      */
-    private void unlock() {
+    public void unlock() {
         synchronized (lock) {
             if (isLocked) {
                 isLocked = false;
@@ -107,7 +107,7 @@ public class Mutex {
     /**
      * Makes the current thread wait until the lock is unlocked.
      */
-    private void waitUntilUnlocked() {
+    public void waitUntilUnlocked() {
         //return;
         synchronized (lock) {
             while (isLocked) {

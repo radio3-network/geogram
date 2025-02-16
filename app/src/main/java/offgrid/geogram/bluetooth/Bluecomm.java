@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import offgrid.geogram.bluetooth.other.comms.BlueQueueParcel;
 import offgrid.geogram.bluetooth.other.comms.DataCallbackTemplate;
+import offgrid.geogram.bluetooth.other.comms.Mutex;
 import offgrid.geogram.core.Log;
 
 public class Bluecomm {
@@ -65,6 +66,9 @@ public class Bluecomm {
      * @param macAddress The MAC address of the device to connect to.
      */
     public synchronized void getDataRead(String macAddress, DataCallbackTemplate callback) {
+        // don't send data until we are unlocked
+        Mutex.getInstance().waitUntilUnlocked();
+
         if (!checkPermissions()) {
             Log.i(TAG, "Missing required permissions to perform Bluetooth operations.");
             callback.onDataError("Missing required permissions.");
@@ -94,8 +98,13 @@ public class Bluecomm {
                     if (newState == BluetoothGatt.STATE_CONNECTED) {
                         Log.i(TAG, "Connected to GATT server.");
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            //refreshDeviceCache(gatt);
-                            gatt.discoverServices();
+                            Mutex.getInstance().lock();
+                            try {
+                                gatt.discoverServices();
+                            } catch (Exception e) {
+                                Log.e(TAG, "Exception during service discovery: " + e.getMessage());
+                            }
+                            Mutex.getInstance().unlock();
                         }, 1000); // Delay 1 second
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                         Log.i(TAG, "Disconnected from GATT server.");
@@ -205,7 +214,7 @@ public class Bluecomm {
             return;
         }
         // wait a bit until unlocked
-        //Mutex.getInstance().waitUntilUnlocked();
+        Mutex.getInstance().waitUntilUnlocked();
 
         if (checkPermissions() == false) {
             Log.i(TAG, "Missing required permissions to perform Bluetooth operations.");
@@ -237,8 +246,13 @@ public class Bluecomm {
                     if (newState == BluetoothGatt.STATE_CONNECTED) {
                         Log.i(TAG, "Connected to GATT server.");
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            //refreshDeviceCache(gatt);
-                            gatt.discoverServices();
+                            Mutex.getInstance().lock();
+                            try {
+                                gatt.discoverServices();
+                            } catch (Exception e) {
+                                Log.e(TAG, "Exception during service discovery: " + e.getMessage());
+                            }
+                            Mutex.getInstance().unlock();
                         }, 1000); // Delay 1 second
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                         Log.i(TAG, "Disconnected from GATT server.");
