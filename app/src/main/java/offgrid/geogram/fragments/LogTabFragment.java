@@ -88,16 +88,10 @@ public class LogTabFragment extends Fragment {
             }
         });
 
-        return view;
-    }
+        // show all the messages
+        logUpdateAllMessages();
 
-    public void addLogMessage(String message) {
-        if (message == null) {
-            logWindow.setText(""); // Clear log
-        } else {
-            logWindow.append(message + "\n");
-            logScrollView.post(() -> logScrollView.fullScroll(View.FOCUS_DOWN));
-        }
+        return view;
     }
 
     /**
