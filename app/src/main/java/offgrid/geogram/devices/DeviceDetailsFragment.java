@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.eddystone.DeviceFinder;
 import offgrid.geogram.core.Log;
@@ -47,10 +48,10 @@ public class DeviceDetailsFragment extends Fragment {
         btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
 
         // Hide the floating action button
-        FloatingActionButton btnAdd = requireActivity().findViewById(R.id.btn_add);
-        if (btnAdd != null) {
-            btnAdd.hide();
-        }
+//        FloatingActionButton btnAdd = requireActivity().findViewById(R.id.btn_add);
+//        if (btnAdd != null) {
+//            btnAdd.hide();
+//        }
 
         // Set beaconDiscovered details text
         TextView deviceDescription = view.findViewById(R.id.tv_device_description);
@@ -133,8 +134,13 @@ public class DeviceDetailsFragment extends Fragment {
     }
 
     private void launchMessageWindow(DeviceReachable beaconDiscovered) {
-        Toast.makeText(getContext(), "Chat now", Toast.LENGTH_SHORT).show();
+        DeviceChatFragment fragment = DeviceChatFragment.newInstance(beaconDiscovered.getDeviceId());
 
+        MainActivity.activity.getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
@@ -142,9 +148,9 @@ public class DeviceDetailsFragment extends Fragment {
         super.onDestroyView();
 
         // Ensure the floating action button is shown again when leaving the fragment
-        FloatingActionButton btnAdd = requireActivity().findViewById(R.id.btn_add);
-        if (btnAdd != null) {
-            btnAdd.show();
-        }
+//        FloatingActionButton btnAdd = requireActivity().findViewById(R.id.btn_add);
+//        if (btnAdd != null) {
+//            btnAdd.show();
+//        }
     }
 }

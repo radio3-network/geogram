@@ -277,10 +277,10 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
         super.onResume();
 
         // Hide the floating action button
-        FloatingActionButton btnAdd = requireActivity().findViewById(R.id.btn_add);
-        if (btnAdd != null) {
-            btnAdd.hide();
-        }
+//        FloatingActionButton btnAdd = requireActivity().findViewById(R.id.btn_add);
+//        if (btnAdd != null) {
+//            btnAdd.hide();
+//        }
 
         // clear the messages to refresh the window
         eraseMessagesFromWindow();

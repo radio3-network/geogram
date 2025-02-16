@@ -58,7 +58,7 @@
 
         <!-- Empty View for Beacons -->
 
-        <!-- Floating Action Button -->
+        <!-- Floating Action Button
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_add"
             android:layout_width="wrap_content"
@@ -66,10 +66,11 @@
             android:layout_margin="16dp"
             android:src="@drawable/ic_add"
             android:contentDescription="Add"
+            android:visibility="gone"
             app:backgroundTint="@color/material_dynamic_neutral40"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
-
+-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Navigation Drawer -->

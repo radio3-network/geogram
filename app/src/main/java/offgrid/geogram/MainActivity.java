@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     public static MainActivity activity = null;
     public static ListView beacons = null;
-    private FloatingActionButton btnAdd;
+    //private FloatingActionButton btnAdd;
     private static boolean wasCreatedBefore = false;
 
     @Override
@@ -88,13 +88,13 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "Initializing the app...");
 
         // Initialize UI components
-        btnAdd = findViewById(R.id.btn_add);
+        //btnAdd = findViewById(R.id.btn_add);
         beacons = findViewById(R.id.lv_beacons);
 
         // Handle the floating action button click
-        btnAdd.setOnClickListener(v ->
-                Toast.makeText(this, "Feature not yet implemented", Toast.LENGTH_SHORT).show()
-        );
+//        btnAdd.setOnClickListener(v ->
+//                Toast.makeText(this, "Feature not yet implemented", Toast.LENGTH_SHORT).show()
+//        );
 
         // Handle window insets for modern devices
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -167,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             transaction.addToBackStack(null).commit();
-            btnAdd.hide(); // Hide FAB on navigating to any fragment
+            //btnAdd.hide(); // Hide FAB on navigating to any fragment
 
             // Close the drawer after an item is clicked
             drawerLayout.closeDrawer(GravityCompat.START);
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     finish(); // Exit the app if no fragments are in the back stack
                 }
-                btnAdd.show(); // Ensure the Floating Action Button is visible when returning
+                //btnAdd.show(); // Ensure the Floating Action Button is visible when returning
             }
         });
     }

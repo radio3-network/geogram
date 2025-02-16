@@ -86,20 +86,19 @@ public class GattServer {
             // clean the messages on the queue
             BlueQueueReceiving.getInstance(context).clear();
             BlueQueueSending.getInstance(context).clear();
-            //gattServer.close();
-//            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-//                try {
-//                    cleanupStaleConnections();
-//                    gattServer.clearServices();
-//                    gattServer.close();
-//                    Log.i(TAG, "GATT server closed for restart.");
-//                } catch (Exception e) {
-//                    Log.e(TAG, "Error while closing GATT server: " + e.getMessage());
-//                }
-//            } else {
-//                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot close GATT server.");
-//            }
-//            gattServer = null;
+            if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                try {
+                    cleanupStaleConnections();
+                    gattServer.clearServices();
+                    gattServer.close();
+                    Log.i(TAG, "GATT server closed for restart.");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error while closing GATT server: " + e.getMessage());
+                }
+            } else {
+                Log.e(TAG, "Missing BLUETOOTH_CONNECT permission, cannot close GATT server.");
+            }
+            gattServer = null;
         }else{
             initializeGattServer();
         }

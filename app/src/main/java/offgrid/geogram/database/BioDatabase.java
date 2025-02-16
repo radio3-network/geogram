@@ -17,7 +17,7 @@ import offgrid.geogram.devices.DeviceReachable;
 public class BioDatabase {
 
     public static final String TAG = "BioDatabase";
-    public static final String FOLDER_NAME = "profiles";
+    public static final String FOLDER_NAME = "devices";
     public static final String FILE_NAME = "bio.json";
 
     // profiles that we have chatted so far. The string is the device Id being used

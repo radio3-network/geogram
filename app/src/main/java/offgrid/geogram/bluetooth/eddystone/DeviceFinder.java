@@ -68,13 +68,14 @@ public class DeviceFinder {
                     .build();
 
             ScanSettings settings = new ScanSettings.Builder()
-                    .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+                    .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
                     .build();
 
             bluetoothAdapter.getBluetoothLeScanner().startScan(
                     List.of(filter),
                     settings,
                     scanCallback
+
             );
             isScanning = true;
             Log.i(TAG, "Started scanning for Eddystone devices.");

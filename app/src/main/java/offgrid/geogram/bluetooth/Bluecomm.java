@@ -1,5 +1,7 @@
 package offgrid.geogram.bluetooth;
 
+import static offgrid.geogram.util.BluetoothUtils.refreshDeviceCache;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -18,6 +20,7 @@ import java.util.UUID;
 import offgrid.geogram.bluetooth.other.comms.BlueQueueParcel;
 import offgrid.geogram.bluetooth.other.comms.DataCallbackTemplate;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.util.BluetoothUtils;
 
 public class Bluecomm {
 
@@ -63,7 +66,7 @@ public class Bluecomm {
      *
      * @param macAddress The MAC address of the device to connect to.
      */
-    public void getDataRead(String macAddress, DataCallbackTemplate callback) {
+    public synchronized void getDataRead(String macAddress, DataCallbackTemplate callback) {
         if (!checkPermissions()) {
             Log.i(TAG, "Missing required permissions to perform Bluetooth operations.");
             callback.onDataError("Missing required permissions.");
@@ -86,9 +89,6 @@ public class Bluecomm {
 
         try {
 
-
-
-
             bluetoothGatt = device.connectGatt(context, false, new BluetoothGattCallback() {
                 @Override
                 public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -96,7 +96,7 @@ public class Bluecomm {
                     if (newState == BluetoothGatt.STATE_CONNECTED) {
                         Log.i(TAG, "Connected to GATT server.");
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            //refreshDeviceCache(gatt);
+                            refreshDeviceCache(gatt);
                             gatt.discoverServices();
                         }, 1000); // Delay 1 second
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
@@ -115,6 +115,8 @@ public class Bluecomm {
                             Log.i(TAG, "Service not found: " + SERVICE_UUID);
                             callback.onDataError("Service not found.");
                             gatt.disconnect();
+                            // force to clean up the cache
+                            refreshDeviceCache(gatt);
                             return;
                         }
 
@@ -238,9 +240,10 @@ public class Bluecomm {
                     super.onConnectionStateChange(gatt, status, newState);
                     if (newState == BluetoothGatt.STATE_CONNECTED) {
                         Log.i(TAG, "Connected to GATT server.");
-                        //refreshDeviceCache(gatt);
-                        new Handler(Looper.getMainLooper()).postDelayed(
-                                gatt::discoverServices, 1000); // Delay 1 second
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            refreshDeviceCache(gatt);
+                            gatt.discoverServices();
+                        }, 1000); // Delay 1 second
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                         Log.i(TAG, "Disconnected from GATT server.");
                         bluetoothGatt.close();
@@ -257,6 +260,7 @@ public class Bluecomm {
                             Log.i(TAG, "Service not found: " + SERVICE_UUID);
                             callback.onDataError("Service not found.");
                             gatt.disconnect();
+                            refreshDeviceCache(gatt);
                             return;
                         }
 
@@ -325,7 +329,7 @@ public class Bluecomm {
                 }
 
 
-            });
+            }, BluetoothDevice.TRANSPORT_LE);
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());
             callback.onDataError("Security exception occurred.");
