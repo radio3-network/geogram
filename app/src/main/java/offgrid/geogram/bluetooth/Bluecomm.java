@@ -14,13 +14,11 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 
-import java.lang.reflect.Method;
 import java.util.UUID;
 
 import offgrid.geogram.bluetooth.other.comms.BlueQueueParcel;
 import offgrid.geogram.bluetooth.other.comms.DataCallbackTemplate;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.util.BluetoothUtils;
 
 public class Bluecomm {
 
@@ -96,7 +94,7 @@ public class Bluecomm {
                     if (newState == BluetoothGatt.STATE_CONNECTED) {
                         Log.i(TAG, "Connected to GATT server.");
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            refreshDeviceCache(gatt);
+                            //refreshDeviceCache(gatt);
                             gatt.discoverServices();
                         }, 1000); // Delay 1 second
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
@@ -116,7 +114,7 @@ public class Bluecomm {
                             callback.onDataError("Service not found.");
                             gatt.disconnect();
                             // force to clean up the cache
-                            refreshDeviceCache(gatt);
+                            //refreshDeviceCache(gatt);
                             return;
                         }
 
@@ -149,7 +147,8 @@ public class Bluecomm {
                     }
                     gatt.disconnect();
                 }
-            }, BluetoothDevice.TRANSPORT_LE);
+            }, BluetoothDevice.TRANSPORT_LE
+            );
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());
             callback.onDataError("Security exception occurred.");
@@ -230,9 +229,6 @@ public class Bluecomm {
         }
 
         try {
-            // wait a bit until unlocked
-            //Mutex.getInstance().waitUntilUnlocked();
-            //Mutex.getInstance().lock();
 
             bluetoothGatt = device.connectGatt(context, false, new BluetoothGattCallback() {
                 @Override
@@ -241,7 +237,7 @@ public class Bluecomm {
                     if (newState == BluetoothGatt.STATE_CONNECTED) {
                         Log.i(TAG, "Connected to GATT server.");
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            refreshDeviceCache(gatt);
+                            //refreshDeviceCache(gatt);
                             gatt.discoverServices();
                         }, 1000); // Delay 1 second
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
@@ -260,7 +256,7 @@ public class Bluecomm {
                             Log.i(TAG, "Service not found: " + SERVICE_UUID);
                             callback.onDataError("Service not found.");
                             gatt.disconnect();
-                            refreshDeviceCache(gatt);
+                            //refreshDeviceCache(gatt);
                             return;
                         }
 
@@ -329,7 +325,8 @@ public class Bluecomm {
                 }
 
 
-            }, BluetoothDevice.TRANSPORT_LE);
+            }, BluetoothDevice.TRANSPORT_LE
+            );
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());
             callback.onDataError("Security exception occurred.");

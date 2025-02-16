@@ -88,7 +88,7 @@ public class LogTabFragment extends Fragment {
             }
         });
 
-        // show all the messages
+        // Show all the messages
         logUpdateAllMessages();
 
         return view;
@@ -109,6 +109,7 @@ public class LogTabFragment extends Fragment {
             StringBuilder text = new StringBuilder();
             String filter = logFilter.getText().toString().toLowerCase();
 
+            // Filter and append log messages
             for (String message : Log.logMessages) {
                 if (filter.isEmpty() || message.toLowerCase().contains(filter)) {
                     text.append(message).append("\n");
@@ -118,7 +119,7 @@ public class LogTabFragment extends Fragment {
             // Update log messages
             logWindow.setText(text.toString());
 
-            // Scroll to the bottom
+            // Scroll to the bottom after the TextView is updated
             logScrollView.post(() -> {
                 logScrollView.fullScroll(View.FOCUS_DOWN);
 
@@ -129,8 +130,4 @@ public class LogTabFragment extends Fragment {
             });
         });
     }
-
-
-
-
 }

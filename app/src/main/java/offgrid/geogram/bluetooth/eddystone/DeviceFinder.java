@@ -68,7 +68,7 @@ public class DeviceFinder {
                     .build();
 
             ScanSettings settings = new ScanSettings.Builder()
-                    .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
+                    .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
                     .build();
 
             bluetoothAdapter.getBluetoothLeScanner().startScan(
@@ -151,11 +151,7 @@ public class DeviceFinder {
             return;
         }
 
-        // wait for write operations to be over
-//        Mutex.getInstance().waitUntilUnlocked();
-//        Mutex.getInstance().lock();
         byte[] serviceData = result.getScanRecord().getServiceData(EDDYSTONE_SERVICE_UUID);
-        //Mutex.getInstance().unlock();
         if (serviceData == null) {
             return;
         }
