@@ -310,12 +310,6 @@ public class BroadcastChatFragment extends Fragment implements BroadcastSender.M
                 .addToBackStack(null)
                 .commit();
 
-        // Begin the fragment transaction
-//        requireActivity().getSupportFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.fragment_container, fragment) // Replace with your container ID
-//                .addToBackStack(null) // Add to back stack for proper back navigation
-//                .commit();
     }
 
 

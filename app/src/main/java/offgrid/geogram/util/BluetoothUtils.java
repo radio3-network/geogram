@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.other;
+package offgrid.geogram.util;
 
 import android.bluetooth.BluetoothGatt;
 

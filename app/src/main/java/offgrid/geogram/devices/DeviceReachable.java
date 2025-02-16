@@ -54,7 +54,7 @@ public class DeviceReachable {
      * @param instanceId The instance ID to set, as defined by
      *                   the Eddystone protocol.
      */
-    public void setInstanceId(String instanceId) {
+    public void setDeviceId(String instanceId) {
         this.instanceId = instanceId;
     }
 

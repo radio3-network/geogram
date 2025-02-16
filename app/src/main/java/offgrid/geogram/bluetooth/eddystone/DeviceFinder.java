@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.other;
+package offgrid.geogram.bluetooth.eddystone;
 
 import static offgrid.geogram.bluetooth.BluetoothCentral.EDDYSTONE_SERVICE_UUID;
 import static offgrid.geogram.bluetooth.broadcast.BroadcastSender.sendProfileToEveryone;
@@ -28,7 +28,7 @@ public class DeviceFinder {
 
     private final Context context;
     private final BluetoothAdapter bluetoothAdapter;
-    private final HashMap<String, DeviceReachable> beaconMap = new HashMap<>();
+    private final HashMap<String, DeviceReachable> deviceMap = new HashMap<>();
     private boolean isScanning = false;
     private long timeLastUpdated = System.currentTimeMillis();
 
@@ -112,7 +112,7 @@ public class DeviceFinder {
      * Gets the up-to-date HashMap of discovered beacons.
      */
     public HashMap<String, DeviceReachable> getDeviceMap() {
-        return beaconMap;
+        return deviceMap;
     }
 
     private final ScanCallback scanCallback = new ScanCallback() {
@@ -165,28 +165,29 @@ public class DeviceFinder {
         if(deviceId.length() == 12){
             deviceId = deviceId.substring(0, deviceId.length() - 6);
         }
-        //Log.i(TAG, "Found Eddystone beacon: " + deviceId);
+        //Log.i(TAG, "Found Eddystone deviceFound: " + deviceId);
 
         String namespaceId = extractNamespaceId(serviceData);
 
-        // is this beacon already on our hashmap?
-        DeviceReachable beacon = beaconMap.get(deviceId);
+        // is this deviceFound already on our hashmap?
+        DeviceReachable deviceFound = deviceMap.get(deviceId);
 
         // seems like a new one
-        if (beacon == null) {
-            beacon = new DeviceReachable();
-            beacon.setInstanceId(deviceId);
-            beacon.setNamespaceId(namespaceId);
-            beacon.setMacAddress(result.getDevice().getAddress());
-            beacon.setRssi(result.getRssi());
-            beaconMap.put(deviceId, beacon);
+        if (deviceFound == null) {
+            deviceFound = new DeviceReachable();
+            deviceFound.setDeviceId(deviceId);
+            deviceFound.setNamespaceId(namespaceId);
+            deviceFound.setMacAddress(result.getDevice().getAddress());
+            deviceFound.setRssi(result.getRssi());
+            // we only map to device Id becase the Mac Address is variable
+            deviceMap.put(deviceId, deviceFound);
             // send our own profile info to all reachable devices
             // this way they can know about us.
             sendProfileToEveryone(context);
 
             // also save it do disk
-            //BeaconDatabase.saveBeaconToDisk(beacon, context);
-            Log.i(TAG, "New Eddystone beacon found: "
+            //BeaconDatabase.saveBeaconToDisk(deviceFound, context);
+            Log.i(TAG, "New Eddystone deviceFound found: "
                     + deviceId
                     + " at "
                     + result.getDevice().getAddress()
@@ -195,15 +196,18 @@ public class DeviceFinder {
 
             // update the list visible on the main screen
             DeviceListing.getInstance().updateList(this.context);
-            Log.i(TAG, "Updating beacon list on UI");
+            Log.i(TAG, "Updating deviceFound list on UI");
         }
 
+        // the device is available on our database
+        // let's update the info we have on it
+
         // setup the usual data
-        beacon.setTimeLastFound(System.currentTimeMillis());
-        beacon.setRssi(result.getRssi());
-        beacon.setServiceData(serviceData);
-        beacon.setMacAddress(result.getDevice().getAddress());
-        //Log.i(TAG, "Updated beacon: " + instanceId + " RSSI: " + result.getRssi());
+        deviceFound.setTimeLastFound(System.currentTimeMillis());
+        deviceFound.setRssi(result.getRssi());
+        deviceFound.setServiceData(serviceData);
+        deviceFound.setMacAddress(result.getDevice().getAddress());
+        //Log.i(TAG, "Updated deviceFound: " + instanceId + " RSSI: " + result.getRssi());
     }
 
 
@@ -212,7 +216,7 @@ public class DeviceFinder {
      */
     public void cleanupDisconnectedDevices() {
         long currentTime = System.currentTimeMillis();
-        Iterator<Map.Entry<String, DeviceReachable>> iterator = beaconMap.entrySet().iterator();
+        Iterator<Map.Entry<String, DeviceReachable>> iterator = deviceMap.entrySet().iterator();
 
         while (iterator.hasNext()) {
             Map.Entry<String, DeviceReachable> entry = iterator.next();
@@ -256,11 +260,10 @@ public class DeviceFinder {
     }
 
     /**
-     * Updates a beacon.
-     * @param beacon
+     * Updates a deviceFound.
      */
-    public void update(DeviceReachable beacon) {
-        beaconMap.put(beacon.getDeviceId(), beacon);
+    public void update(DeviceReachable deviceFound) {
+        deviceMap.put(deviceFound.getDeviceId(), deviceFound);
     }
 
 

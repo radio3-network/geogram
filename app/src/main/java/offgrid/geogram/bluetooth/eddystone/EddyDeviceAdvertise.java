@@ -1,4 +1,4 @@
-package offgrid.geogram.bluetooth.other;
+package offgrid.geogram.bluetooth.eddystone;
 
 import static offgrid.geogram.bluetooth.BluetoothCentral.EDDYSTONE_SERVICE_UUID;
 
@@ -12,7 +12,6 @@ import android.os.Build;
 
 import java.nio.ByteBuffer;
 
-import offgrid.geogram.bluetooth.eddystone.EddystoneNamespaceGenerator;
 import offgrid.geogram.core.old.old.GenerateDeviceId;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.wifi.WiFiCommon;

@@ -39,7 +39,7 @@ public class BeaconDatabaseTest {
         // always 10 digits, user-defined
         beacon.setNamespaceId("0123456789");
         // identifier based on Android
-        beacon.setInstanceId("000000");
+        beacon.setDeviceId("000000");
         beacon.setRssi(74);
 
 //        File file = BeaconDatabase.saveBeaconToDisk(beacon, appContext);

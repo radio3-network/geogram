@@ -9,8 +9,8 @@ import android.os.ParcelUuid;
 import java.util.List;
 import java.util.UUID;
 
-import offgrid.geogram.bluetooth.other.DeviceFinder;
-import offgrid.geogram.bluetooth.other.EddyDeviceAdvertise;
+import offgrid.geogram.bluetooth.eddystone.DeviceFinder;
+import offgrid.geogram.bluetooth.eddystone.EddyDeviceAdvertise;
 import offgrid.geogram.bluetooth.other.GattServer;
 import offgrid.geogram.bluetooth.other.comms.BluePing;
 import offgrid.geogram.bluetooth.other.old.BluetoothStateReceiver;

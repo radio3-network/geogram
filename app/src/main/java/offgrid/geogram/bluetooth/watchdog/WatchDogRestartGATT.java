@@ -1,19 +1,11 @@
 package offgrid.geogram.bluetooth.watchdog;
 
-import static offgrid.geogram.bluetooth.broadcast.LostAndFound.askToResendPackage;
-
 import android.content.Context;
 import android.os.Handler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import offgrid.geogram.bluetooth.BlueQueueReceiving;
-import offgrid.geogram.bluetooth.other.DeviceFinder;
 import offgrid.geogram.bluetooth.other.GattServer;
-import offgrid.geogram.bluetooth.other.comms.BluePackage;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.devices.DeviceReachable;
 
 public class WatchDogRestartGATT {
 

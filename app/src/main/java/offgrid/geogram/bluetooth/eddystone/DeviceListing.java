@@ -1,6 +1,6 @@
-package offgrid.geogram.bluetooth.other;
+package offgrid.geogram.bluetooth.eddystone;
 
-import static offgrid.geogram.bluetooth.other.BluetoothUtils.calculateDistance;
+import static offgrid.geogram.util.BluetoothUtils.calculateDistance;
 import static offgrid.geogram.util.DateUtils.getHumanReadableTime;
 
 import android.content.Context;
@@ -70,30 +70,30 @@ public class DeviceListing {
         }
 
         // transform into a simple arrayList
-        ArrayList<DeviceReachable> beaconsList = new ArrayList<>(beaconsToList.values());
+        ArrayList<DeviceReachable> deviceList = new ArrayList<>(beaconsToList.values());
         // Sort beacons by last seen time, most recent first
-        beaconsList.sort(Comparator.comparingLong(DeviceReachable::getTimeLastFound).reversed());
+        deviceList.sort(Comparator.comparingLong(DeviceReachable::getTimeLastFound).reversed());
 
         ArrayList<BioProfile> displayList = new ArrayList<>();
-        for (DeviceReachable beacon : beaconsList) {
+        for (DeviceReachable deviceFound : deviceList) {
             // data displayed on main screen
-            String distance = calculateDistance(beacon.getRssi());
-            long lastSeen = System.currentTimeMillis() - beacon.getTimeLastFound();
+            String distance = calculateDistance(deviceFound.getRssi());
+            long lastSeen = System.currentTimeMillis() - deviceFound.getTimeLastFound();
 
             if (lastSeen > 3 * 60_000) {
-                distance = "not reachable since " + getHumanReadableTime(beacon.getTimeLastFound());
+                distance = "not reachable since " + getHumanReadableTime(deviceFound.getTimeLastFound());
             }
 
 
             // get the device id
-            String deviceId = beacon.getDeviceId();
+            String deviceId = deviceFound.getDeviceId();
             if(deviceId.endsWith("000000")){
                 deviceId = deviceId.substring(0, 6);
             }
             BioProfile bioData = BioDatabase.get(deviceId, context);
             if(bioData == null){
                 Log.e(TAG, "No bio data found for " + deviceId);
-                LostAndFound.askForBio(beacon.getMacAddress(), context);
+                LostAndFound.askForBio(deviceFound.getMacAddress(), context);
                 continue;
             }
             bioData.setDistance(distance);

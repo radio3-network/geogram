@@ -5,7 +5,7 @@ import android.content.Context;
 import java.io.File;
 import java.util.HashMap;
 
-import offgrid.geogram.bluetooth.other.DeviceFinder;
+import offgrid.geogram.bluetooth.eddystone.DeviceFinder;
 import offgrid.geogram.bluetooth.broadcast.BroadcastSender;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.devices.DeviceReachable;

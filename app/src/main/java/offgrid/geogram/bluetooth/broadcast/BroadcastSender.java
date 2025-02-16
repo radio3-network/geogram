@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import offgrid.geogram.bluetooth.BlueQueueSending;
-import offgrid.geogram.bluetooth.other.DeviceFinder;
+import offgrid.geogram.bluetooth.eddystone.DeviceFinder;
 import offgrid.geogram.bluetooth.BluetoothCentral;
 import offgrid.geogram.bluetooth.other.comms.BlueCommands;
 import offgrid.geogram.bluetooth.other.comms.BluePackage;
