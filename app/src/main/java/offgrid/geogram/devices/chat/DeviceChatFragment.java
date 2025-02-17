@@ -1,4 +1,4 @@
-package offgrid.geogram.devices;
+package offgrid.geogram.devices.chat;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,23 +17,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import java.util.ArrayList;
 
-import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
 import offgrid.geogram.bluetooth.BlueQueueReceiving;
 import offgrid.geogram.bluetooth.Bluecomm;
 import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
-import offgrid.geogram.bluetooth.broadcast.BroadcastSender;
 import offgrid.geogram.bluetooth.eddystone.DeviceFinder;
-import offgrid.geogram.bluetooth.eddystone.DeviceListing;
 import offgrid.geogram.core.Central;
 import offgrid.geogram.core.Log;
-import offgrid.geogram.database.BioDatabase;
-import offgrid.geogram.database.BioProfile;
-import offgrid.geogram.util.DateUtils;
+import offgrid.geogram.devices.DeviceReachable;
 
 public class DeviceChatFragment extends Fragment {
 
@@ -64,6 +57,13 @@ public class DeviceChatFragment extends Fragment {
             deviceId = getArguments().getString(ARG_DEVICE_ID);
         }
 
+        if (deviceId == null) {
+            Toast.makeText(getContext(), "Device Id is null", Toast.LENGTH_SHORT).show();
+            requireActivity().onBackPressed();
+        }
+
+        Log.i("DeviceChatFragment", "Chatting with device: " + deviceId);
+
         // Initialize UI
         EditText messageInput = view.findViewById(R.id.message_input);
         ImageButton btnSend = view.findViewById(R.id.btn_send);
@@ -84,6 +84,9 @@ public class DeviceChatFragment extends Fragment {
             if (message.isEmpty()) {
                 return;
             }
+
+            //
+
 
             // Create a direct message
             BroadcastMessage messageToSend = new BroadcastMessage(message, Central.getInstance().getSettings().getIdDevice(), true);

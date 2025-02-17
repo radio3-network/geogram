@@ -7,13 +7,10 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import offgrid.geogram.MainActivity;
 import offgrid.geogram.R;
@@ -21,6 +18,7 @@ import offgrid.geogram.bluetooth.eddystone.DeviceFinder;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
+import offgrid.geogram.devices.chat.DeviceChatFragment;
 
 public class DeviceDetailsFragment extends Fragment {
 

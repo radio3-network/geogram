@@ -8,24 +8,24 @@ import java.util.HashMap;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.database.BioDatabase;
 
-public class DeviceIdChat {
+public class ChatDatabaseWithDevice {
 
     public static final String TAG = "DeviceIdChat";
     public static final String fileMessages = "messages.json";
 
-    private static DeviceIdChat instance;
+    private static ChatDatabaseWithDevice instance;
     private static Context context;
 
     // Chat messages should be in memory
     private final HashMap<String, ChatMessages> messages = new HashMap<>();
 
-    private DeviceIdChat(Context context) {
-        DeviceIdChat.context = context.getApplicationContext(); // Store application context
+    private ChatDatabaseWithDevice(Context context) {
+        ChatDatabaseWithDevice.context = context.getApplicationContext(); // Store application context
     }
 
-    public static synchronized DeviceIdChat getInstance(Context context) {
+    public static synchronized ChatDatabaseWithDevice getInstance(Context context) {
         if (instance == null) {
-            instance = new DeviceIdChat(context);
+            instance = new ChatDatabaseWithDevice(context);
         }
         return instance;
     }

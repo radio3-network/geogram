@@ -26,7 +26,7 @@ public class BluePing {
     private final int PING_INTERVAL_MS = 1 * 60 * 1000; // 1 minutes for the loop
 
     // Indicates whether the ping service is running
-    private boolean isRunning = false;
+    private boolean isRunning = false; // initial state
 
     // Private constructor to prevent instantiation from outside
     private BluePing(Context context) {
@@ -67,10 +67,13 @@ public class BluePing {
                 return;
             }
 
-            Log.i("BluePing", "Ping sent to all devices within reach");
-            String message = BlueCommands.oneLineCommandPing + Central.getInstance().getSettings().getIdDevice();
-            BroadcastSender.broadcastMessageToAllEddystoneDevicesShort(message, context);
-
+            try {
+                Log.i("BluePing", "Ping sent to all devices within reach");
+                String message = BlueCommands.oneLineCommandPing + Central.getInstance().getSettings().getIdDevice();
+                BroadcastSender.broadcastMessageToAllEddystoneDevicesShort(message, context);
+            } catch (Exception e) {
+                Log.e("BluePing", "Error sending ping: " + e.getMessage());
+            }
             // Schedule the next ping
             handler.postDelayed(this, PING_INTERVAL_MS);
         }

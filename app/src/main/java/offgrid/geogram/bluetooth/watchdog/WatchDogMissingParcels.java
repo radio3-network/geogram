@@ -16,7 +16,10 @@ import offgrid.geogram.devices.DeviceReachable;
 
 public class WatchDogMissingParcels {
 
-    private final long timeForMessageIsNotMoving = 15 * 1000;
+    private final long
+            timeForMessageIsNotMoving = 15 * 1000,
+            timeToQuitAskingForRepeat = 3 * 60 * 1000;
+
 
     /*
 
@@ -113,6 +116,13 @@ public class WatchDogMissingParcels {
             if (item.timeSinceLastPing() < timeForMessageIsNotMoving) {
                 continue;
             }
+
+            // is it time to quite asking for a repeated message?
+            if (item.timeSinceLastPing() > timeToQuitAskingForRepeat) {
+                itemsToRemove.add(item);
+                continue;
+            }
+
             // time to ask for resending the package
             String packageId = item.getId();
             String deviceId = item.getDeviceId();
