@@ -55,19 +55,19 @@ public class WatchDogRestartGATT {
         Runnable loopRunnable = new Runnable() {
             @Override
             public void run() {
-                if (isLoopRunning == false) return;
-
-                // Your looped logic here
-                Log.i(TAG, "Restarting the GATT server due to inactivity");
-
-                if(BlueQueueReceiving.getInstance(context).stillReceivingMessages()){
-                    // don't send messages while we are receiving data
-                    Log.i(TAG, "Not restarting the GATT server because we are receiving data");
-                    return;
-                }
-
-                Log.i(TAG, "Restarting GATT server due to inactivity.");
-                GattServer.getInstance(context).restartGattServer();
+//                if (isLoopRunning == false) return;
+//
+//                // Looped logic here
+//                Log.i(TAG, "Restarting the GATT server due to inactivity");
+//
+//                if(BlueQueueReceiving.getInstance(context).stillReceivingMessages()){
+//                    // don't send messages while we are receiving data
+//                    Log.i(TAG, "Not restarting the GATT server because we are receiving data");
+//                    return;
+//                }
+//
+//                Log.i(TAG, "Restarting GATT server due to inactivity.");
+//                GattServer.getInstance(context).restartGattServer();
 
 
                 // Schedule the next execution

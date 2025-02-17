@@ -2,6 +2,7 @@ package offgrid.geogram.bluetooth;
 
 import static offgrid.geogram.util.BluetoothUtils.refreshDeviceCache;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -13,6 +14,8 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+
+import androidx.core.app.ActivityCompat;
 
 import java.util.UUID;
 
@@ -38,9 +41,7 @@ public class Bluecomm {
             timeBetweenChecks = 1000,
             timeBetweenMessages = 1500,
             maxSizeOfMessages = 14,
-            packageTimeToBeActive = 3000
-    ;
-
+            packageTimeToBeActive = 3000;
 
     private Bluecomm(Context context) {
         this.context = context.getApplicationContext();
@@ -59,39 +60,34 @@ public class Bluecomm {
         return instance;
     }
 
-
     /**
      * Reads data from the custom characteristic on a specified device.
      *
      * @param macAddress The MAC address of the device to connect to.
      */
     public synchronized void getDataRead(String macAddress, DataCallbackTemplate callback) {
-        // don't send data until we are unlocked
-        Mutex.getInstance().waitUntilUnlocked();
-
-        if (!checkPermissions()) {
-            Log.i(TAG, "Missing required permissions to perform Bluetooth operations.");
-            callback.onDataError("Missing required permissions.");
-            return;
-        }
-
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
-            Log.i(TAG, "Bluetooth is not available or enabled.");
-            callback.onDataError("Bluetooth is not available or enabled.");
-            return;
-        }
-
-        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(macAddress);
-        if (device == null) {
-            Log.i(TAG, "Device not found with MAC address: " + macAddress);
-            callback.onDataError("Device not found.");
-            return;
-        }
-
+        BluetoothGatt localGatt = null;
         try {
+            if (!checkPermissions()) {
+                callback.onDataError("Missing required permissions.");
+                return;
+            }
 
-            bluetoothGatt = device.connectGatt(context, false, new BluetoothGattCallback() {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+                callback.onDataError("Bluetooth is not available or enabled.");
+                return;
+            }
+
+            BluetoothDevice device = bluetoothAdapter.getRemoteDevice(macAddress);
+            if (device == null) {
+                callback.onDataError("Device not found.");
+                return;
+            }
+
+            Mutex.getInstance().waitUntilUnlocked();
+
+            localGatt = device.connectGatt(context, false, new BluetoothGattCallback() {
                 @Override
                 public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                     super.onConnectionStateChange(gatt, status, newState);
@@ -103,13 +99,15 @@ public class Bluecomm {
                                 gatt.discoverServices();
                             } catch (Exception e) {
                                 Log.e(TAG, "Exception during service discovery: " + e.getMessage());
+                                closeGatt(gatt);
+                                callback.onDataError("Service discovery failed: " + e.getMessage());
+                            } finally {
+                                Mutex.getInstance().unlock();
                             }
-                            Mutex.getInstance().unlock();
-                        }, 1000); // Delay 1 second
+                        }, 1000);
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                         Log.i(TAG, "Disconnected from GATT server.");
-                        //  callback.onDataReadError("Disconnected from device.");
-                        bluetoothGatt.close();
+                        closeGatt(gatt);
                     }
                 }
 
@@ -121,9 +119,7 @@ public class Bluecomm {
                         if (service == null) {
                             Log.i(TAG, "Service not found: " + SERVICE_UUID);
                             callback.onDataError("Service not found.");
-                            gatt.disconnect();
-                            // force to clean up the cache
-                            //refreshDeviceCache(gatt);
+                            closeGatt(gatt);
                             return;
                         }
 
@@ -131,15 +127,20 @@ public class Bluecomm {
                         if (characteristic == null) {
                             Log.i(TAG, "Characteristic not found: " + CHARACTERISTIC_UUID);
                             callback.onDataError("Characteristic not found.");
-                            gatt.disconnect();
+                            closeGatt(gatt);
                             return;
                         }
 
-                        gatt.readCharacteristic(characteristic);
+                        boolean success = gatt.readCharacteristic(characteristic);
+                        if (!success) {
+                            Log.i(TAG, "Failed to initiate characteristic read");
+                            callback.onDataError("Failed to initiate characteristic read");
+                            closeGatt(gatt);
+                        }
                     } else {
                         Log.i(TAG, "Failed to discover services. Status: " + status);
                         callback.onDataError("Failed to discover services.");
-                        gatt.disconnect();
+                        closeGatt(gatt);
                     }
                 }
 
@@ -154,33 +155,20 @@ public class Bluecomm {
                         Log.i(TAG, "Failed to read characteristic. Status: " + status);
                         callback.onDataError("Failed to read characteristic.");
                     }
-                    gatt.disconnect();
+                    closeGatt(gatt);
                 }
-            }, BluetoothDevice.TRANSPORT_LE
-            );
+            }, BluetoothDevice.TRANSPORT_LE);
+
+            bluetoothGatt = localGatt; // Only assign after successful connection
         } catch (SecurityException e) {
-            Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());
+            Log.e(TAG, "SecurityException while connecting to device: " + e.getMessage());
             callback.onDataError("Security exception occurred.");
+            closeGatt(localGatt);
+        } catch (Exception e) {
+            Log.e(TAG, "Unexpected exception: " + e.getMessage());
+            callback.onDataError("Unexpected error occurred.");
+            closeGatt(localGatt);
         }
-    }
-
-
-    /**
-     * Just send a write event to a device without waiting for the reply
-     * This is useful for cases like broadcasting messages to devices
-     * @param macAddress address of the device within reach
-     * @param data text to be sent, attention to keep it short
-     */
-    public synchronized void writeData(String macAddress, String data) {
-        if(data == null){
-            return;
-        }
-        // avoid sending duplicates
-        if(BlueQueueSending.getInstance(context).isAlreadyOnQueueToSend(data, macAddress)){
-            return;
-        }
-        BlueQueueParcel item = new BlueQueueParcel(macAddress, data);
-        BlueQueueSending.getInstance(context).addQueueToSend(item);
     }
 
     /**
@@ -188,7 +176,7 @@ public class Bluecomm {
      * This is useful for cases like broadcasting messages to devices
      */
     public synchronized void writeData(BlueQueueParcel item) {
-        // send data with just logging and no further reaction
+        if (item == null) return;
         writeData(item.getMacAddress(), item.getData(), new DataCallbackTemplate() {
             @Override
             public void onDataSuccess(String data) {
@@ -202,6 +190,22 @@ public class Bluecomm {
     }
 
     /**
+     * Just send a write event to a device without waiting for the reply
+     * This is useful for cases like broadcasting messages to devices
+     */
+    public synchronized void writeData(String macAddress, String data) {
+        if (data == null) {
+            return;
+        }
+        // avoid sending duplicates
+        if (BlueQueueSending.getInstance(context).isAlreadyOnQueueToSend(data, macAddress)) {
+            return;
+        }
+        BlueQueueParcel item = new BlueQueueParcel(macAddress, data);
+        BlueQueueSending.getInstance(context).addQueueToSend(item);
+    }
+
+    /**
      * Writes data to the custom characteristic on a specified device without waiting for a response.
      *
      * @param macAddress The MAC address of the device to connect to.
@@ -209,37 +213,34 @@ public class Bluecomm {
      * @param callback   Callback to handle success or failure of the write operation.
      */
     public synchronized void writeData(String macAddress, String data, DataCallbackTemplate callback) {
-        if(data == null){
-            Log.e(TAG, "Null data received for write operation to "  + macAddress);
-            return;
-        }
-        // wait a bit until unlocked
-        Mutex.getInstance().waitUntilUnlocked();
-
-        if (checkPermissions() == false) {
-            Log.i(TAG, "Missing required permissions to perform Bluetooth operations.");
-            callback.onDataError("Missing required permissions.");
-            return;
-        }
-
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
-            String message = "Bluetooth is not available or enabled";
-            Log.i(TAG, message);
-            callback.onDataError(message);
-            return;
-        }
-
-        BluetoothDevice device = bluetoothAdapter.getRemoteDevice(macAddress);
-        if (device == null) {
-            Log.i(TAG, "Device not found with MAC address: " + macAddress);
-            callback.onDataError("Device not found.");
-            return;
-        }
-
+        BluetoothGatt localGatt = null;
         try {
+            if (data == null) {
+                Log.e(TAG, "Null data received for write operation to " + macAddress);
+                callback.onDataError("Null data received");
+                return;
+            }
 
-            bluetoothGatt = device.connectGatt(context, false, new BluetoothGattCallback() {
+            if (!checkPermissions()) {
+                callback.onDataError("Missing required permissions.");
+                return;
+            }
+
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled()) {
+                callback.onDataError("Bluetooth is not available or enabled.");
+                return;
+            }
+
+            BluetoothDevice device = bluetoothAdapter.getRemoteDevice(macAddress);
+            if (device == null) {
+                callback.onDataError("Device not found.");
+                return;
+            }
+
+            Mutex.getInstance().waitUntilUnlocked();
+
+            localGatt = device.connectGatt(context, false, new BluetoothGattCallback() {
                 @Override
                 public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
                     super.onConnectionStateChange(gatt, status, newState);
@@ -251,15 +252,17 @@ public class Bluecomm {
                                 gatt.discoverServices();
                             } catch (Exception e) {
                                 Log.e(TAG, "Exception during service discovery: " + e.getMessage());
+                                closeGatt(gatt);
+                                callback.onDataError("Service discovery failed: " + e.getMessage());
+                            } finally {
+                                Mutex.getInstance().unlock();
                             }
-                            Mutex.getInstance().unlock();
-                        }, 1000); // Delay 1 second
+                        }, 1000);
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                         Log.i(TAG, "Disconnected from GATT server.");
-                        bluetoothGatt.close();
+                        closeGatt(gatt);
                     }
                 }
-
 
                 @Override
                 public void onServicesDiscovered(BluetoothGatt gatt, int status) {
@@ -269,8 +272,7 @@ public class Bluecomm {
                         if (service == null) {
                             Log.i(TAG, "Service not found: " + SERVICE_UUID);
                             callback.onDataError("Service not found.");
-                            gatt.disconnect();
-                            //refreshDeviceCache(gatt);
+                            closeGatt(gatt);
                             return;
                         }
 
@@ -278,7 +280,7 @@ public class Bluecomm {
                         if (characteristic == null) {
                             Log.i(TAG, "Characteristic not found: " + CHARACTERISTIC_UUID);
                             callback.onDataError("Characteristic not found.");
-                            gatt.disconnect();
+                            closeGatt(gatt);
                             return;
                         }
 
@@ -288,20 +290,16 @@ public class Bluecomm {
                                 (properties & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) {
                             Log.e(TAG, "Characteristic does not support write operations.");
                             callback.onDataError("Characteristic does not support write operations.");
-                            gatt.disconnect();
+                            closeGatt(gatt);
                             return;
                         }
 
-                        // Set the write type to default
-                        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-
-                        // Introduce a delay to ensure smooth operation
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
                             try {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    int result = gatt.writeCharacteristic(characteristic, data.getBytes(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-                                    //experiment
-                                    //gatt.disconnect();
+                                    int result = gatt.writeCharacteristic(characteristic, data.getBytes(),
+                                            BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+
                                     if (result != BluetoothGatt.GATT_SUCCESS) {
                                         Log.e(TAG, "GATT write failed with status: " + result);
                                         callback.onDataError("GATT write failed with status: " + result);
@@ -310,46 +308,77 @@ public class Bluecomm {
                                         callback.onDataSuccess("Write operation initiated.");
                                     }
                                 } else {
-                                    // For older APIs, use the legacy method
+                                    characteristic.setValue(data.getBytes());
                                     characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
                                     boolean success = gatt.writeCharacteristic(characteristic);
-                                    if (success == false) {
+                                    if (!success) {
                                         Log.i(TAG, "Failed to initiate write operation.");
                                         callback.onDataError("Failed to initiate write operation.");
-                                        gatt.disconnect();
                                     } else {
                                         Log.i(TAG, "Write operation initiated successfully.");
                                         callback.onDataSuccess("Write operation initiated.");
                                     }
-                                    //experiment
-                                    gatt.disconnect();
                                 }
                             } catch (Exception e) {
                                 Log.e(TAG, "Exception during write operation: " + e.getMessage());
                                 callback.onDataError("Exception during write operation: " + e.getMessage());
-                                //experiment
-                                gatt.disconnect();
+                            } finally {
+                                closeGatt(gatt);
                             }
-                        }, 300); // Delay of 200ms to avoid back-to-back operations
+                        }, 300);
                     } else {
                         Log.i(TAG, "Failed to discover services. Status: " + status);
                         callback.onDataError("Failed to discover services.");
-                        gatt.disconnect();
+                        closeGatt(gatt);
                     }
                 }
+            }, BluetoothDevice.TRANSPORT_LE);
 
-
-            }, BluetoothDevice.TRANSPORT_LE
-            );
+            bluetoothGatt = localGatt;
         } catch (SecurityException e) {
-            Log.i(TAG, "SecurityException while connecting to device: " + e.getMessage());
+            Log.e(TAG, "SecurityException while connecting to device: " + e.getMessage());
             callback.onDataError("Security exception occurred.");
-            //Mutex.getInstance().unlock();
-
+            closeGatt(localGatt);
+        } catch (Exception e) {
+            Log.e(TAG, "Unexpected exception: " + e.getMessage());
+            callback.onDataError("Unexpected error occurred.");
+            closeGatt(localGatt);
         }
-        //Mutex.getInstance().unlock();
-
     }
+
+    private void closeGatt(BluetoothGatt gatt) {
+        if (gatt == null) {
+            Log.i(TAG, "BluetoothGatt is already null, skipping close operation.");
+            return;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12+
+            if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Log.i(TAG, "Missing BLUETOOTH_CONNECT permission. Cannot close GATT.");
+                return;
+            }
+        }
+
+        try {
+            Log.i(TAG, "Disconnecting GATT...");
+            gatt.disconnect();
+
+            // Optional: Refresh cache before closing to prevent stale services
+            if (refreshDeviceCache(gatt)) {
+                Log.i(TAG, "Device cache refreshed successfully.");
+            } else {
+                Log.i(TAG, "Failed to refresh device cache.");
+            }
+
+            Log.i(TAG, "Closing GATT...");
+            gatt.close();
+            Log.i(TAG, "GATT closed successfully.");
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while closing GATT: " + e.getMessage());
+        }
+    }
+
+
 
     /**
      * Checks if the required permissions are granted.

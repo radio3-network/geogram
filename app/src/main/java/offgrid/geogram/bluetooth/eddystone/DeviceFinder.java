@@ -13,14 +13,11 @@ import android.content.Context;
 import android.os.Handler;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import offgrid.geogram.bluetooth.Bluecomm;
 import offgrid.geogram.bluetooth.other.comms.Mutex;
 import offgrid.geogram.core.Log;
 import offgrid.geogram.devices.DeviceReachable;
@@ -28,7 +25,7 @@ import offgrid.geogram.devices.DeviceReachable;
 public class DeviceFinder {
 
     private static final String TAG = "DeviceFinder";
-    private static final long BEACON_TIMEOUT_MS = 30000; // 30 seconds
+    //private static final long BEACON_TIMEOUT_MS = 30000; // 30 seconds
     private static final long SCAN_DURATION_MS = 3000; // Scan for 3 seconds
     private static final long SCAN_INTERVAL_MS = 15000; // Pause for 15 seconds between scans
 
@@ -105,8 +102,6 @@ public class DeviceFinder {
 
 
         try {
-            // reserve the bluetooth handler
-            Mutex.getInstance().lock();
             ScanFilter filter = new ScanFilter.Builder()
                     .setServiceUuid(EDDYSTONE_SERVICE_UUID)
                     .build();
@@ -124,8 +119,7 @@ public class DeviceFinder {
         } catch (SecurityException e) {
             Log.i(TAG, "SecurityException while starting scan: " + e.getMessage());
         }
-        // unlock it
-        Mutex.getInstance().unlock();
+
     }
 
     /**
@@ -204,6 +198,9 @@ public class DeviceFinder {
 //            return;
 //        }
 
+        // reserve the bluetooth handler
+        Mutex.getInstance().lock();
+
         byte[] serviceData = result.getScanRecord().getServiceData(EDDYSTONE_SERVICE_UUID);
         if (serviceData == null) {
             return;
@@ -233,24 +230,27 @@ public class DeviceFinder {
         deviceFound.setRssi(result.getRssi());
         deviceFound.setServiceData(serviceData);
         deviceFound.setMacAddress(result.getDevice().getAddress());
+
+        // unlock it
+        Mutex.getInstance().unlock();
     }
 
-    /**
-     * Cleans up devices that haven't been seen for a while.
-     */
-    public void cleanupDisconnectedDevices() {
-        long currentTime = System.currentTimeMillis();
-        Iterator<Map.Entry<String, DeviceReachable>> iterator = deviceMap.entrySet().iterator();
-
-        while (iterator.hasNext()) {
-            Map.Entry<String, DeviceReachable> entry = iterator.next();
-            DeviceReachable device = entry.getValue();
-            if (currentTime - device.getTimeLastFound() > BEACON_TIMEOUT_MS) {
-                Log.i(TAG, "Removing disconnected device: " + entry.getKey());
-                iterator.remove();
-            }
-        }
-    }
+//    /**
+//     * Cleans up devices that haven't been seen for a while.
+//     */
+//    public void cleanupDisconnectedDevices() {
+//        long currentTime = System.currentTimeMillis();
+//        Iterator<Map.Entry<String, DeviceReachable>> iterator = deviceMap.entrySet().iterator();
+//
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, DeviceReachable> entry = iterator.next();
+//            DeviceReachable device = entry.getValue();
+//            if (currentTime - device.getTimeLastFound() > BEACON_TIMEOUT_MS) {
+//                Log.i(TAG, "Removing disconnected device: " + entry.getKey());
+//                iterator.remove();
+//            }
+//        }
+//    }
 
     /**
      * Extracts the Namespace ID from service data.
