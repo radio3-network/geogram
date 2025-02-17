@@ -38,6 +38,7 @@ public class Bluecomm {
     private static final UUID CHARACTERISTIC_UUID = BluetoothCentral.UUID_CHARACTERISTIC_GENERAL;
 
     public static final int
+            delayDiscoverServices = 1000,
             timeBetweenChecks = 1000,
             timeBetweenMessages = 1500,
             maxSizeOfMessages = 14,
@@ -257,7 +258,7 @@ public class Bluecomm {
                             } finally {
                                 Mutex.getInstance().unlock();
                             }
-                        }, 1000);
+                        }, delayDiscoverServices);
                     } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                         Log.i(TAG, "Disconnected from GATT server.");
                         closeGatt(gatt);
@@ -266,6 +267,7 @@ public class Bluecomm {
 
                 @Override
                 public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                    Mutex.getInstance().waitUntilUnlocked();
                     super.onServicesDiscovered(gatt, status);
                     if (status == BluetoothGatt.GATT_SUCCESS) {
                         BluetoothGattService service = gatt.getService(SERVICE_UUID);
