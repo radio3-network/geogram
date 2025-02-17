@@ -1,11 +1,13 @@
-package offgrid.geogram.bluetooth.other.comms;
+package offgrid.geogram.bluetooth.watchdog;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
 import offgrid.geogram.bluetooth.broadcast.BroadcastSender;
+import offgrid.geogram.bluetooth.other.comms.BlueCommands;
 import offgrid.geogram.core.Central;
+import offgrid.geogram.core.Log;
 
 /**
  * Singleton class for BluePing.
@@ -21,7 +23,7 @@ public class BluePing {
     // Handler for managing delayed tasks
     private Handler handler;
     private final int INITIAL_DELAY_MS = 60000; // 60 seconds
-    private final int PING_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes for the loop
+    private final int PING_INTERVAL_MS = 1 * 60 * 1000; // 1 minutes for the loop
 
     // Indicates whether the ping service is running
     private boolean isRunning = false;
@@ -65,6 +67,7 @@ public class BluePing {
                 return;
             }
 
+            Log.i("BluePing", "Ping sent to all devices within reach");
             String message = BlueCommands.oneLineCommandPing + Central.getInstance().getSettings().getIdDevice();
             BroadcastSender.broadcastMessageToAllEddystoneDevicesShort(message, context);
 

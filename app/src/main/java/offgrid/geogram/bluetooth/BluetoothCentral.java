@@ -12,7 +12,7 @@ import java.util.UUID;
 import offgrid.geogram.bluetooth.eddystone.DeviceFinder;
 import offgrid.geogram.bluetooth.eddystone.EddyDeviceAdvertise;
 import offgrid.geogram.bluetooth.other.GattServer;
-import offgrid.geogram.bluetooth.other.comms.BluePing;
+import offgrid.geogram.bluetooth.watchdog.BluePing;
 import offgrid.geogram.bluetooth.other.old.BluetoothStateReceiver;
 import offgrid.geogram.bluetooth.watchdog.WatchDogMissingParcels;
 import offgrid.geogram.bluetooth.watchdog.WatchDogRestartGATT;
