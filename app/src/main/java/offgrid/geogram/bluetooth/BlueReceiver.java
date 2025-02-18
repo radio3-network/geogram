@@ -1,6 +1,7 @@
 package offgrid.geogram.bluetooth;
 
 import static offgrid.geogram.bluetooth.broadcast.BroadcastSender.sendPackageToDevice;
+import static offgrid.geogram.bluetooth.other.comms.BlueCommands.oneLineAcknowledgement;
 import static offgrid.geogram.bluetooth.other.comms.BlueCommands.oneLineCommandBio;
 import static offgrid.geogram.bluetooth.other.comms.BlueCommands.oneLineCommandGapBroadcast;
 import static offgrid.geogram.bluetooth.other.comms.BlueCommands.gapREPEAT;
@@ -150,6 +151,9 @@ public class BlueReceiver {
             // remove this message from the queue
             // don't remove yet to avoid replay actions
             //packagesBeingReceived.remove(UID);
+
+            // trigger an event that a message was received
+            EventControl.startEvent(EventType.BLUETOOTH_PACKAGE_RECEIVED, packageBeingReceived);
         }
 
     }
@@ -240,6 +244,13 @@ public class BlueReceiver {
         if(receivedData.startsWith(oneLineCommandBio)){
             //String data = receivedData.substring(oneLineCommandPing.length());
             BioDatabase.sendBio(macAddress, context);
+            return;
+        }
+
+        // received a message like >ACK:QB
+        // this is an update to the MAC address of that device Id
+        if(receivedData.startsWith(oneLineAcknowledgement)){
+            EventControl.startEvent(EventType.BLUETOOTH_ACKNOWLEDGE_RECEIVED, receivedData);
             return;
         }
 

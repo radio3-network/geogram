@@ -68,7 +68,7 @@ public class BluePackage {
     private String[] dataParcels;
 
     // Timestamp when data transmission started
-    private final long transmissionTimeStart;
+    private long timestamp;
     private long transmissionTimeLastActive;
 
     private final String checksum;
@@ -106,7 +106,7 @@ public class BluePackage {
             this.command = command;
             this.data = data;
             this.messageParcelCurrent = -1;
-            this.transmissionTimeStart = System.currentTimeMillis();
+            this.timestamp = System.currentTimeMillis();
             this.ping();
             this.isTransferring = true;
             this.messageParcelsTotal = (int) Math.ceil((double) this.data.length() / TEXT_LENGTH_PER_PARCEL);
@@ -128,7 +128,7 @@ public class BluePackage {
                 this.data = null;
                 this.messageParcelCurrent = -1;
                 this.command = DataType.NONE;
-                this.transmissionTimeStart = -1;
+                this.timestamp = -1;
                 this.checksum = null;
                 return;
             }
@@ -143,7 +143,7 @@ public class BluePackage {
             // get the device id
             this.deviceId = parts[4];
             // setup the transmission time
-            this.transmissionTimeStart = System.currentTimeMillis();
+            this.timestamp = System.currentTimeMillis();
             this.ping();
             this.isTransferring = true;
         }
@@ -341,8 +341,12 @@ public class BluePackage {
      *
      * @return The timestamp as a long value.
      */
-    public long getTransmissionTimeStart() {
-        return transmissionTimeStart;
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 
     /**

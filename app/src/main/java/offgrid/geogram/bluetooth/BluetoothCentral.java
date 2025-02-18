@@ -14,9 +14,13 @@ import offgrid.geogram.bluetooth.eddystone.EddyDeviceAdvertise;
 import offgrid.geogram.bluetooth.other.GattServer;
 import offgrid.geogram.bluetooth.watchdog.BluePing;
 import offgrid.geogram.bluetooth.other.old.BluetoothStateReceiver;
+import offgrid.geogram.bluetooth.watchdog.EventBluetoothAcknowledgementReceived;
+import offgrid.geogram.bluetooth.watchdog.EventBluetoothPackageReceived;
 import offgrid.geogram.bluetooth.watchdog.WatchDogMissingParcels;
 import offgrid.geogram.bluetooth.watchdog.WatchDogRestartGATT;
 import offgrid.geogram.core.Log;
+import offgrid.geogram.events.EventControl;
+import offgrid.geogram.events.EventType;
 
 public class BluetoothCentral {
 
@@ -43,6 +47,18 @@ public class BluetoothCentral {
     private BluetoothCentral(Context context) {
         this.context = context.getApplicationContext();
         initialize();
+        setupEvents();
+    }
+
+    private void setupEvents() {
+        // handle the case a new package being received as complete
+        EventControl.addEvent(EventType.BLUETOOTH_PACKAGE_RECEIVED,
+                new EventBluetoothPackageReceived(TAG + "+ packageReceived", context)
+        );
+        EventControl.addEvent(EventType.BLUETOOTH_ACKNOWLEDGE_RECEIVED,
+                new EventBluetoothAcknowledgementReceived(TAG + "+ ackReceived", context)
+        );
+
     }
 
     /**

@@ -44,13 +44,9 @@ public class DeviceChatFragment extends Fragment {
     private static final String ARG_DEVICE_ID = "device_id";
     private static final String TAG = "DeviceChatFragment";
     private String deviceId;
-    private final ArrayList<BroadcastMessage> displayedMessages = new ArrayList<>();
-
     private LinearLayout chatMessageContainer;
     private ScrollView chatScrollView;
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private static final int REFRESH_INTERVAL_MS = 2000;
-    Runnable runningPoll = null;
     BioProfile profile = null;
 
     public static DeviceChatFragment newInstance(String deviceId) {
@@ -142,6 +138,8 @@ public class DeviceChatFragment extends Fragment {
                         // specific type C for chatting
                         DataType.C, messageToSend.getMessage(), deviceId
                 );
+                // repeat the timestamp to permit finding this message again
+                packageToSend.setTimestamp(messageToSend.getTimestamp());
 
                 // send the package to the device
                 sendPackageToDevice(deviceUpdated.getMacAddress(), packageToSend, this.getContext());
@@ -228,9 +226,19 @@ public class DeviceChatFragment extends Fragment {
         TextView textBoxLower = userMessageView.findViewById(R.id.lower_text);
 
         long timeStamp = message.getTimestamp();
-        String dateText = DateUtils.convertTimestampForChatMessage(timeStamp);
+        String textLower = DateUtils.convertTimestampForChatMessage(timeStamp);
+
+        if(message.delivered){
+            textLower += " ✔";
+        }
+
+        if(message.read){
+            textLower += "✔";
+        }
+
+
         textBoxUpper.setText("");
-        textBoxLower.setText(dateText);
+        textBoxLower.setText(textLower);
 
         chatMessageContainer.addView(userMessageView);
         chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));

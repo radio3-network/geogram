@@ -60,4 +60,13 @@ public class ChatMessages {
             Log.e("ChatMessages", "Error saving chat messages to file: " + e.getMessage());
         }
     }
+
+    public ChatMessage getMessage(long timestamp, String data) {
+        for (ChatMessage chatMessage : messages) {
+            if (chatMessage.timestamp == timestamp && chatMessage.message.equals(data)) {
+                return chatMessage;
+            }
+        }
+        return null;
+    }
 }

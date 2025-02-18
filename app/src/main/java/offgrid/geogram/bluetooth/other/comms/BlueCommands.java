@@ -11,5 +11,7 @@ public class BlueCommands {
             oneLineCommandBio = ">BIO:",        // request to send back the biographical details
             oneLineCommandGapBroadcast = ">B:", // means a one line statement
             gapREPEAT = "REPEAT",               // please send the whole package again
-            oneLineCommandPing = ">PING:";      // send the Mac Address and Device Id
+            oneLineCommandPing = ">PING:",      // send the Mac Address and Device Id
+            oneLineAcknowledgement = ">ACK:";   // confirm that a package was received
+
 }

@@ -7,6 +7,8 @@ public class ChatMessage {
     public String authorId;
     public String message;
     public long timestamp;
+    public boolean delivered = false;
+    public boolean read = false;
     // SHA1 list of attachments
     public ArrayList<String> attachments = new ArrayList<>();
 
@@ -26,5 +28,9 @@ public class ChatMessage {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public void setDelivered(boolean delivered) {
+        this.delivered = delivered;
     }
 }
