@@ -118,8 +118,7 @@ public class DeviceChatFragment extends Fragment {
             deviceMessages.add(messageToSend);
             // save the message to disk
             ChatDatabaseWithDevice.getInstance(this.getContext()).saveToDisk(deviceId, deviceMessages);
-            // inform the UI (start the connected events)
-            EventControl.startEvent(EventType.MESSAGE_DIRECT_RECEIVED, messageToSend, false);
+
 
             new Thread(() -> {
                 // get the updated MAC address (they change often)
@@ -141,6 +140,8 @@ public class DeviceChatFragment extends Fragment {
 
                 requireActivity().runOnUiThread(() -> {
                     messageInput.setText("");
+                    // inform the UI (start the connected events)
+                    EventControl.startEvent(EventType.MESSAGE_DIRECT_RECEIVED, messageToSend, false);
                     //chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
                 });
             }).start();
@@ -155,13 +156,17 @@ public class DeviceChatFragment extends Fragment {
                 ChatMessage message = (ChatMessage) data[0];
                 boolean receivedFromOutside = (boolean) data[1];
                 Log.i("DeviceChatFragment", "Message received: " + message.getMessage());
-                requireActivity().runOnUiThread(() -> {
-                    if (receivedFromOutside) {
-                        displayReceivedMessage(message);
-                    } else {
-                        displayUserMessage(message);
-                    }
-                });
+                // to update the UI in real-time this is needed
+                if (//isAdded() &&
+                        getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (receivedFromOutside) {
+                            displayReceivedMessage(message);
+                        } else {
+                            displayUserMessage(message);
+                        }
+                    });
+                }
             }
         };
         EventControl.addEvent(EventType.MESSAGE_DIRECT_RECEIVED, actionAddMessageReceived);
