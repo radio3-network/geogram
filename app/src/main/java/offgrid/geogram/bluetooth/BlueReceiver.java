@@ -17,6 +17,11 @@ import offgrid.geogram.core.Log;
 import offgrid.geogram.bluetooth.broadcast.LostAndFound;
 import offgrid.geogram.database.BioDatabase;
 import offgrid.geogram.database.BioProfile;
+import offgrid.geogram.devices.chat.ChatDatabaseWithDevice;
+import offgrid.geogram.devices.chat.ChatMessage;
+import offgrid.geogram.devices.chat.ChatMessages;
+import offgrid.geogram.events.EventControl;
+import offgrid.geogram.events.EventType;
 
 /**
  * This class stores the requests that are made from outside
@@ -246,7 +251,6 @@ public class BlueReceiver {
 
     /**
      * Process all commands arriving to the
-     * @return the answer to the request
      */
     private void processReceivedRequest(
             String macAddress,
@@ -254,10 +258,13 @@ public class BlueReceiver {
             Context context) {
         //Log.i(TAG, "Received command: " + received);
         switch (packageReceived.getCommand()) {
-            case G -> {
+            case C -> {
+                saveDirectChatMessage(macAddress, packageReceived, context);
+                return;
             }
             case B -> {
                 saveBroadCastMessage(macAddress, packageReceived, context);
+                return;
             }
             default -> {
             }
@@ -265,8 +272,30 @@ public class BlueReceiver {
     }
 
     /**
+     * Received a direct chat message from the other device
+     * @param macAddress MAC address of the device sending this message
+     * @param packageReceived message received
+     * @param context context of the application
+     */
+    private void saveDirectChatMessage(String macAddress, BluePackage packageReceived, Context context) {
+        Log.i(TAG, "Direct message received: " + packageReceived.getData());
+        // get the device Id
+        String deviceId = packageReceived.getDeviceId();
+        // get the respective database
+        ChatMessages deviceMessages =
+                ChatDatabaseWithDevice.getInstance(context).getMessages(deviceId);
+        // create a message
+        ChatMessage message = new ChatMessage(deviceId, packageReceived.getData());
+        // add it to the database
+        deviceMessages.add(message);
+        // save it to disk
+        ChatDatabaseWithDevice.getInstance(context).saveToDisk(deviceId, deviceMessages);
+        // inform the UI (start the connected events)
+        EventControl.startEvent(EventType.MESSAGE_DIRECT_RECEIVED, message, true);
+    }
+
+    /**
      * Handle the broadcast message when being received from the outside
-     * @param context
      */
     private void saveBroadCastMessage(
             String macAddress,

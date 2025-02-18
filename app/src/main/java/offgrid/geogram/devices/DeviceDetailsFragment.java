@@ -104,7 +104,11 @@ public class DeviceDetailsFragment extends Fragment {
             return view;
         }
 
-        deviceDescription.setText(profile.getNick());
+        String deviceName = profile.getNick() + " ("
+                + deviceDiscovered.getMacAddress()
+                + ")";
+
+        deviceDescription.setText(deviceName);
         deviceDescriptionAdditional.setText(profile.getExtra());
 
 

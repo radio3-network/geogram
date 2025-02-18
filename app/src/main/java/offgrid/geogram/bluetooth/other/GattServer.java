@@ -379,6 +379,10 @@ public class GattServer {
                 try {
                     // Get the proper value for the request
                     String received = new String(value);
+                    if(received.isEmpty()){
+                        Log.e(TAG, "Received empty string from " + device.getAddress());
+                        return;
+                    }
                     BlueReceiver dataWriteFromOutside = BlueReceiver.getInstance();
                     dataWriteFromOutside.receivingDataFromDevice(device.getAddress(), received, context);
 
@@ -387,7 +391,7 @@ public class GattServer {
                         handler.post(() -> {
                             try {
                                 if (context.checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-                                    String responseMessage = "Acknowledged";
+                                    String responseMessage = "OK";
                                     gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, responseMessage.getBytes());
                                     Log.i(TAG, "Response sent to " + device.getAddress() + ": " + responseMessage);
                                 } else {

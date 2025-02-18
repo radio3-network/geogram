@@ -52,7 +52,7 @@ public class ChatDatabaseWithDevice {
         saveToDisk(deviceId, messageBox);
     }
 
-    private void saveToDisk(String deviceId, ChatMessages messageBox) {
+    public void saveToDisk(String deviceId, ChatMessages messageBox) {
         if (deviceId == null) {
             Log.e(TAG, "Device Id is null");
             return;
@@ -70,6 +70,7 @@ public class ChatDatabaseWithDevice {
         File file = new File(folder, fileMessages);
         try {
             messageBox.saveToFile(file);
+            Log.i(TAG, "Saved data to file: " + file.getAbsolutePath());
         } catch (Exception e) {
             Log.e(TAG, "Failed to save data to file: " + file.getAbsolutePath() + " " + e.getMessage());
         }
@@ -84,7 +85,7 @@ public class ChatDatabaseWithDevice {
         if(this.messages.containsKey(deviceId)){
             return this.messages.get(deviceId);
         }
-        // we need to load it from disk
+        // we need to load it from disk?
         File folder = BioDatabase.getFolderDeviceId(deviceId, context);
         if (folder == null) {
             Log.e(TAG, "Folder is null");
