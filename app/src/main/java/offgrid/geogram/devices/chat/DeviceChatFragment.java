@@ -51,6 +51,7 @@ public class DeviceChatFragment extends Fragment {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private static final int REFRESH_INTERVAL_MS = 2000;
     Runnable runningPoll = null;
+    BioProfile profile = null;
 
     public static DeviceChatFragment newInstance(String deviceId) {
         DeviceChatFragment fragment = new DeviceChatFragment();
@@ -74,6 +75,13 @@ public class DeviceChatFragment extends Fragment {
             requireActivity().onBackPressed();
         }
 
+        BioProfile profile = BioDatabase.get(deviceId, this.getContext());
+        String nickname = "Chat";
+
+        if (profile != null) {
+            nickname = profile.getNick();
+        }
+
         Log.i("DeviceChatFragment", "Chatting with device: " + deviceId);
 
         // Initialize UI
@@ -88,7 +96,7 @@ public class DeviceChatFragment extends Fragment {
 
         // change the title
         TextView chatTitleTextView = view.findViewById(R.id.chat_title);
-        chatTitleTextView.setText("Chat");
+        chatTitleTextView.setText(nickname);
 
         // Send button
         btnSend.setOnClickListener(v -> {
@@ -183,15 +191,6 @@ public class DeviceChatFragment extends Fragment {
         handler.removeCallbacksAndMessages(null);
     }
 
-//    private void startMessagePolling() {
-//        if (runningPoll != null) return;
-//        runningPoll = () -> {
-//            updateMessages();
-//            handler.postDelayed(runningPoll, REFRESH_INTERVAL_MS);
-//        };
-//        handler.postDelayed(runningPoll, REFRESH_INTERVAL_MS);
-//    }
-
 
     private void displayMessages() {
         if(deviceId == null){
@@ -250,25 +249,20 @@ public class DeviceChatFragment extends Fragment {
         TextView textBoxUpper = receivedMessageView.findViewById(R.id.message_boxUpper);
         TextView textBoxLower = receivedMessageView.findViewById(R.id.message_boxLower);
 
-        BioProfile profile = BioDatabase.get(message.authorId, this.getContext());
-        String nickname = "";
-
-        if (profile != null) {
-            nickname = profile.getNick();
-        }
 
         // Add the timestamp
         long timeStamp = message.getTimestamp();
         String dateText = DateUtils.convertTimestampForChatMessage(timeStamp);
         textBoxUpper.setText("");
-
+        textBoxLower.setText(dateText);
         // Set the sender's name
-        if (nickname.isEmpty() && message.getAuthorId() != null) {
-            textBoxLower.setText(message.getAuthorId());
-        } else {
-            String idText = nickname + "    " + dateText;
-            textBoxLower.setText(idText);
-        }
+//        if (nickname.isEmpty() && message.getAuthorId() != null) {
+//            textBoxLower.setText(message.getAuthorId());
+//        } else {
+//            String idText = nickname + "    " +
+//                    dateText;
+//            textBoxLower.setText(idText);
+//        }
 
 
 
