@@ -102,10 +102,7 @@ public class LogTabFragment extends Fragment {
             return;
         }
 
-        // Check if logFilter has focus
-        boolean filterHadFocus = logFilter.hasFocus();
-
-        logWindow.post(() -> {
+        logScrollView.post(() -> {
             StringBuilder text = new StringBuilder();
             String filter = logFilter.getText().toString().toLowerCase();
 
@@ -116,18 +113,15 @@ public class LogTabFragment extends Fragment {
                 }
             }
 
-            // Update log messages
+            // Prevent auto-scrolling issues by resetting movement method
+            logWindow.setMovementMethod(null);
             logWindow.setText(text.toString());
 
-            // Scroll to the bottom after the TextView is updated
-            logScrollView.post(() -> {
-                logScrollView.fullScroll(View.FOCUS_DOWN);
-
-                // Restore focus to logFilter if it had focus
-                if (filterHadFocus) {
-                    logFilter.requestFocus();
-                }
-            });
+            // Always force scrolling to the bottom
+            logScrollView.postDelayed(() -> logScrollView.fullScroll(View.FOCUS_DOWN), 50);
         });
     }
+
+
+
 }
