@@ -21,10 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.util.ArrayList;
-
 import offgrid.geogram.R;
-import offgrid.geogram.bluetooth.broadcast.BroadcastMessage;
 import offgrid.geogram.bluetooth.eddystone.DeviceFinder;
 import offgrid.geogram.bluetooth.other.comms.BluePackage;
 import offgrid.geogram.bluetooth.other.comms.DataType;
@@ -153,9 +150,41 @@ public class DeviceChatFragment extends Fragment {
             }).start();
         });
 
+        // add the events
+        addEventDirectMessageReceived();
+        addEventMessageReceivedOnOtherDevice();
 
+        // add all messages to the initial view
+        displayMessages();
+
+        return view;
+    }
+
+    private void addEventMessageReceivedOnOtherDevice() {
         // add our hook to the event actions
-        EventAction actionAddMessageReceived = new EventAction(TAG){
+        EventAction action = new EventAction(TAG + "-MessageReceivedOnOtherDevice"){
+            @Override
+            // expect a ChatMessage as first object"
+            public void action(Object... data) {
+                ChatMessage message = (ChatMessage) data[0];
+                if(message == null){
+                    return;
+                }
+                if (getActivity() == null) {
+                    return;
+                }
+                // to update the UI in real-time this is needed
+                getActivity().runOnUiThread(() -> {
+                    updateReceivedMessage();
+                });
+
+            }
+        };
+        EventControl.addEvent(EventType.MESSAGE_DIRECT_UPDATE, action);
+    }
+    private void addEventDirectMessageReceived() {
+        // add our hook to the event actions
+        EventAction actionAddMessageReceived = new EventAction(TAG + "-DeviceChatFragmentMessageReceived"){
             @Override
             // expect a ChatMessage as first object and "receivedFromOutside as boolean"
             public void action(Object... data) {
@@ -163,8 +192,7 @@ public class DeviceChatFragment extends Fragment {
                 boolean receivedFromOutside = (boolean) data[1];
                 Log.i("DeviceChatFragment", "Message received: " + message.getMessage());
                 // to update the UI in real-time this is needed
-                if (//isAdded() &&
-                        getActivity() != null) {
+                if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         if (receivedFromOutside) {
                             displayReceivedMessage(message);
@@ -176,11 +204,6 @@ public class DeviceChatFragment extends Fragment {
             }
         };
         EventControl.addEvent(EventType.MESSAGE_DIRECT_RECEIVED, actionAddMessageReceived);
-
-        // add all messages to the initial view
-        displayMessages();
-
-        return view;
     }
 
     @Override
@@ -243,6 +266,16 @@ public class DeviceChatFragment extends Fragment {
         chatMessageContainer.addView(userMessageView);
         chatScrollView.post(() -> chatScrollView.fullScroll(View.FOCUS_DOWN));
     }
+
+
+    /**
+     * Adds a received message to the chat message container.
+     */
+    private void updateReceivedMessage() {
+        chatMessageContainer.removeAllViews();
+        displayMessages();
+    }
+
 
     /**
      * Adds a received message to the chat message container.

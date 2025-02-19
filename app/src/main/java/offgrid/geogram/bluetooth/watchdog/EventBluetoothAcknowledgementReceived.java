@@ -15,6 +15,8 @@ import offgrid.geogram.devices.chat.ChatDatabaseWithDevice;
 import offgrid.geogram.devices.chat.ChatMessage;
 import offgrid.geogram.devices.chat.ChatMessages;
 import offgrid.geogram.events.EventAction;
+import offgrid.geogram.events.EventControl;
+import offgrid.geogram.events.EventType;
 
 public class EventBluetoothAcknowledgementReceived extends EventAction {
 
@@ -70,5 +72,7 @@ public class EventBluetoothAcknowledgementReceived extends EventAction {
         // save it to disk
         ChatDatabaseWithDevice.getInstance(context).saveToDisk(deviceId, deviceMessages);
         Log.i(TAG, "Message marked as delivered: " + packageSent.getData());
+        // inform that the screen can be updated
+        EventControl.startEvent(EventType.MESSAGE_DIRECT_UPDATE, chatMessage);
     }
 }
