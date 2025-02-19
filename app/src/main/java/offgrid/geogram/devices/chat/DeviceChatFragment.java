@@ -150,6 +150,13 @@ public class DeviceChatFragment extends Fragment {
             }).start();
         });
 
+        // Scroll chat when user clicks the message input
+        messageInput.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                chatScrollView.postDelayed(() -> chatScrollView.fullScroll(View.FOCUS_DOWN), 200);
+            }
+        });
+
         // add the events
         addEventDirectMessageReceived();
         addEventMessageReceivedOnOtherDevice();
